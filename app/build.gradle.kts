@@ -1,8 +1,5 @@
 plugins {
     id("com.android.application")
-    // Apply Kotlin Android plugin so the module participates in Kotlin
-    // dependency management provided at the root level.
-    kotlin("android")
 }
 
 android {
@@ -35,16 +32,11 @@ android {
 }
 
 dependencies {
-
-    // Ensure all Kotlin libraries use the same version to avoid duplicate class
-    // conflicts between different Kotlin stdlib artifacts.
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.10"))
-
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.8.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.6.1")
     implementation("androidx.navigation:navigation-fragment:2.5.3")
     implementation("androidx.navigation:navigation-ui:2.5.3")
     testImplementation("junit:junit:4.13.2")
