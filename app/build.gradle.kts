@@ -1,5 +1,8 @@
 plugins {
     id("com.android.application")
+    // Apply Kotlin Android plugin so the module participates in Kotlin
+    // dependency management provided at the root level.
+    kotlin("android")
 }
 
 android {
@@ -32,6 +35,10 @@ android {
 }
 
 dependencies {
+
+    // Ensure all Kotlin libraries use the same version to avoid duplicate class
+    // conflicts between different Kotlin stdlib artifacts.
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.10"))
 
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.8.0")
