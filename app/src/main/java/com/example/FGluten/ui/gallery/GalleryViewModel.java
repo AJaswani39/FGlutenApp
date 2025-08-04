@@ -1,16 +1,22 @@
 package com.example.FGluten.ui.gallery;
 
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-public class GalleryViewModel extends ViewModel {
+import com.example.FGluten.R;
+
+public class GalleryViewModel extends AndroidViewModel {
 
     private final MutableLiveData<String> mText;
 
-    public GalleryViewModel() {
+    public GalleryViewModel(@NonNull Application application) {
+        super(application);
         mText = new MutableLiveData<>();
-        mText.setValue("Where you will see all the gluten free restaurants..");
+        mText.setValue(getApplication().getString(R.string.gallery_fragment_text));
     }
 
     public LiveData<String> getText() {
