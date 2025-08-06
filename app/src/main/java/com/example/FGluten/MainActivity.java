@@ -1,7 +1,6 @@
 package com.example.FGluten;
 
 import android.os.Bundle;
-import android.view.View;
 import android.view.Menu;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -42,6 +41,11 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
     }
+
+    private void setContentView(DrawerLayout root) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

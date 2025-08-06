@@ -1,7 +1,7 @@
 package com.example.FGluten.data;
 
 import java.util.List;
-import java.util.Objects;
+
 
 //GF = Gluten free
 public class Restaurant {
@@ -12,6 +12,15 @@ public class Restaurant {
 
     private final double latitude;
     private final double longitude;
+
+    public Restaurant(String name, String address, boolean hasGFMenu, List<String> gfMenu, double latitude, double longitude) {
+        this.name = name;
+        this.address = address;
+        this.hasGFMenu = hasGFMenu;
+        this.gfMenu = gfMenu;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
 
     public String getName() {
@@ -26,8 +35,8 @@ public class Restaurant {
         return gfMenu;
     }
 
-    public boolean gethasGFMenu() {
-        return hasGFMenu;
+    public boolean hasGFMenu() {
+        return this.hasGFMenu;
     }
 
     public double getLatitude() {
@@ -38,8 +47,8 @@ public class Restaurant {
         return longitude;
     }
 
-    @Override
-    public String determineIfGlutenFree(Object gf) {
+
+    public String determineIfGlutenFree() {
         if (!this.hasGFMenu) {
             return "This restaurant has no gluten free options";
         } else {
