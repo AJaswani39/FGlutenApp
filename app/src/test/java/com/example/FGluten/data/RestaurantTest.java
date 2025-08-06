@@ -30,7 +30,7 @@ public class RestaurantTest {
                 0.0,
                 0.0
         );
-        String expected = "This restaurant does not have gluten free options";
+        String expected = "This restaurant has no gluten free options";
         assertEquals(expected, restaurant.determineIfGlutenFree());
     }
 }
