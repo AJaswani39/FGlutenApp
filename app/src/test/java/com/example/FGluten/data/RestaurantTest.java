@@ -1,7 +1,10 @@
 package com.example.FGluten.data;
-import org.junit.Test;
-import java.util.Collections;
+
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+import java.util.Collections;
 
 
 public class RestaurantTest {
@@ -21,7 +24,7 @@ public class RestaurantTest {
 
     }
     @Test
-    public void determineIfGlutenFree_noGFMenuTrue_returnsNegativeMessage() {
+    public void determineIfGlutenFree_hasGFMenuFalse_returnsNegativeMessage() {
         Restaurant restaurant = new Restaurant(
                 "Test Restaurant",
                 "123 Test Street",
