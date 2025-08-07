@@ -60,14 +60,16 @@ public class Restaurant {
     // toString method
     @Override
     public String toString(){
-        return "Restaurant{" +
-                "name=" + name
-                + " address=" + address
-                + " hasGlutenFreeOption=" + hasGFMenu
-                + " Gluten Free Menu=" + gfMenu
-                + " latitude=" + latitude
-                + " longitude=" + longitude
-                + "}";
+        return String.format(
+                "Restaurant{name=%s, address=%s, hasGFMenu=%s, gfMenu=%s, latitude=%s, longitude=%s}",
+                name,
+                address,
+                hasGFMenu,
+                gfMenu,
+                latitude,
+                longitude
+
+        );
     }
 
 }
