@@ -14,6 +14,6 @@
 
     <string name="home_fragment_text">This is home fragment</string>
     <string name="gallery_fragment_text">Where you will see all the gluten free restaurants..</string>
-    <string name="title_restaurant">Restaurant Detail</string>
+    <string name="title_restaurant_detail">Restaurant Detail</string>
     <string name="slideshow_fragment_text">This is slideshow fragment</string>
 </resources>
