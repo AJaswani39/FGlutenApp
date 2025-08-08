@@ -10,13 +10,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
+
+
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.example.FGluten.R;
 import com.example.FGluten.data.Restaurant;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class RestaurantListFragment extends Fragment {
@@ -29,7 +31,6 @@ public class RestaurantListFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
         RecyclerView recyclerView = root.findViewById(R.id.restaurant_recycler);
-
         // Sample data
         restaurants.clear();
         restaurants.add(new Restaurant("Cafe Good", "123 Main St", true,
@@ -38,6 +39,29 @@ public class RestaurantListFragment extends Fragment {
                 new ArrayList<>(), 0.0, 0.0));
 
         RestaurantAdapter adapter = new RestaurantAdapter(restaurants, restaurant -> {
+
+        RestaurantViewModel viewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_list_item_1, new ArrayList<>());
+        listView.setAdapter(adapter);
+
+        viewModel.getRestaurants().observe(getViewLifecycleOwner(), list -> {
+            restaurants.clear();
+            restaurants.addAll(list);
+
+            List<String> names = new ArrayList<>();
+            for (Restaurant r : restaurants) {
+                names.add(r.getName());
+            }
+            adapter.clear();
+            adapter.addAll(names);
+            adapter.notifyDataSetChanged();
+        });
+
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            Restaurant selected = restaurants.get(position);
+
             Bundle bundle = new Bundle();
             bundle.putSerializable("restaurant", restaurant);
             NavHostFragment.findNavController(RestaurantListFragment.this)
