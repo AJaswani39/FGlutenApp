@@ -1,10 +1,11 @@
 package com.example.FGluten.data;
 
+import java.io.Serializable;
 import java.util.List;
 
 
 //GF = Gluten free
-public class Restaurant {
+public class Restaurant implements Serializable {
     private final String name;
     private final String address;
     private final boolean hasGFMenu;
