@@ -1,7 +1,13 @@
 import android.view.ViewGroup;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
+
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,19 +23,63 @@ public class RestaurantListFragment extends Fragment {
     private RestaurantAdapter adapter;
 
     @Override
+
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
+        RecyclerView recyclerView = root.findViewById(R.id.restaurant_recycler);
+        // Sample data
+        restaurants.clear();
+        restaurants.add(new Restaurant("Cafe Good", "123 Main St", true,
+                Arrays.asList("GF Burger", "Salad"), 0.0, 0.0));
+        restaurants.add(new Restaurant("Pizza Place", "456 Elm St", false,
+                new ArrayList<>(), 0.0, 0.0));
+
+        RestaurantAdapter adapter = new RestaurantAdapter(restaurants, restaurant -> {
+
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         RestaurantViewModel viewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
         binding = FragmentRestaurantListBinding.inflate(inflater, container, false);
 
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_list_item_1, new ArrayList<>());
+        listView.setAdapter(adapter);
+
+        viewModel.getRestaurants().observe(getViewLifecycleOwner(), list -> {
+            restaurants.clear();
+            restaurants.addAll(list);
+
+            List<String> names = new ArrayList<>();
+            for (Restaurant r : restaurants) {
+                names.add(r.getName());
+            }
+            adapter.clear();
+            adapter.addAll(names);
+            adapter.notifyDataSetChanged();
+        });
+
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            Restaurant selected = restaurants.get(position);
+
+
         adapter = new RestaurantAdapter(new ArrayList<>(), restaurant -> {
+
             Bundle bundle = new Bundle();
             bundle.putSerializable("restaurant", restaurant);
             NavHostFragment.findNavController(RestaurantListFragment.this)
                     .navigate(R.id.action_restaurantListFragment_to_restaurantDetailFragment, bundle);
         });
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setAdapter(adapter);
+
         binding.restaurantRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.restaurantRecyclerView.setAdapter(adapter);
+
 
         viewModel.getRestaurants().observe(getViewLifecycleOwner(), adapter::setRestaurants);
 
