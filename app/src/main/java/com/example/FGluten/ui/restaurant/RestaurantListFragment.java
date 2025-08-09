@@ -1,32 +1,29 @@
-package com.example.FGluten.ui.restaurant;
-
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.FGluten.R;
-import com.example.FGluten.data.Restaurant;
+import com.example.FGluten.databinding.FragmentRestaurantListBinding;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class RestaurantListFragment extends Fragment {
 
-    private final List<Restaurant> restaurants = new ArrayList<>();
+    private FragmentRestaurantListBinding binding;
+    private RestaurantAdapter adapter;
 
-    @Nullable
     @Override
+
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
@@ -40,7 +37,13 @@ public class RestaurantListFragment extends Fragment {
 
         RestaurantAdapter adapter = new RestaurantAdapter(restaurants, restaurant -> {
 
+
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
         RestaurantViewModel viewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
+        binding = FragmentRestaurantListBinding.inflate(inflater, container, false);
+
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_list_item_1, new ArrayList<>());
@@ -62,14 +65,30 @@ public class RestaurantListFragment extends Fragment {
         listView.setOnItemClickListener((parent, view, position, id) -> {
             Restaurant selected = restaurants.get(position);
 
+
+        adapter = new RestaurantAdapter(new ArrayList<>(), restaurant -> {
+
             Bundle bundle = new Bundle();
             bundle.putSerializable("restaurant", restaurant);
             NavHostFragment.findNavController(RestaurantListFragment.this)
                     .navigate(R.id.action_restaurantListFragment_to_restaurantDetailFragment, bundle);
         });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 
-        return root;
+        binding.restaurantRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.restaurantRecyclerView.setAdapter(adapter);
+
+
+        viewModel.getRestaurants().observe(getViewLifecycleOwner(), adapter::setRestaurants);
+
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }
