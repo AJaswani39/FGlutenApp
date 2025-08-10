@@ -1,4 +1,4 @@
-package com.example.FGluten.ui.gallery;
+package com.example.fgluten.ui.home;
 
 import android.app.Application;
 
@@ -7,16 +7,16 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.FGluten.R;
+import com.example.fgluten.R;
 
-public class GalleryViewModel extends AndroidViewModel {
+public class HomeViewModel extends AndroidViewModel {
 
     private final MutableLiveData<String> mText;
 
-    public GalleryViewModel(@NonNull Application application) {
+    public HomeViewModel(@NonNull Application application) {
         super(application);
         mText = new MutableLiveData<>();
-        mText.setValue(getApplication().getString(R.string.gallery_fragment_text));
+        mText.setValue(getApplication().getString(R.string.home_fragment_text));
     }
 
     public LiveData<String> getText() {

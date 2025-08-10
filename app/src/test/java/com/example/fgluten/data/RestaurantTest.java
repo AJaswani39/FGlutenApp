@@ -1,4 +1,4 @@
-package com.example.FGluten.data;
+package com.example.fgluten.data;
 
 import static org.junit.Assert.assertEquals;
 

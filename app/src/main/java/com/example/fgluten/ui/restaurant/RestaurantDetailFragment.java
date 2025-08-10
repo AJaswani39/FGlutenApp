@@ -1,4 +1,4 @@
-package com.example.FGluten.ui.restaurant;
+package com.example.fgluten.ui.restaurant;
 
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.FGluten.R;
-import com.example.FGluten.data.Restaurant;
+import com.example.fgluten.R;
+import com.example.fgluten.data.Restaurant;
 
 import java.util.List;
 

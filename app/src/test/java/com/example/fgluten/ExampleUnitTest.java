@@ -1,4 +1,4 @@
-package com.example.FGluten;
+package com.example.fgluten;
 
 import org.junit.Test;
 

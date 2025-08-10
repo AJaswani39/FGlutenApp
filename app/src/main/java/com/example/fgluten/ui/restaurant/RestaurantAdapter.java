@@ -1,5 +1,5 @@
 
-package com.example.FGluten.ui.restaurant;
+package com.example.fgluten.ui.restaurant;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.FGluten.R;
-import com.example.FGluten.data.Restaurant;
+import com.example.fgluten.R;
+import com.example.fgluten.data.Restaurant;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.FGluten.data;
+package com.example.fgluten.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
