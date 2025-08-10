@@ -1,3 +1,5 @@
+package com.example.FGluten.ui.restaurant;
+
 import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,38 +38,6 @@ public class RestaurantListFragment extends Fragment {
                 new ArrayList<>(), 0.0, 0.0));
 
         RestaurantAdapter adapter = new RestaurantAdapter(restaurants, restaurant -> {
-
-
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        RestaurantViewModel viewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
-        binding = FragmentRestaurantListBinding.inflate(inflater, container, false);
-
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_list_item_1, new ArrayList<>());
-        listView.setAdapter(adapter);
-
-        viewModel.getRestaurants().observe(getViewLifecycleOwner(), list -> {
-            restaurants.clear();
-            restaurants.addAll(list);
-
-            List<String> names = new ArrayList<>();
-            for (Restaurant r : restaurants) {
-                names.add(r.getName());
-            }
-            adapter.clear();
-            adapter.addAll(names);
-            adapter.notifyDataSetChanged();
-        });
-
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-            Restaurant selected = restaurants.get(position);
-
-
-        adapter = new RestaurantAdapter(new ArrayList<>(), restaurant -> {
-
             Bundle bundle = new Bundle();
             bundle.putSerializable("restaurant", restaurant);
             NavHostFragment.findNavController(RestaurantListFragment.this)
@@ -77,13 +47,7 @@ public class RestaurantListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 
-        binding.restaurantRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.restaurantRecyclerView.setAdapter(adapter);
-
-
-        viewModel.getRestaurants().observe(getViewLifecycleOwner(), adapter::setRestaurants);
-
-        return binding.getRoot();
+        return root;
     }
 
     @Override
