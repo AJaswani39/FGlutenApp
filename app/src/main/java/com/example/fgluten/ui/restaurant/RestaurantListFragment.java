@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,14 +18,12 @@ import com.example.fgluten.data.Restaurant;
 import com.example.fgluten.databinding.FragmentRestaurantListBinding;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class RestaurantListFragment extends Fragment {
 
     private FragmentRestaurantListBinding binding;
     private RestaurantAdapter adapter;
-    private List<Restaurant> restaurants = new ArrayList<>();
+    private RestaurantViewModel restaurantViewModel;
 
     @Override
 
@@ -32,14 +31,8 @@ public class RestaurantListFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
         RecyclerView recyclerView = root.findViewById(R.id.restaurant_recycler);
-        // Sample data
-        restaurants.clear();
-        restaurants.add(new Restaurant("Cafe Good", "123 Main St", true,
-                Arrays.asList("GF Burger", "Salad"), 0.0, 0.0));
-        restaurants.add(new Restaurant("Pizza Place", "456 Elm St", false,
-                new ArrayList<>(), 0.0, 0.0));
 
-        adapter = new RestaurantAdapter(restaurants, restaurant -> {
+        adapter = new RestaurantAdapter(new ArrayList<>(), restaurant -> {
             Bundle bundle = new Bundle();
             bundle.putSerializable("restaurant", restaurant);
             NavHostFragment.findNavController(RestaurantListFragment.this)
@@ -48,6 +41,9 @@ public class RestaurantListFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
+
+        restaurantViewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
+        restaurantViewModel.getRestaurants().observe(getViewLifecycleOwner(), adapter::setRestaurants);
 
         return root;
     }
