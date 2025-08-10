@@ -1,6 +1,7 @@
 package com.example.fgluten.data;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -9,7 +10,7 @@ import java.util.Collections;
 
 public class RestaurantTest {
     @Test
-    public void determineIfGlutenFree_hasGFMenuTrue_returnsPositiveMessage() {
+    public void hasGlutenFreeOptions_hasGFMenuTrue_returnsTrue() {
         Restaurant restaurant = new Restaurant(
                 "Test Restaurant",
                 "123 Test Street",
@@ -18,13 +19,10 @@ public class RestaurantTest {
                 0.0,
                 0.0
         );
-
-        String expected = "This restaurant has gluten free options";
-        assertEquals(expected, restaurant.determineIfGlutenFree());
-
+        assertTrue(restaurant.hasGlutenFreeOptions());
     }
     @Test
-    public void determineIfGlutenFree_hasGFMenuFalse_returnsNegativeMessage() {
+    public void hasGlutenFreeOptions_hasGFMenuFalse_returnsFalse() {
         Restaurant restaurant = new Restaurant(
                 "Test Restaurant",
                 "123 Test Street",
@@ -33,7 +31,6 @@ public class RestaurantTest {
                 0.0,
                 0.0
         );
-        String expected = "This restaurant has no gluten free options";
-        assertEquals(expected, restaurant.determineIfGlutenFree());
+        assertFalse(restaurant.hasGlutenFreeOptions());
     }
 }

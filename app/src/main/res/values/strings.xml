@@ -17,4 +17,6 @@
     <string name="title_restaurant_detail">Restaurant Detail</string>
     <string name="slideshow_fragment_text">This is slideshow fragment</string>
     <string name="missing_data">Information unavailable</string>
+    <string name="gf_options_available">This restaurant has gluten free options</string>
+    <string name="gf_options_unavailable">This restaurant has no gluten free options</string>
 </resources>

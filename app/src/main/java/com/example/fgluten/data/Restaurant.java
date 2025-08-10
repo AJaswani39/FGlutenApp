@@ -36,7 +36,7 @@ public class Restaurant implements Serializable {
         return gfMenu;
     }
 
-    public boolean hasGFMenu() {
+    public boolean hasGlutenFreeOptions() {
         return this.hasGFMenu;
     }
 
@@ -47,16 +47,6 @@ public class Restaurant implements Serializable {
     public double getLongitude() {
         return longitude;
     }
-
-
-    public String determineIfGlutenFree() {
-        if (!this.hasGFMenu) {
-            return "This restaurant has no gluten free options";
-        } else {
-            return "This restaurant has gluten free options";
-        }
-    }
-
 
     // toString method
     @Override
