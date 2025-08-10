@@ -1,4 +1,4 @@
-package com.example.FGluten.ui.slideshow;
+package com.example.fgluten.ui.slideshow;
 
 import android.app.Application;
 
@@ -7,7 +7,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.FGluten.R;
+import com.example.fgluten.R;
 
 public class SlideshowViewModel extends AndroidViewModel {
 

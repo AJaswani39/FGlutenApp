@@ -1,4 +1,4 @@
-package com.example.FGluten.ui.restaurant;
+package com.example.fgluten.ui.restaurant;
 
 import android.app.Application;
 
@@ -7,8 +7,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.FGluten.data.Restaurant;
-import com.example.FGluten.data.RestaurantRepository;
+import com.example.fgluten.data.Restaurant;
+import com.example.fgluten.data.RestaurantRepository;
 
 import java.util.List;
 

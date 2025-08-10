@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.FGluten"
+    namespace = "com.example.fgluten"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.FGluten"
+        applicationId = "com.example.fgluten"
         minSdk = 27
         targetSdk = 33
         versionCode = 1

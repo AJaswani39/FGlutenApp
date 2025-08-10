@@ -1,4 +1,4 @@
-package com.example.FGluten.ui.restaurant;
+package com.example.fgluten.ui.restaurant;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,9 +12,9 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.FGluten.R;
-import com.example.FGluten.data.Restaurant;
-import com.example.FGluten.databinding.FragmentRestaurantListBinding;
+import com.example.fgluten.R;
+import com.example.fgluten.data.Restaurant;
+import com.example.fgluten.databinding.FragmentRestaurantListBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package com.example.FGluten;
+package com.example.fgluten;
 
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,7 +10,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.example.FGluten.databinding.ActivityMainBinding;
+import com.example.fgluten.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        com.example.FGluten.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        com.example.fgluten.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         super.setContentView(binding.getRoot());
 
         setSupportActionBar(binding.appBarMain.toolbar);
