@@ -16,4 +16,5 @@
     <string name="gallery_fragment_text">Where you will see all the gluten free restaurants..</string>
     <string name="title_restaurant_detail">Restaurant Detail</string>
     <string name="slideshow_fragment_text">This is slideshow fragment</string>
+    <string name="missing_data">Information unavailable</string>
 </resources>

@@ -14,6 +14,8 @@ import androidx.fragment.app.Fragment;
 import com.example.FGluten.R;
 import com.example.FGluten.data.Restaurant;
 
+import java.util.List;
+
 public class RestaurantDetailFragment extends Fragment {
 
     @Nullable
@@ -27,16 +29,29 @@ public class RestaurantDetailFragment extends Fragment {
         TextView gfStatusView = root.findViewById(R.id.detail_gf_status);
         TextView menuView = root.findViewById(R.id.detail_menu);
 
+        String missingData = getString(R.string.missing_data);
+
+        String name = null;
+        String address = null;
+        String gfStatus = null;
+        List<String> menu = null;
+
+
         Bundle args = getArguments();
         if (args != null) {
             Restaurant restaurant = (Restaurant) args.getSerializable("restaurant");
             if (restaurant != null) {
-                nameView.setText(restaurant.getName());
-                addressView.setText(restaurant.getAddress());
-                gfStatusView.setText(restaurant.determineIfGlutenFree());
-                menuView.setText(TextUtils.join("\n", restaurant.getGlutenFreeMenu()));
+                name = restaurant.getName();
+                address = restaurant.getAddress();
+                gfStatus = restaurant.determineIfGlutenFree();
+                menu = restaurant.getGlutenFreeMenu();
             }
         }
+
+        nameView.setText(name != null ? name : missingData);
+        addressView.setText(address != null ? address : missingData);
+        gfStatusView.setText(gfStatus != null ? gfStatus : missingData);
+        menuView.setText(menu != null ? TextUtils.join("\n", menu) : missingData);
 
         return root;
     }
