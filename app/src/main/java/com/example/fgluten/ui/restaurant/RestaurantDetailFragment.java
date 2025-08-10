@@ -33,7 +33,7 @@ public class RestaurantDetailFragment extends Fragment {
 
         String name = null;
         String address = null;
-        String gfStatus = null;
+        Boolean hasGfOptions = null;
         List<String> menu = null;
 
 
@@ -43,14 +43,18 @@ public class RestaurantDetailFragment extends Fragment {
             if (restaurant != null) {
                 name = restaurant.getName();
                 address = restaurant.getAddress();
-                gfStatus = restaurant.determineIfGlutenFree();
+                hasGfOptions = restaurant.hasGlutenFreeOptions();
                 menu = restaurant.getGlutenFreeMenu();
             }
         }
 
         nameView.setText(name != null ? name : missingData);
         addressView.setText(address != null ? address : missingData);
-        gfStatusView.setText(gfStatus != null ? gfStatus : missingData);
+        if (hasGfOptions != null) {
+            gfStatusView.setText(hasGfOptions ? R.string.gf_options_available : R.string.gf_options_unavailable);
+        } else {
+            gfStatusView.setText(missingData);
+        }
         menuView.setText(menu != null ? TextUtils.join("\n", menu) : missingData);
 
         return root;
