@@ -1,28 +1,30 @@
 package com.example.FGluten.ui.restaurant;
 
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
-
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import com.example.FGluten.R;
+import com.example.FGluten.data.Restaurant;
 import com.example.FGluten.databinding.FragmentRestaurantListBinding;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class RestaurantListFragment extends Fragment {
 
     private FragmentRestaurantListBinding binding;
     private RestaurantAdapter adapter;
+    private List<Restaurant> restaurants = new ArrayList<>();
 
     @Override
 
@@ -37,7 +39,7 @@ public class RestaurantListFragment extends Fragment {
         restaurants.add(new Restaurant("Pizza Place", "456 Elm St", false,
                 new ArrayList<>(), 0.0, 0.0));
 
-        RestaurantAdapter adapter = new RestaurantAdapter(restaurants, restaurant -> {
+        adapter = new RestaurantAdapter(restaurants, restaurant -> {
             Bundle bundle = new Bundle();
             bundle.putSerializable("restaurant", restaurant);
             NavHostFragment.findNavController(RestaurantListFragment.this)
