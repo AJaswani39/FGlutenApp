@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FGluten App"
+rootProject.name = "FGlutenApp"
 include(":app")
  
