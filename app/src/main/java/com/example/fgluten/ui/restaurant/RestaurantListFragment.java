@@ -29,8 +29,9 @@ public class RestaurantListFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
-        RecyclerView recyclerView = root.findViewById(R.id.restaurant_recycler);
+
+        binding = FragmentRestaurantListBinding.inflate(inflater, container, false);
+        RecyclerView recyclerView = binding.restaurantRecycler;
 
         adapter = new RestaurantAdapter(new ArrayList<>(), restaurant -> {
             Bundle bundle = new Bundle();
@@ -45,7 +46,7 @@ public class RestaurantListFragment extends Fragment {
         restaurantViewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
         restaurantViewModel.getRestaurants().observe(getViewLifecycleOwner(), adapter::setRestaurants);
 
-        return root;
+        return binding.getRoot();
     }
 
     @Override
