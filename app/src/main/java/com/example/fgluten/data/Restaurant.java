@@ -1,11 +1,12 @@
 package com.example.fgluten.data;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.util.List;
 
 
 //GF = Gluten free
-public class Restaurant implements Serializable {
+public class Restaurant implements Parcelable {
     private final String name;
     private final String address;
     private final boolean hasGFMenu;
@@ -21,6 +22,15 @@ public class Restaurant implements Serializable {
         this.gfMenu = gfMenu;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    protected Restaurant(Parcel in) {
+        name = in.readString();
+        address = in.readString();
+        hasGFMenu = in.readByte() != 0;
+        gfMenu = in.createStringArrayList();
+        latitude = in.readDouble();
+        longitude = in.readDouble();
     }
 
 
@@ -47,6 +57,33 @@ public class Restaurant implements Serializable {
     public double getLongitude() {
         return longitude;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(address);
+        dest.writeByte((byte) (hasGFMenu ? 1 : 0));
+        dest.writeStringList(gfMenu);
+        dest.writeDouble(latitude);
+        dest.writeDouble(longitude);
+    }
+
+    public static final Creator<Restaurant> CREATOR = new Creator<Restaurant>() {
+        @Override
+        public Restaurant createFromParcel(Parcel in) {
+            return new Restaurant(in);
+        }
+
+        @Override
+        public Restaurant[] newArray(int size) {
+            return new Restaurant[size];
+        }
+    };
 
     // toString method
     @Override

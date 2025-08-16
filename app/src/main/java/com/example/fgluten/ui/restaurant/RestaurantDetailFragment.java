@@ -39,7 +39,7 @@ public class RestaurantDetailFragment extends Fragment {
 
         Bundle args = getArguments();
         if (args != null) {
-            Restaurant restaurant = (Restaurant) args.getSerializable("restaurant");
+            Restaurant restaurant = (Restaurant) args.getParcelable("restaurant");
             if (restaurant != null) {
                 name = restaurant.getName();
                 address = restaurant.getAddress();

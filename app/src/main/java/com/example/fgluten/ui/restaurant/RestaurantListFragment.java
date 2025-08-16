@@ -35,7 +35,7 @@ public class RestaurantListFragment extends Fragment {
 
         adapter = new RestaurantAdapter(new ArrayList<>(), restaurant -> {
             Bundle bundle = new Bundle();
-            bundle.putSerializable("restaurant", restaurant);
+            bundle.putParcelable("restaurant", restaurant);
             NavHostFragment.findNavController(RestaurantListFragment.this)
                     .navigate(R.id.action_restaurantListFragment_to_restaurantDetailFragment, bundle);
         });
