@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.CancellationTokenSource;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.PlaceLikelihood;
@@ -227,7 +228,7 @@ public class RestaurantViewModel extends AndroidViewModel {
                 })
                 .addOnFailureListener(e -> {
                     Log.w(TAG, "Places request failed", e);
-                    publishWithDistances(userLocation, repository.getRestaurants());
+                    handlePlacesFailure(e, userLocation);
                 });
     }
 
@@ -240,6 +241,51 @@ public class RestaurantViewModel extends AndroidViewModel {
             likelyHasGf = lower.contains("gluten") || lower.contains("gf");
         }
         return new Restaurant(name, address, likelyHasGf, new ArrayList<>(), latLng.latitude, latLng.longitude);
+    }
+
+    private void handlePlacesFailure(Throwable throwable, Location userLocation) {
+        String message = buildDetailedError(throwable);
+        if (userLocation != null) {
+            lastUserLat = userLocation.getLatitude();
+            lastUserLng = userLocation.getLongitude();
+        }
+        if (!lastSuccessfulRestaurants.isEmpty() && lastUserLat != null && lastUserLng != null) {
+            restaurantState.setValue(RestaurantUiState.successWithMessage(
+                    new ArrayList<>(lastSuccessfulRestaurants),
+                    lastUserLat,
+                    lastUserLng,
+                    message
+            ));
+        } else {
+            restaurantState.setValue(RestaurantUiState.error(message));
+        }
+    }
+
+    private String buildDetailedError(Throwable throwable) {
+        String base = getApplication().getString(R.string.fgluten_places_error_message);
+        if (throwable == null) {
+            return base;
+        }
+        StringBuilder sb = new StringBuilder(base);
+        if (throwable instanceof ApiException) {
+            ApiException api = (ApiException) throwable;
+            sb.append(" [statusCode=").append(api.getStatusCode());
+            if (api.getStatusMessage() != null) {
+                sb.append(", statusMessage=").append(api.getStatusMessage());
+            }
+            sb.append("]");
+        } else {
+            if (throwable.getClass() != null) {
+                sb.append(" [").append(throwable.getClass().getSimpleName()).append("]");
+            }
+            if (throwable.getMessage() != null && !throwable.getMessage().isEmpty()) {
+                sb.append(" ").append(throwable.getMessage());
+            }
+        }
+        if (throwable.getCause() != null && throwable.getCause().getMessage() != null) {
+            sb.append(" Cause: ").append(throwable.getCause().getMessage());
+        }
+        return sb.toString();
     }
 
     private void publishWithDistances(Location userLocation, List<Restaurant> restaurants) {

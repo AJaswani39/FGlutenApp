@@ -34,4 +34,14 @@
     <string name="sort_by">Sort:</string>
     <string name="sort_distance">Distance</string>
     <string name="sort_name">Name</string>
+    <string name="fgluten_places_error_message">Unable to load restaurants right now</string>
+    <string name="home_title">Find gluten-safe spots nearby</string>
+    <string name="home_subtitle">See what’s safe around you, with crowd notes and GF badges.</string>
+    <string name="cta_find_restaurants">Find restaurants</string>
+    <string name="home_permission_prompt">Allow location to show places near you.</string>
+    <string name="home_tips_title">Ordering tips</string>
+    <string name="home_tip_one">Ask about dedicated fryers and separate prep areas.</string>
+    <string name="home_tip_two">Confirm gluten-free soy sauce for Asian dishes.</string>
+    <string name="home_tip_three">Avoid shared toasters and cutting boards.</string>
+    <string name="home_last_nearby_title">Last nearby finds</string>
 </resources>
