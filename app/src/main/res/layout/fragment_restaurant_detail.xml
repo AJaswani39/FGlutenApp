@@ -52,6 +52,21 @@
             android:textSize="14sp"/>
 
         <TextView
+            android:id="@+id/detail_menu_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="?android:textColorSecondary"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/detail_rescan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/rescan_menu" />
+
+        <TextView
             android:id="@+id/detail_gf_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

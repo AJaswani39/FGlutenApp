@@ -52,16 +52,41 @@ public class RestaurantMarkerBottomSheet extends BottomSheetDialogFragment {
 
         StringBuilder sb = new StringBuilder();
         if (restaurant.getRating() != null) {
-            sb.append(String.format("%.1f ★", restaurant.getRating()));
+            sb.append(String.format("%.1f ?", restaurant.getRating()));
         }
         if (restaurant.getOpenNow() != null) {
-            if (sb.length() > 0) sb.append(" • ");
+            if (sb.length() > 0) sb.append("  ");
             sb.append(restaurant.getOpenNow() ? getString(R.string.meta_open_now) : getString(R.string.meta_closed));
+        }
+        String scanLabel = menuScanLabel(restaurant);
+        if (scanLabel != null && !scanLabel.isEmpty()) {
+            if (sb.length() > 0) sb.append(" \u2022 ");
+            sb.append(scanLabel);
         }
         meta.setText(sb.toString());
         meta.setVisibility(sb.length() > 0 ? View.VISIBLE : View.GONE);
 
         navigate.setOnClickListener(v -> openMaps(restaurant));
+    }
+
+    private String menuScanLabel(Restaurant restaurant) {
+        Restaurant.MenuScanStatus status = restaurant.getMenuScanStatus();
+        if (status == null) {
+            return null;
+        }
+        if (status == Restaurant.MenuScanStatus.FETCHING) {
+            return getString(R.string.menu_scan_pending_short);
+        } else if (status == Restaurant.MenuScanStatus.SUCCESS) {
+            if (restaurant.getGlutenFreeMenu() != null && !restaurant.getGlutenFreeMenu().isEmpty()) {
+                return getString(R.string.menu_scan_found_gf);
+            }
+            return getString(R.string.menu_scan_none_found);
+        } else if (status == Restaurant.MenuScanStatus.NO_WEBSITE) {
+            return getString(R.string.menu_scan_no_site);
+        } else if (status == Restaurant.MenuScanStatus.FAILED) {
+            return getString(R.string.menu_scan_unavailable);
+        }
+        return null;
     }
 
     private void openMaps(Restaurant restaurant) {

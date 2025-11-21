@@ -79,6 +79,10 @@ public class HomeViewModel extends AndroidViewModel {
                 boolean hasGf = obj.optBoolean("hasGf", false);
                 double rLat = obj.optDouble("lat", 0);
                 double rLng = obj.optDouble("lng", 0);
+                String placeId = obj.optString("placeId", null);
+                String menuUrl = obj.optString("menuUrl", null);
+                String scanStatusString = obj.optString("menuScanStatus", Restaurant.MenuScanStatus.NOT_STARTED.name());
+                long scanTimestamp = obj.optLong("menuScanTimestamp", 0L);
                 JSONArray menuArray = obj.optJSONArray("menu");
                 List<String> menu = new ArrayList<>();
                 if (menuArray != null) {
@@ -86,7 +90,16 @@ public class HomeViewModel extends AndroidViewModel {
                         menu.add(menuArray.optString(j, ""));
                     }
                 }
-                Restaurant r = new Restaurant(name, address, hasGf, menu, rLat, rLng);
+                Restaurant r = new Restaurant(name, address, hasGf, menu, rLat, rLng, null, null, placeId);
+                if (menuUrl != null && !menuUrl.isEmpty()) {
+                    r.setMenuUrl(menuUrl);
+                }
+                try {
+                    r.setMenuScanStatus(Restaurant.MenuScanStatus.valueOf(scanStatusString));
+                } catch (Exception ignored) {
+                    r.setMenuScanStatus(Restaurant.MenuScanStatus.NOT_STARTED);
+                }
+                r.setMenuScanTimestamp(scanTimestamp);
                 if (!Double.isNaN(lat) && !Double.isNaN(lng)) {
                     float[] results = new float[1];
                     Location.distanceBetween(lat, lng, rLat, rLng, results);

@@ -1,9 +1,9 @@
-
 package com.example.fgluten.ui.restaurant;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -140,14 +140,39 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         private String buildMeta(Restaurant restaurant) {
             StringBuilder sb = new StringBuilder();
             if (restaurant.getRating() != null) {
-                sb.append(String.format("%.1f ★", restaurant.getRating()));
+                sb.append(String.format("%.1f ?", restaurant.getRating()));
             }
             if (restaurant.getOpenNow() != null) {
-                if (sb.length() > 0) sb.append(" • ");
+                if (sb.length() > 0) sb.append("  ");
                 sb.append(restaurant.getOpenNow() ? itemView.getContext().getString(R.string.meta_open_now)
                         : itemView.getContext().getString(R.string.meta_closed));
             }
+            String scanLabel = menuScanLabel(itemView.getContext(), restaurant);
+            if (!TextUtils.isEmpty(scanLabel)) {
+                if (sb.length() > 0) sb.append(" \u2022 ");
+                sb.append(scanLabel);
+            }
             return sb.toString();
+        }
+
+        private String menuScanLabel(Context context, Restaurant restaurant) {
+            Restaurant.MenuScanStatus status = restaurant.getMenuScanStatus();
+            if (status == null) {
+                return null;
+            }
+            if (status == Restaurant.MenuScanStatus.FETCHING) {
+                return context.getString(R.string.menu_scan_pending_short);
+            } else if (status == Restaurant.MenuScanStatus.SUCCESS) {
+                if (restaurant.getGlutenFreeMenu() != null && !restaurant.getGlutenFreeMenu().isEmpty()) {
+                    return context.getString(R.string.menu_scan_found_gf);
+                }
+                return context.getString(R.string.menu_scan_none_found);
+            } else if (status == Restaurant.MenuScanStatus.NO_WEBSITE) {
+                return context.getString(R.string.menu_scan_no_site);
+            } else if (status == Restaurant.MenuScanStatus.FAILED) {
+                return context.getString(R.string.menu_scan_unavailable);
+            }
+            return null;
         }
 
         private void openInMaps(Restaurant restaurant) {

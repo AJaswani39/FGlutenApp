@@ -73,4 +73,15 @@
     <string name="detail_open_now">Open now</string>
     <string name="detail_closed">Closed now</string>
     <string name="detail_hours_unknown">Hours unavailable</string>
+    <string name="menu_scan_pending_short">Menu scanning...</string>
+    <string name="menu_scan_found_gf">GF items confirmed</string>
+    <string name="menu_scan_none_found">No GF mentions found</string>
+    <string name="menu_scan_no_site">No online menu</string>
+    <string name="menu_scan_unavailable">Menu unavailable</string>
+    <string name="menu_scan_pending_detail">Scanning menu for gluten-free items...</string>
+    <string name="menu_scan_scanned_with_gf">Menu scanned; gluten-free items confirmed.</string>
+    <string name="menu_scan_scanned_no_gf">Menu scanned; no gluten-free mentions found.</string>
+    <string name="menu_scan_not_started">Menu not yet scanned</string>
+    <string name="rescan_menu">Re-scan menu</string>
+    <string name="menu_scan_requested">Re-scanning menu…</string>
 </resources>

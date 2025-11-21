@@ -42,10 +42,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RestaurantViewModel extends AndroidViewModel {
 
@@ -137,8 +143,13 @@ public class RestaurantViewModel extends AndroidViewModel {
     private final boolean hasMapsKey;
     private static final String TAG = "RestaurantViewModel";
     private static final String PREF_KEY_CACHE = "restaurant_cache";
+    private static final long MENU_SCAN_TTL_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
+    private static final int MENU_MAX_BYTES = 200_000;
+    private static final int MAX_SCANS_PER_BATCH = 5;
+    private static final String USER_AGENT = "FGlutenApp/1.0";
     private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final Map<String, List<String>> robotsDisallowCache = new HashMap<>();
 
     public RestaurantViewModel(@NonNull Application application) {
         super(application);
@@ -316,13 +327,14 @@ public class RestaurantViewModel extends AndroidViewModel {
                         double rLng = loc != null ? loc.optDouble("lng", Double.NaN) : Double.NaN;
                         Double rating = obj.has("rating") ? obj.optDouble("rating") : null;
                         Boolean openNow = null;
+                        String placeId = obj.optString("place_id", null);
                         JSONObject opening = obj.optJSONObject("opening_hours");
                         if (opening != null && opening.has("open_now")) {
                             openNow = opening.optBoolean("open_now");
                         }
                         if (Double.isNaN(rLat) || Double.isNaN(rLng)) continue;
                         boolean likelyHasGf = name.toLowerCase().contains("gluten") || name.toLowerCase().contains("gf");
-                        results.add(new Restaurant(name, address, likelyHasGf, new ArrayList<>(), rLat, rLng, rating, openNow));
+                        results.add(new Restaurant(name, address, likelyHasGf, new ArrayList<>(), rLat, rLng, rating, openNow, placeId));
                     }
                 }
             } catch (Exception ex) {
@@ -375,7 +387,8 @@ public class RestaurantViewModel extends AndroidViewModel {
             // OpeningHours does not expose open-now directly here; leave null.
             openNow = null;
         }
-        return new Restaurant(name, address, likelyHasGf, new ArrayList<>(), latLng.latitude, latLng.longitude, rating, openNow);
+        String placeId = place.getId();
+        return new Restaurant(name, address, likelyHasGf, new ArrayList<>(), latLng.latitude, latLng.longitude, rating, openNow, placeId);
     }
 
     private void handlePlacesFailure(Throwable throwable, Location userLocation) {
@@ -445,6 +458,7 @@ public class RestaurantViewModel extends AndroidViewModel {
         lastUserLng = userLocation.getLongitude();
         emitFilteredState(null);
         saveCache(restaurants, lastUserLat, lastUserLng);
+        kickOffMenuScans(restaurants);
     }
 
     private void postLocationError() {
@@ -492,6 +506,304 @@ public class RestaurantViewModel extends AndroidViewModel {
         }
     }
 
+    private void kickOffMenuScans(List<Restaurant> restaurants) {
+        if (restaurants == null || restaurants.isEmpty()) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        boolean anyStarted = false;
+        int launched = 0;
+        for (Restaurant restaurant : restaurants) {
+            if (TextUtils.isEmpty(restaurant.getPlaceId())) {
+                continue;
+            }
+            Restaurant.MenuScanStatus status = restaurant.getMenuScanStatus();
+            if (status == Restaurant.MenuScanStatus.FETCHING) {
+                continue;
+            }
+            long age = restaurant.getMenuScanTimestamp() > 0 ? (now - restaurant.getMenuScanTimestamp()) : Long.MAX_VALUE;
+            if (age < MENU_SCAN_TTL_MS && status != Restaurant.MenuScanStatus.NOT_STARTED) {
+                continue; // recently checked
+            }
+            restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.FETCHING);
+            anyStarted = true;
+            ioExecutor.execute(() -> scanMenu(restaurant));
+            launched++;
+            if (launched >= MAX_SCANS_PER_BATCH) {
+                break; // avoid hammering servers on burst
+            }
+        }
+        if (anyStarted) {
+            mainHandler.post(() -> emitFilteredState(null));
+        }
+    }
+
+    public void requestMenuRescan(Restaurant restaurant) {
+        if (restaurant == null || TextUtils.isEmpty(restaurant.getPlaceId())) {
+            return;
+        }
+        restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.FETCHING);
+        restaurant.setMenuScanTimestamp(System.currentTimeMillis());
+        restaurant.setGlutenFreeMenuItems(new ArrayList<>());
+        mainHandler.post(() -> emitFilteredState(null));
+        ioExecutor.execute(() -> scanMenu(restaurant));
+    }
+
+    private void scanMenu(Restaurant restaurant) {
+        String website = fetchWebsiteForPlace(restaurant.getPlaceId());
+        if (TextUtils.isEmpty(website)) {
+            restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.NO_WEBSITE);
+            restaurant.setMenuScanTimestamp(System.currentTimeMillis());
+            mainHandler.post(() -> emitFilteredState(null));
+            return;
+        }
+
+        restaurant.setMenuUrl(website);
+        String html = fetchHtml(website);
+        if (html != null) {
+            String menuUrl = findMenuLink(html, website);
+            if (!TextUtils.isEmpty(menuUrl) && !menuUrl.equals(website)) {
+                restaurant.setMenuUrl(menuUrl);
+                String menuHtml = fetchHtml(menuUrl);
+                if (menuHtml != null) {
+                    html = menuHtml;
+                }
+            }
+        }
+
+        List<String> evidence = html != null ? extractGfEvidence(html) : new ArrayList<>();
+        restaurant.setGlutenFreeMenuItems(evidence);
+        restaurant.setMenuScanTimestamp(System.currentTimeMillis());
+        if (TextUtils.isEmpty(restaurant.getMenuUrl())) {
+            restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.NO_WEBSITE);
+        } else if (html == null) {
+            restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.FAILED);
+        } else {
+            // SUCCESS simply means we scanned; evidence may be empty if no GF items were found.
+            restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.SUCCESS);
+        }
+        mainHandler.post(() -> emitFilteredState(null));
+    }
+
+    private String fetchWebsiteForPlace(String placeId) {
+        if (TextUtils.isEmpty(placeId) || !hasMapsKey) {
+            return null;
+        }
+        HttpURLConnection connection = null;
+        try {
+            String encodedPlaceId = placeId;
+            try {
+                encodedPlaceId = URLEncoder.encode(placeId, "UTF-8");
+            } catch (Exception ignored) {
+                // best-effort; continue with raw value
+            }
+            String urlStr = "https://maps.googleapis.com/maps/api/place/details/json"
+                    + "?place_id=" + encodedPlaceId
+                    + "&fields=website"
+                    + "&key=" + BuildConfig.MAPS_API_KEY;
+            URL url = new URL(urlStr);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(8000);
+            connection.setReadTimeout(8000);
+            int code = connection.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                return null;
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            reader.close();
+            JSONObject root = new JSONObject(sb.toString());
+            JSONObject result = root.optJSONObject("result");
+            if (result != null) {
+                String website = result.optString("website", null);
+                if (!TextUtils.isEmpty(website)) {
+                    return website;
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "fetchWebsiteForPlace failed for placeId=" + placeId, e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return null;
+    }
+
+    private String fetchHtml(String urlStr) {
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(urlStr);
+            if (!isAllowedByRobots(urlStr)) {
+                Log.d(TAG, "Blocked by robots.txt for url=" + urlStr);
+                return null;
+            }
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(8000);
+            connection.setReadTimeout(8000);
+            connection.setRequestProperty("User-Agent", USER_AGENT);
+            connection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            int code = connection.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                return null;
+            }
+            String contentType = connection.getHeaderField("Content-Type");
+            if (contentType != null && !contentType.toLowerCase().contains("text")) {
+                return null;
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            char[] buffer = new char[2048];
+            int total = 0;
+            int read;
+            while ((read = reader.read(buffer)) != -1 && total < MENU_MAX_BYTES) {
+                sb.append(buffer, 0, read);
+                total += read;
+            }
+            reader.close();
+            return sb.toString();
+        } catch (Exception e) {
+            Log.w(TAG, "fetchHtml failed for url=" + urlStr, e);
+            return null;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    private String findMenuLink(String html, String baseUrl) {
+        if (TextUtils.isEmpty(html)) {
+            return null;
+        }
+        Pattern menuPattern = Pattern.compile("href\\s*=\\s*\"([^\"]*menu[^\"]*)\"", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = menuPattern.matcher(html);
+        while (matcher.find()) {
+            String link = matcher.group(1);
+            String resolved = resolveUrl(baseUrl, link);
+            if (!TextUtils.isEmpty(resolved)) {
+                return resolved;
+            }
+        }
+        return null;
+    }
+
+    private String resolveUrl(String baseUrl, String candidate) {
+        try {
+            URI base = new URI(baseUrl);
+            URI resolved = base.resolve(candidate);
+            return resolved.toString();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private boolean isAllowedByRobots(String urlStr) {
+        try {
+            URL url = new URL(urlStr);
+            String host = url.getHost();
+            String path = url.getPath();
+            List<String> disallows = robotsDisallowCache.get(host);
+            if (disallows == null) {
+                disallows = fetchRobots(host, url.getProtocol());
+                robotsDisallowCache.put(host, disallows);
+            }
+            for (String rule : disallows) {
+                if (path.startsWith(rule)) {
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "robots check failed for " + urlStr, e);
+            return true; // fail open to avoid blocking everything
+        }
+        return true;
+    }
+
+    private List<String> fetchRobots(String host, String scheme) {
+        List<String> disallows = new ArrayList<>();
+        HttpURLConnection connection = null;
+        BufferedReader reader = null;
+        try {
+            URL robotsUrl = new URL(scheme + "://" + host + "/robots.txt");
+            connection = (HttpURLConnection) robotsUrl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.setRequestProperty("User-Agent", USER_AGENT);
+            int code = connection.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                return disallows;
+            }
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            boolean inStarSection = false;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+                if (line.toLowerCase().startsWith("user-agent:")) {
+                    String agent = line.substring("user-agent:".length()).trim();
+                    inStarSection = "*".equals(agent);
+                } else if (inStarSection && line.toLowerCase().startsWith("disallow:")) {
+                    String rule = line.substring("disallow:".length()).trim();
+                    if (!rule.isEmpty()) {
+                        disallows.add(rule);
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // ignore robots failures
+        } finally {
+            if (reader != null) {
+                try { reader.close(); } catch (Exception ignored) {}
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return disallows;
+    }
+
+    private List<String> extractGfEvidence(String html) {
+        List<String> results = new ArrayList<>();
+        if (TextUtils.isEmpty(html)) {
+            return results;
+        }
+        String noTags = html.replaceAll("(?s)<script.*?>.*?</script>", " ")
+                .replaceAll("(?s)<style.*?>.*?</style>", " ")
+                .replaceAll("<[^>]+>", " ");
+        String[] lines = noTags.split("\n");
+        Pattern gfPattern = Pattern.compile("(?i)(gluten[-\\s]?free|\\bgf\\b|celiac|coeliac|no gluten)");
+        for (String rawLine : lines) {
+            String line = rawLine.trim().replaceAll("\\s{2,}", " ");
+            if (line.length() < 4) {
+                continue;
+            }
+            Matcher m = gfPattern.matcher(line);
+            if (m.find()) {
+                String snippet = line;
+                if (snippet.length() > 140) {
+                    snippet = snippet.substring(0, 140);
+                }
+                if (!results.contains(snippet)) {
+                    results.add(snippet);
+                    if (results.size() >= 8) {
+                        break;
+                    }
+                }
+            }
+        }
+        return results;
+    }
+
     private void saveCache(List<Restaurant> restaurants, double lat, double lng) {
         try {
             JSONObject root = new JSONObject();
@@ -518,6 +830,16 @@ public class RestaurantViewModel extends AndroidViewModel {
                         menu.put(m);
                     }
                 }
+                if (r.getPlaceId() != null) {
+                    obj.put("placeId", r.getPlaceId());
+                }
+                if (r.getMenuUrl() != null) {
+                    obj.put("menuUrl", r.getMenuUrl());
+                }
+                if (r.getMenuScanStatus() != null) {
+                    obj.put("menuScanStatus", r.getMenuScanStatus().name());
+                }
+                obj.put("menuScanTimestamp", r.getMenuScanTimestamp());
                 obj.put("menu", menu);
                 items.put(obj);
             }
@@ -555,6 +877,10 @@ public class RestaurantViewModel extends AndroidViewModel {
                 boolean hasGf = obj.optBoolean("hasGf", false);
                 double rLat = obj.optDouble("lat", 0);
                 double rLng = obj.optDouble("lng", 0);
+                String placeId = obj.optString("placeId", null);
+                String menuUrl = obj.optString("menuUrl", null);
+                String scanStatusString = obj.optString("menuScanStatus", Restaurant.MenuScanStatus.NOT_STARTED.name());
+                long scanTimestamp = obj.optLong("menuScanTimestamp", 0L);
                 Double rating = obj.has("rating") ? obj.optDouble("rating") : null;
                 Boolean openNow = obj.has("openNow") ? obj.optBoolean("openNow") : null;
                 JSONArray menuArray = obj.optJSONArray("menu");
@@ -564,7 +890,16 @@ public class RestaurantViewModel extends AndroidViewModel {
                         menu.add(menuArray.optString(j, ""));
                     }
                 }
-                Restaurant r = new Restaurant(name, address, hasGf, menu, rLat, rLng, rating, openNow);
+                Restaurant r = new Restaurant(name, address, hasGf, menu, rLat, rLng, rating, openNow, placeId);
+                if (!TextUtils.isEmpty(menuUrl)) {
+                    r.setMenuUrl(menuUrl);
+                }
+                try {
+                    r.setMenuScanStatus(Restaurant.MenuScanStatus.valueOf(scanStatusString));
+                } catch (Exception ignored) {
+                    r.setMenuScanStatus(Restaurant.MenuScanStatus.NOT_STARTED);
+                }
+                r.setMenuScanTimestamp(scanTimestamp);
                 restored.add(r);
             }
             if (restored.isEmpty()) {
@@ -579,6 +914,7 @@ public class RestaurantViewModel extends AndroidViewModel {
                 message = message + " (" + android.text.format.DateFormat.format("MMM d, h:mm a", timestamp) + ")";
             }
             emitFilteredState(message);
+            kickOffMenuScans(restored);
         } catch (JSONException e) {
             Log.w(TAG, "Failed to parse cached restaurants", e);
         }

@@ -6,10 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
@@ -24,6 +26,7 @@ public class RestaurantDetailFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_restaurant_detail, container, false);
+        RestaurantViewModel viewModel = new ViewModelProvider(requireActivity()).get(RestaurantViewModel.class);
 
         TextView nameView = root.findViewById(R.id.detail_name);
         TextView addressView = root.findViewById(R.id.detail_address);
@@ -32,9 +35,55 @@ public class RestaurantDetailFragment extends Fragment {
         TextView ratingView = root.findViewById(R.id.detail_rating);
         TextView hoursView = root.findViewById(R.id.detail_hours);
         TextView distanceView = root.findViewById(R.id.detail_distance);
+        TextView menuStatusView = root.findViewById(R.id.detail_menu_status);
+        Button rescanButton = root.findViewById(R.id.detail_rescan);
 
         String missingData = getString(R.string.missing_data);
 
+        final Restaurant[] current = new Restaurant[1];
+
+
+        Bundle args = getArguments();
+        if (args != null) {
+            Restaurant restaurant = (Restaurant) args.getParcelable("restaurant");
+            if (restaurant != null) {
+                current[0] = restaurant;
+            }
+        }
+
+        renderRestaurant(current[0], missingData, nameView, addressView, gfStatusView, menuView, ratingView, hoursView, distanceView, menuStatusView);
+
+        rescanButton.setOnClickListener(v -> {
+            if (current[0] != null) {
+                menuStatusView.setText(R.string.menu_scan_requested);
+                viewModel.requestMenuRescan(current[0]);
+            }
+        });
+
+        viewModel.getRestaurantState().observe(getViewLifecycleOwner(), state -> {
+            if (state == null || state.getRestaurants() == null || current[0] == null) {
+                return;
+            }
+            Restaurant updated = findMatching(state.getRestaurants(), current[0]);
+            if (updated != null) {
+                current[0] = updated;
+                renderRestaurant(updated, missingData, nameView, addressView, gfStatusView, menuView, ratingView, hoursView, distanceView, menuStatusView);
+            }
+        });
+
+        return root;
+    }
+
+    private void renderRestaurant(Restaurant restaurant,
+                                  String missingData,
+                                  TextView nameView,
+                                  TextView addressView,
+                                  TextView gfStatusView,
+                                  TextView menuView,
+                                  TextView ratingView,
+                                  TextView hoursView,
+                                  TextView distanceView,
+                                  TextView menuStatusView) {
         String name = null;
         String address = null;
         Boolean hasGfOptions = null;
@@ -42,20 +91,17 @@ public class RestaurantDetailFragment extends Fragment {
         Double rating = null;
         Boolean openNow = null;
         double distanceMeters = 0;
+        Restaurant.MenuScanStatus scanStatus = null;
 
-
-        Bundle args = getArguments();
-        if (args != null) {
-            Restaurant restaurant = (Restaurant) args.getParcelable("restaurant");
-            if (restaurant != null) {
-                name = restaurant.getName();
-                address = restaurant.getAddress();
-                hasGfOptions = restaurant.hasGlutenFreeOptions();
-                menu = restaurant.getGlutenFreeMenu();
-                rating = restaurant.getRating();
-                openNow = restaurant.getOpenNow();
-                distanceMeters = restaurant.getDistanceMeters();
-            }
+        if (restaurant != null) {
+            name = restaurant.getName();
+            address = restaurant.getAddress();
+            hasGfOptions = restaurant.hasGlutenFreeOptions();
+            menu = restaurant.getGlutenFreeMenu();
+            rating = restaurant.getRating();
+            openNow = restaurant.getOpenNow();
+            distanceMeters = restaurant.getDistanceMeters();
+            scanStatus = restaurant.getMenuScanStatus();
         }
 
         nameView.setText(name != null ? name : missingData);
@@ -80,6 +126,24 @@ public class RestaurantDetailFragment extends Fragment {
 
         // Menu lines
         menuView.setText(menu != null && !menu.isEmpty() ? TextUtils.join("\n", menu) : getString(R.string.gf_menu_unknown));
+
+        String menuStatusText;
+        if (scanStatus == Restaurant.MenuScanStatus.FETCHING) {
+            menuStatusText = getString(R.string.menu_scan_pending_detail);
+        } else if (scanStatus == Restaurant.MenuScanStatus.SUCCESS) {
+            if (menu != null && !menu.isEmpty()) {
+                menuStatusText = getString(R.string.menu_scan_scanned_with_gf);
+            } else {
+                menuStatusText = getString(R.string.menu_scan_scanned_no_gf);
+            }
+        } else if (scanStatus == Restaurant.MenuScanStatus.NO_WEBSITE) {
+            menuStatusText = getString(R.string.menu_scan_no_site);
+        } else if (scanStatus == Restaurant.MenuScanStatus.FAILED) {
+            menuStatusText = getString(R.string.menu_scan_unavailable);
+        } else {
+            menuStatusText = getString(R.string.menu_scan_not_started);
+        }
+        menuStatusView.setText(menuStatusText);
 
         // Rating
         if (rating != null) {
@@ -124,7 +188,19 @@ public class RestaurantDetailFragment extends Fragment {
         } else {
             distanceView.setVisibility(View.GONE);
         }
+    }
 
-        return root;
+    private Restaurant findMatching(List<Restaurant> restaurants, Restaurant target) {
+        if (restaurants == null || target == null) return null;
+        for (Restaurant r : restaurants) {
+            if (r.getPlaceId() != null && target.getPlaceId() != null && r.getPlaceId().equals(target.getPlaceId())) {
+                return r;
+            }
+            if (target.getPlaceId() == null && r.getName() != null && r.getName().equals(target.getName())
+                    && r.getAddress() != null && r.getAddress().equals(target.getAddress())) {
+                return r;
+            }
+        }
+        return null;
     }
 }
