@@ -58,6 +58,16 @@ public class RestaurantMarkerBottomSheet extends BottomSheetDialogFragment {
             if (sb.length() > 0) sb.append("  ");
             sb.append(restaurant.getOpenNow() ? getString(R.string.meta_open_now) : getString(R.string.meta_closed));
         }
+        String favLabel = favoriteLabel(restaurant);
+        if (favLabel != null && !favLabel.isEmpty()) {
+            if (sb.length() > 0) sb.append(" \u2022 ");
+            sb.append(favLabel);
+        }
+        String notesLabel = notesLabel(restaurant);
+        if (notesLabel != null && !notesLabel.isEmpty()) {
+            if (sb.length() > 0) sb.append(" \u2022 ");
+            sb.append(notesLabel);
+        }
         String scanLabel = menuScanLabel(restaurant);
         if (scanLabel != null && !scanLabel.isEmpty()) {
             if (sb.length() > 0) sb.append(" \u2022 ");
@@ -67,6 +77,22 @@ public class RestaurantMarkerBottomSheet extends BottomSheetDialogFragment {
         meta.setVisibility(sb.length() > 0 ? View.VISIBLE : View.GONE);
 
         navigate.setOnClickListener(v -> openMaps(restaurant));
+    }
+
+    private String favoriteLabel(Restaurant restaurant) {
+        String status = restaurant.getFavoriteStatus();
+        if (status == null) return null;
+        if ("safe".equals(status)) return getString(R.string.favorite_safe);
+        if ("try".equals(status)) return getString(R.string.favorite_try);
+        if ("avoid".equals(status)) return getString(R.string.favorite_avoid);
+        return null;
+    }
+
+    private String notesLabel(Restaurant restaurant) {
+        if (restaurant.getCrowdNotes() == null || restaurant.getCrowdNotes().isEmpty()) {
+            return null;
+        }
+        return getString(R.string.crowd_notes_count, restaurant.getCrowdNotes().size());
     }
 
     private String menuScanLabel(Restaurant restaurant) {

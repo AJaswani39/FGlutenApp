@@ -83,6 +83,13 @@ public class HomeViewModel extends AndroidViewModel {
                 String menuUrl = obj.optString("menuUrl", null);
                 String scanStatusString = obj.optString("menuScanStatus", Restaurant.MenuScanStatus.NOT_STARTED.name());
                 long scanTimestamp = obj.optLong("menuScanTimestamp", 0L);
+                JSONArray notesArray = obj.optJSONArray("notes");
+                List<String> notes = new ArrayList<>();
+                if (notesArray != null) {
+                    for (int j = 0; j < notesArray.length(); j++) {
+                        notes.add(notesArray.optString(j, ""));
+                    }
+                }
                 JSONArray menuArray = obj.optJSONArray("menu");
                 List<String> menu = new ArrayList<>();
                 if (menuArray != null) {
@@ -91,6 +98,13 @@ public class HomeViewModel extends AndroidViewModel {
                     }
                 }
                 Restaurant r = new Restaurant(name, address, hasGf, menu, rLat, rLng, null, null, placeId);
+                String fav = obj.optString("favoriteStatus", null);
+                if (fav != null && !fav.isEmpty()) {
+                    r.setFavoriteStatus(fav);
+                }
+                if (!notes.isEmpty()) {
+                    r.setCrowdNotes(notes);
+                }
                 if (menuUrl != null && !menuUrl.isEmpty()) {
                     r.setMenuUrl(menuUrl);
                 }

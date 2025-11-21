@@ -21,6 +21,7 @@ public class Restaurant implements Parcelable {
     private final String address;
     private final boolean hasGFMenu;
     private final List<String> gfMenu;
+    private final List<String> crowdNotes;
 
     private final double latitude;
     private final double longitude;
@@ -31,6 +32,7 @@ public class Restaurant implements Parcelable {
     private String menuUrl;
     private MenuScanStatus menuScanStatus;
     private long menuScanTimestamp;
+    private String favoriteStatus; // "safe", "avoid", "try", or null
 
     public Restaurant(String name, String address, boolean hasGFMenu, List<String> gfMenu, double latitude, double longitude) {
         this(name, address, hasGFMenu, gfMenu, latitude, longitude, null, null, null);
@@ -47,6 +49,7 @@ public class Restaurant implements Parcelable {
         this.address = address;
         this.hasGFMenu = hasGFMenu;
         this.gfMenu = gfMenu != null ? gfMenu : new ArrayList<>();
+        this.crowdNotes = new ArrayList<>();
         this.latitude = latitude;
         this.longitude = longitude;
         this.distanceMeters = 0.0;
@@ -56,6 +59,7 @@ public class Restaurant implements Parcelable {
         this.menuUrl = null;
         this.menuScanStatus = MenuScanStatus.NOT_STARTED;
         this.menuScanTimestamp = 0L;
+        this.favoriteStatus = null;
     }
 
     protected Restaurant(Parcel in) {
@@ -63,6 +67,7 @@ public class Restaurant implements Parcelable {
         address = in.readString();
         hasGFMenu = in.readByte() != 0;
         gfMenu = in.createStringArrayList();
+        crowdNotes = in.createStringArrayList();
         latitude = in.readDouble();
         longitude = in.readDouble();
         distanceMeters = in.readDouble();
@@ -84,6 +89,7 @@ public class Restaurant implements Parcelable {
                 ? MenuScanStatus.values()[statusOrdinal]
                 : MenuScanStatus.NOT_STARTED;
         menuScanTimestamp = in.readLong();
+        favoriteStatus = in.readString();
     }
 
 
@@ -162,6 +168,31 @@ public class Restaurant implements Parcelable {
         }
     }
 
+    public List<String> getCrowdNotes() {
+        return crowdNotes;
+    }
+
+    public void setCrowdNotes(List<String> notes) {
+        crowdNotes.clear();
+        if (notes != null) {
+            crowdNotes.addAll(notes);
+        }
+    }
+
+    public void addCrowdNote(String note) {
+        if (note != null && !note.trim().isEmpty()) {
+            crowdNotes.add(note.trim());
+        }
+    }
+
+    public String getFavoriteStatus() {
+        return favoriteStatus;
+    }
+
+    public void setFavoriteStatus(String favoriteStatus) {
+        this.favoriteStatus = favoriteStatus;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -173,6 +204,7 @@ public class Restaurant implements Parcelable {
         dest.writeString(address);
         dest.writeByte((byte) (hasGFMenu ? 1 : 0));
         dest.writeStringList(gfMenu);
+        dest.writeStringList(crowdNotes);
         dest.writeDouble(latitude);
         dest.writeDouble(longitude);
         dest.writeDouble(distanceMeters);
@@ -191,6 +223,7 @@ public class Restaurant implements Parcelable {
         dest.writeString(menuUrl);
         dest.writeInt(menuScanStatus != null ? menuScanStatus.ordinal() : MenuScanStatus.NOT_STARTED.ordinal());
         dest.writeLong(menuScanTimestamp);
+        dest.writeString(favoriteStatus);
     }
 
     public static final Creator<Restaurant> CREATOR = new Creator<Restaurant>() {
@@ -209,7 +242,7 @@ public class Restaurant implements Parcelable {
     @Override
     public String toString(){
         return String.format(
-                "Restaurant{name=%s, address=%s, hasGFMenu=%s, gfMenu=%s, latitude=%s, longitude=%s, distanceMeters=%s, placeId=%s, menuScanStatus=%s}",
+                "Restaurant{name=%s, address=%s, hasGFMenu=%s, gfMenu=%s, latitude=%s, longitude=%s, distanceMeters=%s, placeId=%s, menuScanStatus=%s, favoriteStatus=%s}",
                 name,
                 address,
                 hasGFMenu,
@@ -218,7 +251,8 @@ public class Restaurant implements Parcelable {
                 longitude,
                 distanceMeters,
                 placeId,
-                menuScanStatus
+                menuScanStatus,
+                favoriteStatus
 
         );
     }

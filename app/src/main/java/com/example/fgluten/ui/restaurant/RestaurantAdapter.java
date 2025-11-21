@@ -152,6 +152,16 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                 if (sb.length() > 0) sb.append(" \u2022 ");
                 sb.append(scanLabel);
             }
+            String favLabel = favoriteLabel(itemView.getContext(), restaurant);
+            if (!TextUtils.isEmpty(favLabel)) {
+                if (sb.length() > 0) sb.append(" \u2022 ");
+                sb.append(favLabel);
+            }
+            String notesLabel = notesLabel(itemView.getContext(), restaurant);
+            if (!TextUtils.isEmpty(notesLabel)) {
+                if (sb.length() > 0) sb.append(" \u2022 ");
+                sb.append(notesLabel);
+            }
             return sb.toString();
         }
 
@@ -171,6 +181,30 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                 return context.getString(R.string.menu_scan_no_site);
             } else if (status == Restaurant.MenuScanStatus.FAILED) {
                 return context.getString(R.string.menu_scan_unavailable);
+            }
+            return null;
+        }
+
+        private String notesLabel(Context context, Restaurant restaurant) {
+            List<String> notes = restaurant.getCrowdNotes();
+            int count = notes != null ? notes.size() : 0;
+            if (count <= 0) return null;
+            return context.getString(R.string.crowd_notes_count, count);
+        }
+
+        private String favoriteLabel(Context context, Restaurant restaurant) {
+            String status = restaurant.getFavoriteStatus();
+            if (TextUtils.isEmpty(status)) {
+                return null;
+            }
+            if ("safe".equals(status)) {
+                return context.getString(R.string.favorite_safe);
+            }
+            if ("try".equals(status)) {
+                return context.getString(R.string.favorite_try);
+            }
+            if ("avoid".equals(status)) {
+                return context.getString(R.string.favorite_avoid);
             }
             return null;
         }

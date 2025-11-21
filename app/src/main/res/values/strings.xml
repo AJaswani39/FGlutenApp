@@ -92,4 +92,15 @@
     <string name="rescan_menu">Re-scan menu</string>
     <string name="menu_scan_requested">Re-scanning menu…</string>
     <string name="loading_app">Loading FGluten…</string>
+    <string name="favorite_safe">Safe</string>
+    <string name="favorite_avoid">Avoid</string>
+    <string name="favorite_try">Try</string>
+    <string name="favorite_clear">Clear</string>
+    <string name="favorite_status_label">Marked: %1$s</string>
+    <string name="favorites_section_title">Mark this place</string>
+    <string name="crowd_notes_title">Crowd notes</string>
+    <string name="crowd_notes_empty">No notes yet. Add one?</string>
+    <string name="crowd_notes_add_hint">Add a short note (cross-contam, celiac-safe, etc)</string>
+    <string name="crowd_notes_add">Add note</string>
+    <string name="crowd_notes_count">Notes: %1$d</string>
 </resources>

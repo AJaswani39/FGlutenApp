@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
 import com.example.fgluten.util.SettingsManager;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.List;
 
@@ -37,6 +39,12 @@ public class RestaurantDetailFragment extends Fragment {
         TextView distanceView = root.findViewById(R.id.detail_distance);
         TextView menuStatusView = root.findViewById(R.id.detail_menu_status);
         Button rescanButton = root.findViewById(R.id.detail_rescan);
+        MaterialButtonToggleGroup favToggle = root.findViewById(R.id.favorite_toggle);
+        Button favClear = root.findViewById(R.id.fav_clear);
+        TextView favStatus = root.findViewById(R.id.detail_fav_status);
+        TextView notesList = root.findViewById(R.id.detail_notes_list);
+        EditText noteInput = root.findViewById(R.id.detail_note_input);
+        Button noteAdd = root.findViewById(R.id.detail_note_add);
 
         String missingData = getString(R.string.missing_data);
 
@@ -51,12 +59,43 @@ public class RestaurantDetailFragment extends Fragment {
             }
         }
 
-        renderRestaurant(current[0], missingData, nameView, addressView, gfStatusView, menuView, ratingView, hoursView, distanceView, menuStatusView);
+        renderRestaurant(current[0], missingData, nameView, addressView, gfStatusView, menuView, ratingView, hoursView, distanceView, menuStatusView, favToggle, favStatus, notesList);
 
         rescanButton.setOnClickListener(v -> {
             if (current[0] != null) {
                 menuStatusView.setText(R.string.menu_scan_requested);
                 viewModel.requestMenuRescan(current[0]);
+            }
+        });
+
+        favToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) return;
+            if (current[0] == null) return;
+            String status = null;
+            if (checkedId == R.id.fav_safe) {
+                status = "safe";
+            } else if (checkedId == R.id.fav_try) {
+                status = "try";
+            } else if (checkedId == R.id.fav_avoid) {
+                status = "avoid";
+            }
+            viewModel.setFavoriteStatus(current[0], status);
+            favStatus.setText(status != null ? getString(R.string.favorite_status_label, status) : "");
+        });
+
+        favClear.setOnClickListener(v -> {
+            if (current[0] == null) return;
+            favToggle.clearChecked();
+            viewModel.setFavoriteStatus(current[0], null);
+            favStatus.setText("");
+        });
+
+        noteAdd.setOnClickListener(v -> {
+            if (current[0] == null) return;
+            String note = noteInput.getText() != null ? noteInput.getText().toString().trim() : "";
+            if (!note.isEmpty()) {
+                viewModel.addCrowdNote(current[0], note);
+                noteInput.setText("");
             }
         });
 
@@ -67,7 +106,7 @@ public class RestaurantDetailFragment extends Fragment {
             Restaurant updated = findMatching(state.getRestaurants(), current[0]);
             if (updated != null) {
                 current[0] = updated;
-                renderRestaurant(updated, missingData, nameView, addressView, gfStatusView, menuView, ratingView, hoursView, distanceView, menuStatusView);
+                renderRestaurant(updated, missingData, nameView, addressView, gfStatusView, menuView, ratingView, hoursView, distanceView, menuStatusView, favToggle, favStatus, notesList);
             }
         });
 
@@ -83,7 +122,10 @@ public class RestaurantDetailFragment extends Fragment {
                                   TextView ratingView,
                                   TextView hoursView,
                                   TextView distanceView,
-                                  TextView menuStatusView) {
+                                  TextView menuStatusView,
+                                  MaterialButtonToggleGroup favToggle,
+                                  TextView favStatusView,
+                                  TextView notesListView) {
         String name = null;
         String address = null;
         Boolean hasGfOptions = null;
@@ -92,6 +134,7 @@ public class RestaurantDetailFragment extends Fragment {
         Boolean openNow = null;
         double distanceMeters = 0;
         Restaurant.MenuScanStatus scanStatus = null;
+        List<String> notes = null;
 
         if (restaurant != null) {
             name = restaurant.getName();
@@ -102,6 +145,7 @@ public class RestaurantDetailFragment extends Fragment {
             openNow = restaurant.getOpenNow();
             distanceMeters = restaurant.getDistanceMeters();
             scanStatus = restaurant.getMenuScanStatus();
+            notes = restaurant.getCrowdNotes();
         }
 
         nameView.setText(name != null ? name : missingData);
@@ -187,6 +231,36 @@ public class RestaurantDetailFragment extends Fragment {
             distanceView.setText(label);
         } else {
             distanceView.setVisibility(View.GONE);
+        }
+
+        if (favToggle != null) {
+            favToggle.clearChecked();
+            String status = restaurant != null ? restaurant.getFavoriteStatus() : null;
+            if ("safe".equals(status)) favToggle.check(R.id.fav_safe);
+            if ("try".equals(status)) favToggle.check(R.id.fav_try);
+            if ("avoid".equals(status)) favToggle.check(R.id.fav_avoid);
+            if (favStatusView != null) {
+                favStatusView.setText(status != null ? getString(R.string.favorite_status_label, status) : "");
+            }
+        }
+
+        if (notesListView != null) {
+            if (notes != null && !notes.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                int count = 0;
+                for (String n : notes) {
+                    if (n == null || n.trim().isEmpty()) continue;
+                    sb.append("\u2022 ").append(n.trim()).append("\n");
+                    count++;
+                }
+                if (sb.length() > 0) {
+                    notesListView.setText(sb.toString().trim());
+                } else {
+                    notesListView.setText(getString(R.string.crowd_notes_empty));
+                }
+            } else {
+                notesListView.setText(getString(R.string.crowd_notes_empty));
+            }
         }
     }
 
