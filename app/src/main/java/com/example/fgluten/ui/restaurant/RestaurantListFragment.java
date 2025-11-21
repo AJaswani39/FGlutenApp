@@ -73,7 +73,7 @@ public class RestaurantListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 
-        restaurantViewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
+        restaurantViewModel = new ViewModelProvider(requireActivity()).get(RestaurantViewModel.class);
         restaurantViewModel.getRestaurantState().observe(getViewLifecycleOwner(), this::renderUiState);
 
         binding.stateAction.setOnClickListener(v -> requestLocationFlow());

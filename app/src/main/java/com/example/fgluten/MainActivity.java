@@ -3,8 +3,10 @@ package com.example.fgluten;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -12,9 +14,11 @@ import androidx.navigation.NavOptions;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.core.view.GravityCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.fgluten.databinding.ActivityMainBinding;
 import com.example.fgluten.ui.settings.SettingsBottomSheet;
+import com.example.fgluten.ui.restaurant.RestaurantViewModel;
 import com.example.fgluten.util.SettingsManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -22,15 +26,18 @@ import com.google.android.material.snackbar.Snackbar;
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
+    private View globalLoadingOverlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen.installSplashScreen(this);
         // Apply saved theme before inflating
         SettingsManager.setThemeMode(this, SettingsManager.getThemeMode(this));
         super.onCreate(savedInstanceState);
 
         com.example.fgluten.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         super.setContentView(binding.getRoot());
+        globalLoadingOverlay = findViewById(R.id.global_loading_overlay);
 
         setSupportActionBar(binding.appBarMain.toolbar);
         DrawerLayout drawer = binding.drawerLayout;
@@ -63,8 +70,20 @@ public class MainActivity extends AppCompatActivity {
             }
             return handled;
         });
+
+        observeGlobalLoading();
     }
 
+    private void observeGlobalLoading() {
+        RestaurantViewModel restaurantViewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
+        restaurantViewModel.getRestaurantState().observe(this, state -> {
+            if (globalLoadingOverlay == null || state == null) {
+                return;
+            }
+            boolean show = state.getStatus() == com.example.fgluten.ui.restaurant.RestaurantViewModel.Status.LOADING;
+            globalLoadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+        });
+    }
 
 
     @Override
