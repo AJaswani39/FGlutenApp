@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Application;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -31,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class RestaurantViewModel extends AndroidViewModel {
 
@@ -117,7 +122,10 @@ public class RestaurantViewModel extends AndroidViewModel {
     private Double lastUserLng = null;
     private boolean gfOnly = false;
     private SortMode sortMode = SortMode.DISTANCE;
+    private final SharedPreferences cachePrefs;
+    private boolean cacheAttempted = false;
     private static final String TAG = "RestaurantViewModel";
+    private static final String PREF_KEY_CACHE = "restaurant_cache";
 
     public RestaurantViewModel(@NonNull Application application) {
         super(application);
@@ -128,6 +136,7 @@ public class RestaurantViewModel extends AndroidViewModel {
             Places.initialize(application, apiKey);
         }
         placesClient = Places.createClient(application);
+        cachePrefs = application.getSharedPreferences("restaurant_cache", Context.MODE_PRIVATE);
     }
 
     public LiveData<RestaurantUiState> getRestaurantState() {
@@ -145,6 +154,8 @@ public class RestaurantViewModel extends AndroidViewModel {
     }
 
     public void loadNearbyRestaurants() {
+        loadCachedIfAvailable();
+
         if (!hasLocationPermission()) {
             String message = getApplication().getString(R.string.location_permission_needed);
             restaurantState.setValue(RestaurantUiState.permissionRequired(message));
@@ -173,7 +184,7 @@ public class RestaurantViewModel extends AndroidViewModel {
 
     private void requestFreshLocation() {
         CancellationTokenSource tokenSource = new CancellationTokenSource();
-        fusedLocationProviderClient.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, tokenSource.getToken())
+        fusedLocationProviderClient.getCurrentLocation(Priority.PRIORITY_LOW_POWER, tokenSource.getToken())
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         publishRestaurantsForLocation(location);
@@ -251,6 +262,7 @@ public class RestaurantViewModel extends AndroidViewModel {
         lastUserLat = userLocation.getLatitude();
         lastUserLng = userLocation.getLongitude();
         emitFilteredState(null);
+        saveCache(restaurants, lastUserLat, lastUserLng);
     }
 
     private void postLocationError() {
@@ -294,6 +306,84 @@ public class RestaurantViewModel extends AndroidViewModel {
             restaurantState.setValue(RestaurantUiState.successWithMessage(filtered, lastUserLat, lastUserLng, messageIfAny));
         } else {
             restaurantState.setValue(RestaurantUiState.success(filtered, lastUserLat, lastUserLng));
+        }
+    }
+
+    private void saveCache(List<Restaurant> restaurants, double lat, double lng) {
+        try {
+            JSONObject root = new JSONObject();
+            root.put("lat", lat);
+            root.put("lng", lng);
+            JSONArray items = new JSONArray();
+            for (Restaurant r : restaurants) {
+                JSONObject obj = new JSONObject();
+                obj.put("name", r.getName());
+                obj.put("address", r.getAddress());
+                obj.put("hasGf", r.hasGlutenFreeOptions());
+                obj.put("lat", r.getLatitude());
+                obj.put("lng", r.getLongitude());
+                JSONArray menu = new JSONArray();
+                if (r.getGlutenFreeMenu() != null) {
+                    for (String m : r.getGlutenFreeMenu()) {
+                        menu.put(m);
+                    }
+                }
+                obj.put("menu", menu);
+                items.put(obj);
+            }
+            root.put("items", items);
+            cachePrefs.edit().putString(PREF_KEY_CACHE, root.toString()).apply();
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to cache restaurants", e);
+        }
+    }
+
+    private void loadCachedIfAvailable() {
+        if (cacheAttempted) {
+            return;
+        }
+        cacheAttempted = true;
+        String cached = cachePrefs.getString(PREF_KEY_CACHE, null);
+        if (cached == null) {
+            return;
+        }
+        try {
+            JSONObject root = new JSONObject(cached);
+            double lat = root.optDouble("lat", Double.NaN);
+            double lng = root.optDouble("lng", Double.NaN);
+            JSONArray items = root.optJSONArray("items");
+            if (items == null || Double.isNaN(lat) || Double.isNaN(lng)) {
+                return;
+            }
+            List<Restaurant> restored = new ArrayList<>();
+            for (int i = 0; i < items.length(); i++) {
+                JSONObject obj = items.optJSONObject(i);
+                if (obj == null) continue;
+                String name = obj.optString("name", "");
+                String address = obj.optString("address", "");
+                boolean hasGf = obj.optBoolean("hasGf", false);
+                double rLat = obj.optDouble("lat", 0);
+                double rLng = obj.optDouble("lng", 0);
+                JSONArray menuArray = obj.optJSONArray("menu");
+                List<String> menu = new ArrayList<>();
+                if (menuArray != null) {
+                    for (int j = 0; j < menuArray.length(); j++) {
+                        menu.add(menuArray.optString(j, ""));
+                    }
+                }
+                Restaurant r = new Restaurant(name, address, hasGf, menu, rLat, rLng);
+                restored.add(r);
+            }
+            if (restored.isEmpty()) {
+                return;
+            }
+            lastRestaurantsRaw.clear();
+            lastRestaurantsRaw.addAll(restored);
+            lastUserLat = lat;
+            lastUserLng = lng;
+            emitFilteredState(getApplication().getString(R.string.using_cached_results));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to parse cached restaurants", e);
         }
     }
 }
