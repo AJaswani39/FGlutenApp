@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private View globalLoadingOverlay;
+    private View startupLoadingOverlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         com.example.fgluten.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         super.setContentView(binding.getRoot());
         globalLoadingOverlay = findViewById(R.id.global_loading_overlay);
+        startupLoadingOverlay = findViewById(R.id.startup_loading_overlay);
 
         setSupportActionBar(binding.appBarMain.toolbar);
         DrawerLayout drawer = binding.drawerLayout;
@@ -77,11 +79,19 @@ public class MainActivity extends AppCompatActivity {
     private void observeGlobalLoading() {
         RestaurantViewModel restaurantViewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
         restaurantViewModel.getRestaurantState().observe(this, state -> {
-            if (globalLoadingOverlay == null || state == null) {
+            if ((globalLoadingOverlay == null && startupLoadingOverlay == null) || state == null) {
                 return;
             }
             boolean show = state.getStatus() == com.example.fgluten.ui.restaurant.RestaurantViewModel.Status.LOADING;
-            globalLoadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+            if (globalLoadingOverlay != null) {
+                globalLoadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+            if (startupLoadingOverlay != null) {
+                // Hide startup overlay once we leave the very first loading state
+                if (!show) {
+                    startupLoadingOverlay.setVisibility(View.GONE);
+                }
+            }
         });
     }
 
