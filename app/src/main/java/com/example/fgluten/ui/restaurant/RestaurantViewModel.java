@@ -542,11 +542,33 @@ public class RestaurantViewModel extends AndroidViewModel {
         if (restaurant == null || TextUtils.isEmpty(restaurant.getPlaceId())) {
             return;
         }
-        restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.FETCHING);
-        restaurant.setMenuScanTimestamp(System.currentTimeMillis());
-        restaurant.setGlutenFreeMenuItems(new ArrayList<>());
+        Restaurant target = findMatchingInLast(restaurant);
+        if (target == null) {
+            target = restaurant;
+        }
+        target.setMenuScanStatus(Restaurant.MenuScanStatus.FETCHING);
+        target.setMenuScanTimestamp(System.currentTimeMillis());
+        target.setGlutenFreeMenuItems(new ArrayList<>());
         mainHandler.post(() -> emitFilteredState(null));
-        ioExecutor.execute(() -> scanMenu(restaurant));
+        ioExecutor.execute(() -> scanMenu(target));
+    }
+
+    private Restaurant findMatchingInLast(Restaurant candidate) {
+        if (candidate == null || lastRestaurantsRaw.isEmpty()) {
+            return null;
+        }
+        for (Restaurant r : lastRestaurantsRaw) {
+            if (!TextUtils.isEmpty(candidate.getPlaceId()) && candidate.getPlaceId().equals(r.getPlaceId())) {
+                return r;
+            }
+            if (TextUtils.isEmpty(candidate.getPlaceId())
+                    && candidate.getName() != null && candidate.getAddress() != null
+                    && candidate.getName().equals(r.getName())
+                    && candidate.getAddress().equals(r.getAddress())) {
+                return r;
+            }
+        }
+        return null;
     }
 
     private void scanMenu(Restaurant restaurant) {
