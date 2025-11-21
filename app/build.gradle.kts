@@ -39,6 +39,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.9.2")
     implementation("androidx.navigation:navigation-fragment:2.9.3")
     implementation("androidx.navigation:navigation-ui:2.9.3")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("com.google.firebase:firebase-firestore:26.0.0")
     implementation("androidx.recyclerview:recyclerview:1.3.0")
     testImplementation("junit:junit:4.13.2")

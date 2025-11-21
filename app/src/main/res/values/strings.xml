@@ -19,4 +19,13 @@
     <string name="missing_data">Information unavailable</string>
     <string name="gf_options_available">This restaurant has gluten free options</string>
     <string name="gf_options_unavailable">This restaurant has no gluten free options</string>
+    <string name="location_permission_needed">Turn on location to see nearby gluten-friendly spots.</string>
+    <string name="enable_location">Use my location</string>
+    <string name="loading_restaurants">Finding gluten-friendly places near you...</string>
+    <string name="location_error">We couldn&#39;t get your location. Try again.</string>
+    <string name="retry">Retry</string>
+    <string name="no_restaurants_found">No restaurants found nearby right now.</string>
+    <string name="distance_km_away">%1$.1f km away</string>
+    <string name="distance_m_away">%1$d m away</string>
+    <string name="gluten_free_badge">Gluten free</string>
 </resources>

@@ -14,6 +14,7 @@ public class Restaurant implements Parcelable {
 
     private final double latitude;
     private final double longitude;
+    private double distanceMeters;
 
     public Restaurant(String name, String address, boolean hasGFMenu, List<String> gfMenu, double latitude, double longitude) {
         this.name = name;
@@ -22,6 +23,7 @@ public class Restaurant implements Parcelable {
         this.gfMenu = gfMenu;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.distanceMeters = 0.0;
     }
 
     protected Restaurant(Parcel in) {
@@ -31,6 +33,7 @@ public class Restaurant implements Parcelable {
         gfMenu = in.createStringArrayList();
         latitude = in.readDouble();
         longitude = in.readDouble();
+        distanceMeters = in.readDouble();
     }
 
 
@@ -58,6 +61,14 @@ public class Restaurant implements Parcelable {
         return longitude;
     }
 
+    public double getDistanceMeters() {
+        return distanceMeters;
+    }
+
+    public void setDistanceMeters(double distanceMeters) {
+        this.distanceMeters = distanceMeters;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -71,6 +82,7 @@ public class Restaurant implements Parcelable {
         dest.writeStringList(gfMenu);
         dest.writeDouble(latitude);
         dest.writeDouble(longitude);
+        dest.writeDouble(distanceMeters);
     }
 
     public static final Creator<Restaurant> CREATOR = new Creator<Restaurant>() {
@@ -89,13 +101,14 @@ public class Restaurant implements Parcelable {
     @Override
     public String toString(){
         return String.format(
-                "Restaurant{name=%s, address=%s, hasGFMenu=%s, gfMenu=%s, latitude=%s, longitude=%s}",
+                "Restaurant{name=%s, address=%s, hasGFMenu=%s, gfMenu=%s, latitude=%s, longitude=%s, distanceMeters=%s}",
                 name,
                 address,
                 hasGFMenu,
                 gfMenu,
                 latitude,
-                longitude
+                longitude,
+                distanceMeters
 
         );
     }

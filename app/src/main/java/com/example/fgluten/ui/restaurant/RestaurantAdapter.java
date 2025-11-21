@@ -1,6 +1,7 @@
 
 package com.example.fgluten.ui.restaurant;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,21 +59,53 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
 
         private final TextView nameTextView;
         private final TextView addressTextView;
+        private final TextView distanceTextView;
+        private final TextView gfBadgeView;
 
         public RestaurantViewHolder(@NonNull View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.restaurant_name);
             addressTextView = itemView.findViewById(R.id.restaurant_address);
+            distanceTextView = itemView.findViewById(R.id.restaurant_distance);
+            gfBadgeView = itemView.findViewById(R.id.restaurant_gf_badge);
         }
 
         public void bind(Restaurant restaurant, OnRestaurantClickListener listener) {
             nameTextView.setText(restaurant.getName());
             addressTextView.setText(restaurant.getAddress());
+
+            double distanceMeters = restaurant.getDistanceMeters();
+            String distanceLabel = formatDistance(itemView.getContext(), distanceMeters);
+            if (distanceLabel != null) {
+                distanceTextView.setText(distanceLabel);
+                distanceTextView.setVisibility(View.VISIBLE);
+            } else {
+                distanceTextView.setVisibility(View.GONE);
+            }
+
+            if (restaurant.hasGlutenFreeOptions()) {
+                gfBadgeView.setVisibility(View.VISIBLE);
+            } else {
+                gfBadgeView.setVisibility(View.GONE);
+            }
+
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onRestaurantClick(restaurant);
                 }
             });
+        }
+
+        private String formatDistance(Context context, double meters) {
+            if (meters <= 0) {
+                return null;
+            }
+            if (meters >= 1000) {
+                double km = meters / 1000.0;
+                return context.getString(R.string.distance_km_away, km);
+            }
+            int roundedMeters = (int) Math.round(meters);
+            return context.getString(R.string.distance_m_away, roundedMeters);
         }
     }
 }
