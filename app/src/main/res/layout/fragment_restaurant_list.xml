@@ -214,6 +214,42 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/error_banner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#FFFDE7E9"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/cached_banner"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/error_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="#C62828"
+            tools:text="Unable to load restaurants." />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/error_retry"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/retry" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/error_dismiss"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dismiss" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/state_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -249,6 +285,70 @@
             android:visibility="gone" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/skeleton_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/filter_sliders"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@drawable/bg_skeleton_card"
+            android:layout_marginBottom="8dp">
+
+            <View
+                android:layout_width="60%"
+                android:layout_height="16dp"
+                android:background="@drawable/bg_skeleton_block" />
+
+            <View
+                android:layout_width="80%"
+                android:layout_height="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_skeleton_block" />
+
+            <View
+                android:layout_width="40%"
+                android:layout_height="10dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_skeleton_block" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="@drawable/bg_skeleton_card"
+            android:layout_marginBottom="8dp">
+
+            <View
+                android:layout_width="70%"
+                android:layout_height="16dp"
+                android:background="@drawable/bg_skeleton_block" />
+
+            <View
+                android:layout_width="50%"
+                android:layout_height="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_skeleton_block" />
+
+            <View
+                android:layout_width="45%"
+                android:layout_height="10dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_skeleton_block" />
+        </LinearLayout>
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/restaurant_map_container"
         android:layout_width="0dp"
@@ -257,7 +357,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cached_banner">
+        app:layout_constraintTop_toBottomOf="@id/error_banner">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/restaurant_map"
@@ -283,7 +383,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cached_banner" />
+        app:layout_constraintTop_toBottomOf="@id/error_banner" />
 
     <FrameLayout
         android:id="@+id/loading_overlay"

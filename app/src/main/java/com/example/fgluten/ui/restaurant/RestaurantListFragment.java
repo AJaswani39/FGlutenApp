@@ -80,6 +80,8 @@ public class RestaurantListFragment extends Fragment {
         binding.buttonRefresh.setOnClickListener(v -> requestLocationFlow());
         binding.cachedDismiss.setOnClickListener(v -> binding.cachedBanner.setVisibility(View.GONE));
         binding.stateSettings.setOnClickListener(v -> openAppSettings());
+        binding.errorRetry.setOnClickListener(v -> requestLocationFlow());
+        binding.errorDismiss.setOnClickListener(v -> binding.errorBanner.setVisibility(View.GONE));
         setupToggleButtons();
         setupFilterControls();
         setupMap();
@@ -110,13 +112,17 @@ public class RestaurantListFragment extends Fragment {
         }
         lastUiState = state;
         boolean isLoading = state.getStatus() == RestaurantViewModel.Status.LOADING;
-        binding.loadingOverlay.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        binding.loadingOverlay.setVisibility(View.GONE);
+        binding.skeletonContainer.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         binding.stateSettings.setVisibility(View.GONE);
 
         if (state.getRestaurants() != null) {
             adapter.setRestaurants(state.getRestaurants());
         }
         boolean hasData = state.getRestaurants() != null && !state.getRestaurants().isEmpty();
+        if (isLoading) {
+            hasData = false;
+        }
         applyContentVisibility(hasData);
 
         boolean shouldShowMessage = !hasData && state.getMessage() != null;
@@ -145,6 +151,13 @@ public class RestaurantListFragment extends Fragment {
             binding.cachedText.setText(state.getMessage());
         } else {
             binding.cachedBanner.setVisibility(View.GONE);
+        }
+
+        if (state.getStatus() == RestaurantViewModel.Status.ERROR) {
+            binding.errorBanner.setVisibility(View.VISIBLE);
+            binding.errorText.setText(state.getMessage());
+        } else {
+            binding.errorBanner.setVisibility(View.GONE);
         }
 
         renderMap(state);
