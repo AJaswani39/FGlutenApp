@@ -62,6 +62,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         private final TextView addressTextView;
         private final TextView distanceTextView;
         private final TextView gfBadgeView;
+        private final TextView metaView;
 
         public RestaurantViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -69,6 +70,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
             addressTextView = itemView.findViewById(R.id.restaurant_address);
             distanceTextView = itemView.findViewById(R.id.restaurant_distance);
             gfBadgeView = itemView.findViewById(R.id.restaurant_gf_badge);
+            metaView = itemView.findViewById(R.id.restaurant_meta);
         }
 
         public void bind(Restaurant restaurant, OnRestaurantClickListener listener) {
@@ -88,6 +90,14 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                 gfBadgeView.setVisibility(View.VISIBLE);
             } else {
                 gfBadgeView.setVisibility(View.GONE);
+            }
+
+            String meta = buildMeta(restaurant);
+            if (meta != null && !meta.isEmpty()) {
+                metaView.setVisibility(View.VISIBLE);
+                metaView.setText(meta);
+            } else {
+                metaView.setVisibility(View.GONE);
             }
 
             itemView.setOnClickListener(v -> {
@@ -118,6 +128,19 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                 int roundedMeters = (int) Math.round(meters);
                 return context.getString(R.string.distance_m_away, roundedMeters);
             }
+        }
+
+        private String buildMeta(Restaurant restaurant) {
+            StringBuilder sb = new StringBuilder();
+            if (restaurant.getRating() != null) {
+                sb.append(String.format("%.1f ★", restaurant.getRating()));
+            }
+            if (restaurant.getOpenNow() != null) {
+                if (sb.length() > 0) sb.append(" • ");
+                sb.append(restaurant.getOpenNow() ? itemView.getContext().getString(R.string.meta_open_now)
+                        : itemView.getContext().getString(R.string.meta_closed));
+            }
+            return sb.toString();
         }
     }
 }

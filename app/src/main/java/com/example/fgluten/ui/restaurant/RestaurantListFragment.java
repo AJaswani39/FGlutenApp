@@ -32,6 +32,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -217,15 +218,27 @@ public class RestaurantListFragment extends Fragment {
             return;
         }
         googleMap.clear();
+        googleMap.setOnMarkerClickListener(marker -> {
+            Object tag = marker.getTag();
+            if (tag instanceof Restaurant) {
+                RestaurantMarkerBottomSheet.newInstance((Restaurant) tag)
+                        .show(getChildFragmentManager(), "marker_sheet");
+                return true;
+            }
+            return false;
+        });
         LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
         boolean hasBounds = false;
 
         for (Restaurant restaurant : state.getRestaurants()) {
             LatLng latLng = new LatLng(restaurant.getLatitude(), restaurant.getLongitude());
-            googleMap.addMarker(new MarkerOptions()
+            Marker marker = googleMap.addMarker(new MarkerOptions()
                     .position(latLng)
                     .title(restaurant.getName())
                     .snippet(restaurant.getAddress()));
+            if (marker != null) {
+                marker.setTag(restaurant);
+            }
             boundsBuilder.include(latLng);
             hasBounds = true;
         }

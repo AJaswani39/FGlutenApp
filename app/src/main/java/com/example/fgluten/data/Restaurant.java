@@ -15,8 +15,15 @@ public class Restaurant implements Parcelable {
     private final double latitude;
     private final double longitude;
     private double distanceMeters;
+    private final Double rating;
+    private final Boolean openNow;
 
     public Restaurant(String name, String address, boolean hasGFMenu, List<String> gfMenu, double latitude, double longitude) {
+        this(name, address, hasGFMenu, gfMenu, latitude, longitude, null, null);
+    }
+
+    public Restaurant(String name, String address, boolean hasGFMenu, List<String> gfMenu,
+                      double latitude, double longitude, Double rating, Boolean openNow) {
         this.name = name;
         this.address = address;
         this.hasGFMenu = hasGFMenu;
@@ -24,6 +31,8 @@ public class Restaurant implements Parcelable {
         this.latitude = latitude;
         this.longitude = longitude;
         this.distanceMeters = 0.0;
+        this.rating = rating;
+        this.openNow = openNow;
     }
 
     protected Restaurant(Parcel in) {
@@ -34,6 +43,17 @@ public class Restaurant implements Parcelable {
         latitude = in.readDouble();
         longitude = in.readDouble();
         distanceMeters = in.readDouble();
+        if (in.readByte() == 0) {
+            rating = null;
+        } else {
+            rating = in.readDouble();
+        }
+        byte openByte = in.readByte();
+        if (openByte == 0) {
+            openNow = null;
+        } else {
+            openNow = openByte == 1;
+        }
     }
 
 
@@ -69,6 +89,14 @@ public class Restaurant implements Parcelable {
         this.distanceMeters = distanceMeters;
     }
 
+    public Double getRating() {
+        return rating;
+    }
+
+    public Boolean getOpenNow() {
+        return openNow;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -83,6 +111,17 @@ public class Restaurant implements Parcelable {
         dest.writeDouble(latitude);
         dest.writeDouble(longitude);
         dest.writeDouble(distanceMeters);
+        if (rating == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeDouble(rating);
+        }
+        if (openNow == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) (openNow ? 1 : 2));
+        }
     }
 
     public static final Creator<Restaurant> CREATOR = new Creator<Restaurant>() {

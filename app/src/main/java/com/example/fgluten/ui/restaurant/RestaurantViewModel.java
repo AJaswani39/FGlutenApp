@@ -226,7 +226,7 @@ public class RestaurantViewModel extends AndroidViewModel {
     }
 
     private void publishRestaurantsForLocation(Location userLocation) {
-        fetchRestaurantsFromPlaces(userLocation);
+        fetchRestaurantsViaNearbySearch(userLocation);
     }
 
     private void fetchRestaurantsFromPlaces(Location userLocation) {
@@ -234,7 +234,9 @@ public class RestaurantViewModel extends AndroidViewModel {
                 Place.Field.NAME,
                 Place.Field.ADDRESS,
                 Place.Field.LAT_LNG,
-                Place.Field.TYPES
+                Place.Field.TYPES,
+                Place.Field.RATING,
+                Place.Field.OPENING_HOURS
         );
         FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(fields);
 
@@ -312,9 +314,15 @@ public class RestaurantViewModel extends AndroidViewModel {
                         JSONObject loc = geometry != null ? geometry.optJSONObject("location") : null;
                         double rLat = loc != null ? loc.optDouble("lat", Double.NaN) : Double.NaN;
                         double rLng = loc != null ? loc.optDouble("lng", Double.NaN) : Double.NaN;
+                        Double rating = obj.has("rating") ? obj.optDouble("rating") : null;
+                        Boolean openNow = null;
+                        JSONObject opening = obj.optJSONObject("opening_hours");
+                        if (opening != null && opening.has("open_now")) {
+                            openNow = opening.optBoolean("open_now");
+                        }
                         if (Double.isNaN(rLat) || Double.isNaN(rLng)) continue;
                         boolean likelyHasGf = name.toLowerCase().contains("gluten") || name.toLowerCase().contains("gf");
-                        results.add(new Restaurant(name, address, likelyHasGf, new ArrayList<>(), rLat, rLng));
+                        results.add(new Restaurant(name, address, likelyHasGf, new ArrayList<>(), rLat, rLng, rating, openNow));
                     }
                 }
             } catch (Exception ex) {
@@ -361,7 +369,13 @@ public class RestaurantViewModel extends AndroidViewModel {
             String lower = name.toLowerCase();
             likelyHasGf = lower.contains("gluten") || lower.contains("gf");
         }
-        return new Restaurant(name, address, likelyHasGf, new ArrayList<>(), latLng.latitude, latLng.longitude);
+        Double rating = place.getRating();
+        Boolean openNow = null;
+        if (place.getOpeningHours() != null) {
+            // OpeningHours does not expose open-now directly here; leave null.
+            openNow = null;
+        }
+        return new Restaurant(name, address, likelyHasGf, new ArrayList<>(), latLng.latitude, latLng.longitude, rating, openNow);
     }
 
     private void handlePlacesFailure(Throwable throwable, Location userLocation) {
@@ -483,6 +497,7 @@ public class RestaurantViewModel extends AndroidViewModel {
             JSONObject root = new JSONObject();
             root.put("lat", lat);
             root.put("lng", lng);
+            root.put("timestamp", System.currentTimeMillis());
             JSONArray items = new JSONArray();
             for (Restaurant r : restaurants) {
                 JSONObject obj = new JSONObject();
@@ -491,6 +506,12 @@ public class RestaurantViewModel extends AndroidViewModel {
                 obj.put("hasGf", r.hasGlutenFreeOptions());
                 obj.put("lat", r.getLatitude());
                 obj.put("lng", r.getLongitude());
+                if (r.getRating() != null) {
+                    obj.put("rating", r.getRating());
+                }
+                if (r.getOpenNow() != null) {
+                    obj.put("openNow", r.getOpenNow());
+                }
                 JSONArray menu = new JSONArray();
                 if (r.getGlutenFreeMenu() != null) {
                     for (String m : r.getGlutenFreeMenu()) {
@@ -520,6 +541,7 @@ public class RestaurantViewModel extends AndroidViewModel {
             JSONObject root = new JSONObject(cached);
             double lat = root.optDouble("lat", Double.NaN);
             double lng = root.optDouble("lng", Double.NaN);
+            long timestamp = root.optLong("timestamp", 0L);
             JSONArray items = root.optJSONArray("items");
             if (items == null || Double.isNaN(lat) || Double.isNaN(lng)) {
                 return;
@@ -533,6 +555,8 @@ public class RestaurantViewModel extends AndroidViewModel {
                 boolean hasGf = obj.optBoolean("hasGf", false);
                 double rLat = obj.optDouble("lat", 0);
                 double rLng = obj.optDouble("lng", 0);
+                Double rating = obj.has("rating") ? obj.optDouble("rating") : null;
+                Boolean openNow = obj.has("openNow") ? obj.optBoolean("openNow") : null;
                 JSONArray menuArray = obj.optJSONArray("menu");
                 List<String> menu = new ArrayList<>();
                 if (menuArray != null) {
@@ -540,7 +564,7 @@ public class RestaurantViewModel extends AndroidViewModel {
                         menu.add(menuArray.optString(j, ""));
                     }
                 }
-                Restaurant r = new Restaurant(name, address, hasGf, menu, rLat, rLng);
+                Restaurant r = new Restaurant(name, address, hasGf, menu, rLat, rLng, rating, openNow);
                 restored.add(r);
             }
             if (restored.isEmpty()) {
@@ -550,7 +574,11 @@ public class RestaurantViewModel extends AndroidViewModel {
             lastRestaurantsRaw.addAll(restored);
             lastUserLat = lat;
             lastUserLng = lng;
-            emitFilteredState(getApplication().getString(R.string.using_cached_results));
+            String message = getApplication().getString(R.string.using_cached_results);
+            if (timestamp > 0) {
+                message = message + " (" + android.text.format.DateFormat.format("MMM d, h:mm a", timestamp) + ")";
+            }
+            emitFilteredState(message);
         } catch (JSONException e) {
             Log.w(TAG, "Failed to parse cached restaurants", e);
         }

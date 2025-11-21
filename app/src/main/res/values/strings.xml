@@ -60,4 +60,8 @@
     <string name="close">Close</string>
     <string name="distance_miles_away">%1$.1f mi away</string>
     <string name="distance_feet_away">%1$d ft away</string>
+    <string name="meta_open_now">Open now</string>
+    <string name="meta_closed">Closed</string>
+    <string name="marker_navigate">Navigate</string>
+    <string name="marker_directions_error">No maps app available</string>
 </resources>
