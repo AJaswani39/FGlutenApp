@@ -546,11 +546,12 @@ public class RestaurantViewModel extends AndroidViewModel {
         if (target == null) {
             target = restaurant;
         }
+        final Restaurant scanTarget = target;
         target.setMenuScanStatus(Restaurant.MenuScanStatus.FETCHING);
         target.setMenuScanTimestamp(System.currentTimeMillis());
         target.setGlutenFreeMenuItems(new ArrayList<>());
         mainHandler.post(() -> emitFilteredState(null));
-        ioExecutor.execute(() -> scanMenu(target));
+        ioExecutor.execute(() -> scanMenu(scanTarget));
     }
 
     private Restaurant findMatchingInLast(Restaurant candidate) {
