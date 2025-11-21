@@ -42,6 +42,11 @@ public class RestaurantViewModel extends AndroidViewModel {
         ERROR
     }
 
+    public enum SortMode {
+        DISTANCE,
+        NAME
+    }
+
     public static class RestaurantUiState {
         private final Status status;
         private final List<Restaurant> restaurants;
@@ -106,7 +111,12 @@ public class RestaurantViewModel extends AndroidViewModel {
     private final FusedLocationProviderClient fusedLocationProviderClient;
     private final PlacesClient placesClient;
     private final MutableLiveData<RestaurantUiState> restaurantState = new MutableLiveData<>(RestaurantUiState.idle());
+    private final List<Restaurant> lastRestaurantsRaw = new ArrayList<>();
     private final List<Restaurant> lastSuccessfulRestaurants = new ArrayList<>();
+    private Double lastUserLat = null;
+    private Double lastUserLng = null;
+    private boolean gfOnly = false;
+    private SortMode sortMode = SortMode.DISTANCE;
     private static final String TAG = "RestaurantViewModel";
 
     public RestaurantViewModel(@NonNull Application application) {
@@ -122,6 +132,16 @@ public class RestaurantViewModel extends AndroidViewModel {
 
     public LiveData<RestaurantUiState> getRestaurantState() {
         return restaurantState;
+    }
+
+    public void setGfOnly(boolean gfOnly) {
+        this.gfOnly = gfOnly;
+        emitFilteredState(null);
+    }
+
+    public void setSortMode(SortMode sortMode) {
+        this.sortMode = sortMode;
+        emitFilteredState(null);
     }
 
     public void loadNearbyRestaurants() {
@@ -226,29 +246,54 @@ public class RestaurantViewModel extends AndroidViewModel {
             );
             restaurant.setDistanceMeters(results[0]);
         }
-        Collections.sort(restaurants, (first, second) -> Double.compare(first.getDistanceMeters(), second.getDistanceMeters()));
-
-        if (restaurants.isEmpty()) {
-            String message = getApplication().getString(R.string.no_restaurants_found);
-            restaurantState.setValue(RestaurantUiState.error(message));
-        } else {
-            lastSuccessfulRestaurants.clear();
-            lastSuccessfulRestaurants.addAll(restaurants);
-            restaurantState.setValue(RestaurantUiState.success(restaurants, userLocation.getLatitude(), userLocation.getLongitude()));
-        }
+        lastRestaurantsRaw.clear();
+        lastRestaurantsRaw.addAll(restaurants);
+        lastUserLat = userLocation.getLatitude();
+        lastUserLng = userLocation.getLongitude();
+        emitFilteredState(null);
     }
 
     private void postLocationError() {
         String message = getApplication().getString(R.string.location_error);
-        if (!lastSuccessfulRestaurants.isEmpty()) {
-            restaurantState.setValue(RestaurantUiState.successWithMessage(
-                    lastSuccessfulRestaurants,
-                    lastSuccessfulRestaurants.get(0).getLatitude(),
-                    lastSuccessfulRestaurants.get(0).getLongitude(),
-                    getApplication().getString(R.string.using_cached_results)
-            ));
+        if (!lastRestaurantsRaw.isEmpty() && lastUserLat != null && lastUserLng != null) {
+            emitFilteredState(getApplication().getString(R.string.using_cached_results));
         } else {
             restaurantState.setValue(RestaurantUiState.error(message));
+        }
+    }
+
+    private void emitFilteredState(String messageIfAny) {
+        if (lastRestaurantsRaw.isEmpty() || lastUserLat == null || lastUserLng == null) {
+            return;
+        }
+        List<Restaurant> filtered = new ArrayList<>();
+        for (Restaurant restaurant : lastRestaurantsRaw) {
+            if (!gfOnly || restaurant.hasGlutenFreeOptions()) {
+                filtered.add(restaurant);
+            }
+        }
+        if (sortMode == SortMode.DISTANCE) {
+            Collections.sort(filtered, (first, second) -> Double.compare(first.getDistanceMeters(), second.getDistanceMeters()));
+        } else {
+            Collections.sort(filtered, (first, second) -> {
+                String left = first.getName() != null ? first.getName().toLowerCase() : "";
+                String right = second.getName() != null ? second.getName().toLowerCase() : "";
+                return left.compareTo(right);
+            });
+        }
+
+        if (filtered.isEmpty()) {
+            String message = getApplication().getString(R.string.no_restaurants_found);
+            restaurantState.setValue(RestaurantUiState.error(message));
+            return;
+        }
+
+        lastSuccessfulRestaurants.clear();
+        lastSuccessfulRestaurants.addAll(filtered);
+        if (messageIfAny != null) {
+            restaurantState.setValue(RestaurantUiState.successWithMessage(filtered, lastUserLat, lastUserLng, messageIfAny));
+        } else {
+            restaurantState.setValue(RestaurantUiState.success(filtered, lastUserLat, lastUserLng));
         }
     }
 }

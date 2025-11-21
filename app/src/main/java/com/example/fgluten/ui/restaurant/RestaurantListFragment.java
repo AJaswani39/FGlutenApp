@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
 import com.example.fgluten.databinding.FragmentRestaurantListBinding;
+import com.example.fgluten.ui.restaurant.RestaurantViewModel.SortMode;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -72,6 +73,7 @@ public class RestaurantListFragment extends Fragment {
 
         binding.stateAction.setOnClickListener(v -> requestLocationFlow());
         setupToggleButtons();
+        setupFilterControls();
         setupMap();
 
         // kick off first load to show permission state or fetch if already granted
@@ -140,6 +142,20 @@ public class RestaurantListFragment extends Fragment {
             boolean showMap = checkedId == binding.toggleMap.getId();
             binding.restaurantMapContainer.setVisibility(showMap ? View.VISIBLE : View.GONE);
             binding.restaurantRecycler.setVisibility(showMap ? View.GONE : View.VISIBLE);
+        });
+    }
+
+    private void setupFilterControls() {
+        binding.chipGfOnly.setOnCheckedChangeListener((button, isChecked) -> restaurantViewModel.setGfOnly(isChecked));
+        binding.sortToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            if (checkedId == binding.sortDistance.getId()) {
+                restaurantViewModel.setSortMode(SortMode.DISTANCE);
+            } else if (checkedId == binding.sortName.getId()) {
+                restaurantViewModel.setSortMode(SortMode.NAME);
+            }
         });
     }
 

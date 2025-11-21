@@ -32,4 +32,8 @@
     <string name="view_map">Map</string>
     <string name="snackbar_message">Replace with your own action</string>
     <string name="using_cached_results">Showing last available results.</string>
+    <string name="filter_gf_only">GF only</string>
+    <string name="sort_by">Sort:</string>
+    <string name="sort_distance">Distance</string>
+    <string name="sort_name">Name</string>
 </resources>
