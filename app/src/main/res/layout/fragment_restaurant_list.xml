@@ -6,6 +6,27 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/view_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/toggle_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/view_list" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/toggle_map"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_map" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
     <ProgressBar
         android:id="@+id/loading_progress"
         android:layout_width="wrap_content"
@@ -45,6 +66,23 @@
             android:visibility="gone" />
     </LinearLayout>
 
+    <FrameLayout
+        android:id="@+id/restaurant_map_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_toggle">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/restaurant_map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/restaurant_recycler"
         android:layout_width="0dp"
@@ -53,6 +91,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/view_toggle" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

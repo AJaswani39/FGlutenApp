@@ -3,6 +3,7 @@ package com.example.fgluten.ui.restaurant;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.widget.Toast;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
 import com.example.fgluten.databinding.FragmentRestaurantListBinding;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -31,6 +38,8 @@ public class RestaurantListFragment extends Fragment {
     private RestaurantAdapter adapter;
     private RestaurantViewModel restaurantViewModel;
     private ActivityResultLauncher<String[]> permissionLauncher;
+    private GoogleMap googleMap;
+    private boolean isMapReady = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,6 +71,8 @@ public class RestaurantListFragment extends Fragment {
         restaurantViewModel.getRestaurantState().observe(getViewLifecycleOwner(), this::renderUiState);
 
         binding.stateAction.setOnClickListener(v -> requestLocationFlow());
+        setupToggleButtons();
+        setupMap();
 
         // kick off first load to show permission state or fetch if already granted
         restaurantViewModel.loadNearbyRestaurants();
@@ -91,7 +102,7 @@ public class RestaurantListFragment extends Fragment {
             adapter.setRestaurants(state.getRestaurants());
         }
         boolean hasData = state.getRestaurants() != null && !state.getRestaurants().isEmpty();
-        binding.restaurantRecycler.setVisibility(hasData ? View.VISIBLE : View.GONE);
+        applyContentVisibility(hasData);
 
         boolean shouldShowMessage = !hasData && state.getMessage() != null;
         binding.stateContainer.setVisibility(shouldShowMessage ? View.VISIBLE : View.GONE);
@@ -105,6 +116,93 @@ public class RestaurantListFragment extends Fragment {
             } else if (state.getStatus() == RestaurantViewModel.Status.ERROR) {
                 binding.stateAction.setText(R.string.retry);
                 binding.stateAction.setVisibility(View.VISIBLE);
+                Toast.makeText(requireContext(), state.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        } else if (state.getStatus() == RestaurantViewModel.Status.SUCCESS && state.getMessage() != null) {
+            Toast.makeText(requireContext(), state.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
+        renderMap(state);
+    }
+
+    private void applyContentVisibility(boolean hasData) {
+        int checkedId = binding.viewToggle.getCheckedButtonId();
+        boolean showMap = checkedId == binding.toggleMap.getId();
+        binding.restaurantRecycler.setVisibility(!showMap && hasData ? View.VISIBLE : View.GONE);
+        binding.restaurantMapContainer.setVisibility(showMap && hasData ? View.VISIBLE : View.GONE);
+    }
+
+    private void setupToggleButtons() {
+        binding.viewToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            boolean showMap = checkedId == binding.toggleMap.getId();
+            binding.restaurantMapContainer.setVisibility(showMap ? View.VISIBLE : View.GONE);
+            binding.restaurantRecycler.setVisibility(showMap ? View.GONE : View.VISIBLE);
+        });
+    }
+
+    private void setupMap() {
+        androidx.fragment.app.Fragment fragment = getChildFragmentManager().findFragmentById(R.id.restaurant_map);
+        if (fragment instanceof SupportMapFragment) {
+            SupportMapFragment mapFragment = (SupportMapFragment) fragment;
+            mapFragment.getMapAsync(map -> {
+                googleMap = map;
+                isMapReady = true;
+                enableMyLocationOnMap();
+                RestaurantViewModel.RestaurantUiState current = restaurantViewModel.getRestaurantState().getValue();
+                if (current != null) {
+                    renderMap(current);
+                }
+            });
+        }
+    }
+
+    private void enableMyLocationOnMap() {
+        if (googleMap == null) {
+            return;
+        }
+        if (hasLocationPermission()) {
+            try {
+                googleMap.setMyLocationEnabled(true);
+            } catch (SecurityException ignored) {
+                // Permission revoked while map is active.
+            }
+        } else {
+            googleMap.setMyLocationEnabled(false);
+        }
+    }
+
+    private void renderMap(RestaurantViewModel.RestaurantUiState state) {
+        if (!isMapReady || googleMap == null || state.getRestaurants() == null || state.getRestaurants().isEmpty()) {
+            return;
+        }
+        googleMap.clear();
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        boolean hasBounds = false;
+
+        for (Restaurant restaurant : state.getRestaurants()) {
+            LatLng latLng = new LatLng(restaurant.getLatitude(), restaurant.getLongitude());
+            googleMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(restaurant.getName())
+                    .snippet(restaurant.getAddress()));
+            boundsBuilder.include(latLng);
+            hasBounds = true;
+        }
+
+        if (state.getUserLatitude() != null && state.getUserLongitude() != null) {
+            LatLng userLatLng = new LatLng(state.getUserLatitude(), state.getUserLongitude());
+            boundsBuilder.include(userLatLng);
+            hasBounds = true;
+        }
+
+        if (hasBounds) {
+            try {
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 120));
+            } catch (IllegalStateException ignored) {
+                // Map view not laid out yet; skip animation.
             }
         }
     }
@@ -123,6 +221,7 @@ public class RestaurantListFragment extends Fragment {
             }
         }
         if (granted) {
+            enableMyLocationOnMap();
             restaurantViewModel.loadNearbyRestaurants();
         } else {
             restaurantViewModel.loadNearbyRestaurants();
