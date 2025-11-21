@@ -10,21 +10,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:textSize="18sp" />
+        android:textSize="@dimen/list_title_size"
+        android:textColor="?attr/colorOnSurface" />
 
     <TextView
         android:id="@+id/marker_meta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:textColor="?android:textColorSecondary" />
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="@dimen/list_meta_size" />
 
     <TextView
         android:id="@+id/marker_address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:textColor="?android:textColorSecondary" />
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="@dimen/list_subtitle_size" />
 
     <LinearLayout
         android:layout_width="match_parent"
