@@ -11,14 +11,14 @@
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textSize="@dimen/list_title_size"
-        android:textColor="?attr/colorOnSurface" />
+        android:textColor="?android:textColorPrimary" />
 
     <TextView
         android:id="@+id/marker_meta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textColor="?android:textColorSecondary"
         android:textSize="@dimen/list_meta_size" />
 
     <TextView
@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textColor="?android:textColorSecondary"
         android:textSize="@dimen/list_subtitle_size" />
 
     <LinearLayout

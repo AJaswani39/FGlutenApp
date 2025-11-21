@@ -65,4 +65,12 @@
     <string name="marker_navigate">Navigate</string>
     <string name="marker_directions_error">No maps app available</string>
     <string name="open_in_maps">Open in Maps</string>
+    <string name="gf_none">No gluten free options</string>
+    <string name="gf_limited">Limited options available</string>
+    <string name="gf_many">All items or several are gluten safe</string>
+    <string name="gf_menu_unknown">Gluten-free menu not provided</string>
+    <string name="detail_rating">Rating: %1$.1f ★</string>
+    <string name="detail_open_now">Open now</string>
+    <string name="detail_closed">Closed now</string>
+    <string name="detail_hours_unknown">Hours unavailable</string>
 </resources>
