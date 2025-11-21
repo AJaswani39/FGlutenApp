@@ -138,6 +138,9 @@ public class RestaurantViewModel extends AndroidViewModel {
     private Double lastUserLng = null;
     private boolean gfOnly = false;
     private SortMode sortMode = SortMode.DISTANCE;
+    private boolean openNowOnly = false;
+    private double maxDistanceMeters = 0.0; // 0 means no limit
+    private double minRating = 0.0; // 0 means none
     private final SharedPreferences cachePrefs;
     private boolean cacheAttempted = false;
     private final boolean hasMapsKey;
@@ -175,6 +178,21 @@ public class RestaurantViewModel extends AndroidViewModel {
 
     public void setSortMode(SortMode sortMode) {
         this.sortMode = sortMode;
+        emitFilteredState(null);
+    }
+
+    public void setOpenNowOnly(boolean openNowOnly) {
+        this.openNowOnly = openNowOnly;
+        emitFilteredState(null);
+    }
+
+    public void setMaxDistanceMeters(double maxDistanceMeters) {
+        this.maxDistanceMeters = Math.max(0.0, maxDistanceMeters);
+        emitFilteredState(null);
+    }
+
+    public void setMinRating(double minRating) {
+        this.minRating = Math.max(0.0, minRating);
         emitFilteredState(null);
     }
 
@@ -478,7 +496,12 @@ public class RestaurantViewModel extends AndroidViewModel {
         List<Restaurant> filtered = new ArrayList<>();
         for (Restaurant restaurant : lastRestaurantsRaw) {
             if (!gfOnly || restaurant.hasGlutenFreeOptions()) {
-                filtered.add(restaurant);
+                boolean passesOpen = !openNowOnly || (restaurant.getOpenNow() != null && restaurant.getOpenNow());
+                boolean passesRating = minRating <= 0.0 || (restaurant.getRating() != null && restaurant.getRating() >= minRating);
+                boolean passesDistance = maxDistanceMeters <= 0.0 || restaurant.getDistanceMeters() <= maxDistanceMeters;
+                if (passesOpen && passesRating && passesDistance) {
+                    filtered.add(restaurant);
+                }
             }
         }
         if (sortMode == SortMode.DISTANCE) {

@@ -170,6 +170,7 @@ public class RestaurantListFragment extends Fragment {
 
     private void setupFilterControls() {
         binding.chipGfOnly.setOnCheckedChangeListener((button, isChecked) -> restaurantViewModel.setGfOnly(isChecked));
+        binding.chipOpenNow.setOnCheckedChangeListener((button, isChecked) -> restaurantViewModel.setOpenNowOnly(isChecked));
         binding.sortToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (!isChecked) {
                 return;
@@ -180,6 +181,31 @@ public class RestaurantListFragment extends Fragment {
                 restaurantViewModel.setSortMode(SortMode.NAME);
             }
         });
+
+        binding.sliderDistance.addOnChangeListener((slider, value, fromUser) -> {
+            updateDistanceLabel(value);
+            double meters = value <= 0 ? 0 : value * 1000.0;
+            restaurantViewModel.setMaxDistanceMeters(meters);
+        });
+        binding.sliderRating.addOnChangeListener((slider, value, fromUser) -> {
+            updateRatingLabel(value);
+            restaurantViewModel.setMinRating(value);
+        });
+        // initialize labels
+        updateDistanceLabel(binding.sliderDistance.getValue());
+        updateRatingLabel(binding.sliderRating.getValue());
+    }
+
+    private void updateDistanceLabel(float valueKm) {
+        String text = valueKm <= 0 ? getString(R.string.filter_distance_any)
+                : getString(R.string.filter_distance_km_value, (int) valueKm);
+        binding.valueMaxDistance.setText(text);
+    }
+
+    private void updateRatingLabel(float value) {
+        String text = value <= 0 ? getString(R.string.filter_rating_any)
+                : getString(R.string.filter_rating_value, value);
+        binding.valueMinRating.setText(text);
     }
 
     private void setupMap() {
