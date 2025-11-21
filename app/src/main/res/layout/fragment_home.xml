@@ -31,7 +31,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/home_title"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+                    android:textSize="@dimen/home_title_size"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/home_subtitle"
@@ -39,7 +40,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:text="@string/home_subtitle"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    android:textSize="@dimen/home_subtitle_size" />
 
                 <Button
                     android:id="@+id/cta_find_restaurants"
@@ -91,7 +92,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/home_tips_title"
-                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+                    android:textSize="@dimen/home_section_title_size"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/home_tip_one"
@@ -99,7 +101,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/home_tip_one"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    android:textSize="@dimen/home_tip_size" />
 
                 <TextView
                     android:id="@+id/home_tip_two"
@@ -107,7 +109,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:text="@string/home_tip_two"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    android:textSize="@dimen/home_tip_size" />
 
                 <TextView
                     android:id="@+id/home_tip_three"
@@ -115,7 +117,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:text="@string/home_tip_three"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    android:textSize="@dimen/home_tip_size" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -139,7 +141,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/home_last_nearby_title"
-                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+                    android:textSize="@dimen/home_section_title_size"
+                    android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/cached_recycler"
