@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fgluten.databinding.FragmentHomeBinding;
 import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
+import com.example.fgluten.util.SettingsManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,11 +100,13 @@ public class HomeFragment extends Fragment {
         static class CachedViewHolder extends RecyclerView.ViewHolder {
             private final TextView name;
             private final TextView meta;
+            private final Context context;
 
             CachedViewHolder(@NonNull View itemView) {
                 super(itemView);
                 name = itemView.findViewById(R.id.cached_name);
                 meta = itemView.findViewById(R.id.cached_meta);
+                context = itemView.getContext();
             }
 
             void bind(Restaurant restaurant) {
@@ -114,10 +118,20 @@ public class HomeFragment extends Fragment {
                 double dist = restaurant.getDistanceMeters();
                 if (dist > 0) {
                     if (sb.length() > 0) sb.append(" \u2022 ");
-                    if (dist >= 1000) {
-                        sb.append(String.format("%.1f km", dist / 1000.0));
+                    boolean useMiles = SettingsManager.useMiles(context);
+                    if (useMiles) {
+                        double miles = dist / 1609.34;
+                        if (miles >= 0.1) {
+                            sb.append(String.format("%.1f mi", miles));
+                        } else {
+                            sb.append(String.format("%d ft", Math.round(dist * 3.28084)));
+                        }
                     } else {
-                        sb.append(String.format("%d m", Math.round(dist)));
+                        if (dist >= 1000) {
+                            sb.append(String.format("%.1f km", dist / 1000.0));
+                        } else {
+                            sb.append(String.format("%d m", Math.round(dist)));
+                        }
                     }
                 }
                 meta.setText(sb.toString());

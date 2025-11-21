@@ -49,4 +49,15 @@
     <string name="dismiss">Dismiss</string>
     <string name="recenter_map">Recenter map</string>
     <string name="open_settings">Open settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">Use system</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_units">Distance units</string>
+    <string name="settings_units_km">Kilometers</string>
+    <string name="settings_units_miles">Miles</string>
+    <string name="close">Close</string>
+    <string name="distance_miles_away">%1$.1f mi away</string>
+    <string name="distance_feet_away">%1$d ft away</string>
 </resources>

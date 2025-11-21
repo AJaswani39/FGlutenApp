@@ -2,6 +2,7 @@ package com.example.fgluten;
 
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -13,6 +14,8 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.core.view.GravityCompat;
 
 import com.example.fgluten.databinding.ActivityMainBinding;
+import com.example.fgluten.ui.settings.SettingsBottomSheet;
+import com.example.fgluten.util.SettingsManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -22,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Apply saved theme before inflating
+        SettingsManager.setThemeMode(this, SettingsManager.getThemeMode(this));
         super.onCreate(savedInstanceState);
 
         com.example.fgluten.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -67,6 +72,15 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_settings) {
+            SettingsBottomSheet.newInstance().show(getSupportFragmentManager(), "settings_bottom_sheet");
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
