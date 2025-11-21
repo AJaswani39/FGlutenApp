@@ -9,13 +9,15 @@
         android:id="@+id/cached_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceBodyLarge" />
+        android:textColor="?android:textColorPrimary"
+        android:textStyle="bold"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/cached_meta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:textAppearance="?attr/textAppearanceBodySmall"
-        android:textColor="?android:textColorSecondary" />
+        android:textColor="?android:textColorSecondary"
+        android:textSize="14sp" />
 </LinearLayout>
