@@ -64,4 +64,5 @@
     <string name="meta_closed">Closed</string>
     <string name="marker_navigate">Navigate</string>
     <string name="marker_directions_error">No maps app available</string>
+    <string name="open_in_maps">Open in Maps</string>
 </resources>

@@ -2,9 +2,12 @@
 package com.example.fgluten.ui.restaurant;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -63,6 +66,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         private final TextView distanceTextView;
         private final TextView gfBadgeView;
         private final TextView metaView;
+        private final Button openMapsButton;
 
         public RestaurantViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -71,6 +75,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
             distanceTextView = itemView.findViewById(R.id.restaurant_distance);
             gfBadgeView = itemView.findViewById(R.id.restaurant_gf_badge);
             metaView = itemView.findViewById(R.id.restaurant_meta);
+            openMapsButton = itemView.findViewById(R.id.restaurant_open_maps);
         }
 
         public void bind(Restaurant restaurant, OnRestaurantClickListener listener) {
@@ -105,6 +110,8 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                     listener.onRestaurantClick(restaurant);
                 }
             });
+
+            openMapsButton.setOnClickListener(v -> openInMaps(restaurant));
         }
 
         private String formatDistance(Context context, double meters) {
@@ -141,6 +148,26 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                         : itemView.getContext().getString(R.string.meta_closed));
             }
             return sb.toString();
+        }
+
+        private void openInMaps(Restaurant restaurant) {
+            try {
+                Uri uri = Uri.parse("geo:" + restaurant.getLatitude() + "," + restaurant.getLongitude() +
+                        "?q=" + Uri.encode(restaurant.getName()));
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                intent.setPackage("com.google.android.apps.maps");
+                itemView.getContext().startActivity(intent);
+            } catch (Exception e) {
+                try {
+                    Uri uri = Uri.parse("geo:" + restaurant.getLatitude() + "," + restaurant.getLongitude());
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    itemView.getContext().startActivity(intent);
+                } catch (Exception ex) {
+                    if (itemView.getContext() != null) {
+                        android.widget.Toast.makeText(itemView.getContext(), itemView.getContext().getString(R.string.marker_directions_error), android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
         }
     }
 }
