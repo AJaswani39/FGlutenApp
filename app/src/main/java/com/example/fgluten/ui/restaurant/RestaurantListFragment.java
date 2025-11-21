@@ -7,6 +7,9 @@ import android.widget.Toast;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.util.Log;
+import android.content.Intent;
+import android.net.Uri;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -41,6 +44,7 @@ public class RestaurantListFragment extends Fragment {
     private ActivityResultLauncher<String[]> permissionLauncher;
     private GoogleMap googleMap;
     private boolean isMapReady = false;
+    private RestaurantViewModel.RestaurantUiState lastUiState = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,9 +76,13 @@ public class RestaurantListFragment extends Fragment {
         restaurantViewModel.getRestaurantState().observe(getViewLifecycleOwner(), this::renderUiState);
 
         binding.stateAction.setOnClickListener(v -> requestLocationFlow());
+        binding.buttonRefresh.setOnClickListener(v -> requestLocationFlow());
+        binding.cachedDismiss.setOnClickListener(v -> binding.cachedBanner.setVisibility(View.GONE));
+        binding.stateSettings.setOnClickListener(v -> openAppSettings());
         setupToggleButtons();
         setupFilterControls();
         setupMap();
+        binding.buttonRecenter.setOnClickListener(v -> recenterMap());
 
         // kick off first load to show permission state or fetch if already granted
         restaurantViewModel.loadNearbyRestaurants();
@@ -83,6 +91,8 @@ public class RestaurantListFragment extends Fragment {
     }
 
     private void requestLocationFlow() {
+        Log.d("RestaurantListFragment", "Use my location tapped");
+        Toast.makeText(requireContext(), "Use my location tapped", Toast.LENGTH_SHORT).show();
         if (hasLocationPermission()) {
             restaurantViewModel.loadNearbyRestaurants();
         } else {
@@ -97,8 +107,10 @@ public class RestaurantListFragment extends Fragment {
         if (state == null || binding == null) {
             return;
         }
+        lastUiState = state;
         boolean isLoading = state.getStatus() == RestaurantViewModel.Status.LOADING;
-        binding.loadingProgress.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        binding.loadingOverlay.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        binding.stateSettings.setVisibility(View.GONE);
 
         if (state.getRestaurants() != null) {
             adapter.setRestaurants(state.getRestaurants());
@@ -115,13 +127,23 @@ public class RestaurantListFragment extends Fragment {
             if (state.getStatus() == RestaurantViewModel.Status.PERMISSION_REQUIRED) {
                 binding.stateAction.setText(R.string.enable_location);
                 binding.stateAction.setVisibility(View.VISIBLE);
+                binding.stateSettings.setVisibility(View.VISIBLE);
             } else if (state.getStatus() == RestaurantViewModel.Status.ERROR) {
                 binding.stateAction.setText(R.string.retry);
                 binding.stateAction.setVisibility(View.VISIBLE);
+                binding.stateSettings.setVisibility(View.GONE);
                 Toast.makeText(requireContext(), state.getMessage(), Toast.LENGTH_SHORT).show();
             }
         } else if (state.getStatus() == RestaurantViewModel.Status.SUCCESS && state.getMessage() != null) {
             Toast.makeText(requireContext(), state.getMessage(), Toast.LENGTH_SHORT).show();
+            binding.stateSettings.setVisibility(View.GONE);
+        }
+
+        if (state.getStatus() == RestaurantViewModel.Status.SUCCESS && state.getMessage() != null) {
+            binding.cachedBanner.setVisibility(View.VISIBLE);
+            binding.cachedText.setText(state.getMessage());
+        } else {
+            binding.cachedBanner.setVisibility(View.GONE);
         }
 
         renderMap(state);
@@ -223,6 +245,22 @@ public class RestaurantListFragment extends Fragment {
         }
     }
 
+    private void recenterMap() {
+        if (!isMapReady || googleMap == null || lastUiState == null) {
+            return;
+        }
+        if (lastUiState.getUserLatitude() != null && lastUiState.getUserLongitude() != null) {
+            LatLng userLatLng = new LatLng(lastUiState.getUserLatitude(), lastUiState.getUserLongitude());
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 14f));
+        }
+    }
+
+    private void openAppSettings() {
+        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.fromParts("package", requireContext().getPackageName(), null));
+        startActivity(intent);
+    }
+
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
@@ -236,6 +274,7 @@ public class RestaurantListFragment extends Fragment {
                 break;
             }
         }
+        Log.d("RestaurantListFragment", "onPermissionResult granted=" + granted + " values=" + permissions);
         if (granted) {
             enableMyLocationOnMap();
             restaurantViewModel.loadNearbyRestaurants();

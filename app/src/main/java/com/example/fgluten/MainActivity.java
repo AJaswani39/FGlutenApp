@@ -7,8 +7,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.NavOptions;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.core.view.GravityCompat;
 
 import com.example.fgluten.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
@@ -37,6 +39,25 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            boolean handled = false;
+            NavOptions options = new NavOptions.Builder()
+                    .setPopUpTo(R.id.mobile_navigation, true)
+                    .build();
+            if (item.getItemId() == R.id.nav_home || item.getItemId() == R.id.nav_restaurant_list) {
+                navController.navigate(item.getItemId(), null, options);
+                handled = true;
+            }
+            if (!handled) {
+                handled = NavigationUI.onNavDestinationSelected(item, navController);
+            }
+            if (handled) {
+                drawer.closeDrawer(GravityCompat.START);
+                item.setChecked(true);
+            }
+            return handled;
+        });
     }
 
 

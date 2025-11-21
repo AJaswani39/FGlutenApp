@@ -14,7 +14,7 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.FGlutenApp.NoActionBar">
+    <style name="Theme.FGlutenApp.NoActionBar" parent="Theme.FGlutenApp">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>

@@ -7,6 +7,9 @@ import android.location.Location;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.text.TextUtils;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -37,6 +40,12 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RestaurantViewModel extends AndroidViewModel {
 
@@ -125,15 +134,19 @@ public class RestaurantViewModel extends AndroidViewModel {
     private SortMode sortMode = SortMode.DISTANCE;
     private final SharedPreferences cachePrefs;
     private boolean cacheAttempted = false;
+    private final boolean hasMapsKey;
     private static final String TAG = "RestaurantViewModel";
     private static final String PREF_KEY_CACHE = "restaurant_cache";
+    private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     public RestaurantViewModel(@NonNull Application application) {
         super(application);
         repository = new RestaurantRepository();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(application);
         String apiKey = BuildConfig.MAPS_API_KEY;
-        if (!Places.isInitialized() && apiKey != null && !apiKey.isEmpty()) {
+        hasMapsKey = !TextUtils.isEmpty(apiKey);
+        if (!Places.isInitialized() && hasMapsKey) {
             Places.initialize(application, apiKey);
         }
         placesClient = Places.createClient(application);
@@ -155,9 +168,17 @@ public class RestaurantViewModel extends AndroidViewModel {
     }
 
     public void loadNearbyRestaurants() {
+        Log.d(TAG, "loadNearbyRestaurants called");
+        if (!hasMapsKey) {
+            restaurantState.setValue(RestaurantUiState.error(getApplication().getString(R.string.fgluten_missing_maps_key)));
+            return;
+        }
+
         loadCachedIfAvailable();
 
-        if (!hasLocationPermission()) {
+        boolean hasPermission = hasLocationPermission();
+        Log.d(TAG, "hasLocationPermission=" + hasPermission);
+        if (!hasPermission) {
             String message = getApplication().getString(R.string.location_permission_needed);
             restaurantState.setValue(RestaurantUiState.permissionRequired(message));
             return;
@@ -167,13 +188,17 @@ public class RestaurantViewModel extends AndroidViewModel {
 
         fusedLocationProviderClient.getLastLocation()
                 .addOnSuccessListener(location -> {
+                    Log.d(TAG, "getLastLocation success, location=" + (location != null ? location.getLatitude() + "," + location.getLongitude() : "null"));
                     if (location != null) {
                         publishRestaurantsForLocation(location);
                     } else {
                         requestFreshLocation();
                     }
                 })
-                .addOnFailureListener(e -> postLocationError());
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "getLastLocation failure", e);
+                    postLocationError();
+                });
     }
 
     private boolean hasLocationPermission() {
@@ -187,13 +212,17 @@ public class RestaurantViewModel extends AndroidViewModel {
         CancellationTokenSource tokenSource = new CancellationTokenSource();
         fusedLocationProviderClient.getCurrentLocation(Priority.PRIORITY_LOW_POWER, tokenSource.getToken())
                 .addOnSuccessListener(location -> {
+                    Log.d(TAG, "getCurrentLocation success, location=" + (location != null ? location.getLatitude() + "," + location.getLongitude() : "null"));
                     if (location != null) {
                         publishRestaurantsForLocation(location);
                     } else {
                         postLocationError();
                     }
                 })
-                .addOnFailureListener(e -> postLocationError());
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "getCurrentLocation failure", e);
+                    postLocationError();
+                });
     }
 
     private void publishRestaurantsForLocation(Location userLocation) {
@@ -221,8 +250,14 @@ public class RestaurantViewModel extends AndroidViewModel {
                             }
                         }
                     }
+                    Log.d(TAG, "Places success, restaurant candidates=" + results.size());
                     if (results.isEmpty()) {
                         results.addAll(repository.getRestaurants());
+                    }
+                    if (results.isEmpty()) {
+                        Log.w(TAG, "No restaurants returned from Places; attempting Nearby Search REST fallback");
+                        fetchRestaurantsViaNearbySearch(userLocation);
+                        return;
                     }
                     publishWithDistances(userLocation, results);
                 })
@@ -230,6 +265,92 @@ public class RestaurantViewModel extends AndroidViewModel {
                     Log.w(TAG, "Places request failed", e);
                     handlePlacesFailure(e, userLocation);
                 });
+    }
+
+    private void fetchRestaurantsViaNearbySearch(Location userLocation) {
+        ioExecutor.execute(() -> {
+            List<Restaurant> results = new ArrayList<>();
+            HttpURLConnection connection = null;
+            try {
+                double lat = userLocation.getLatitude();
+                double lng = userLocation.getLongitude();
+                String urlStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+                        + "?location=" + lat + "," + lng
+                        + "&radius=5000"
+                        + "&type=restaurant"
+                        + "&keyword=gluten%20free"
+                        + "&key=" + BuildConfig.MAPS_API_KEY;
+                URL url = new URL(urlStr);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setConnectTimeout(8000);
+                connection.setReadTimeout(8000);
+                int code = connection.getResponseCode();
+                if (code != HttpURLConnection.HTTP_OK) {
+                    throw new Exception("HTTP " + code);
+                }
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                reader.close();
+                JSONObject root = new JSONObject(sb.toString());
+                String status = root.optString("status", "");
+                if (!"OK".equalsIgnoreCase(status) && !"ZERO_RESULTS".equalsIgnoreCase(status)) {
+                    throw new Exception("Places nearby search status=" + status);
+                }
+                JSONArray arr = root.optJSONArray("results");
+                if (arr != null) {
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = arr.optJSONObject(i);
+                        if (obj == null) continue;
+                        String name = obj.optString("name", "");
+                        String address = obj.optString("vicinity", "");
+                        JSONObject geometry = obj.optJSONObject("geometry");
+                        JSONObject loc = geometry != null ? geometry.optJSONObject("location") : null;
+                        double rLat = loc != null ? loc.optDouble("lat", Double.NaN) : Double.NaN;
+                        double rLng = loc != null ? loc.optDouble("lng", Double.NaN) : Double.NaN;
+                        if (Double.isNaN(rLat) || Double.isNaN(rLng)) continue;
+                        boolean likelyHasGf = name.toLowerCase().contains("gluten") || name.toLowerCase().contains("gf");
+                        results.add(new Restaurant(name, address, likelyHasGf, new ArrayList<>(), rLat, rLng));
+                    }
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Nearby Search fallback failed", ex);
+                String message = getApplication().getString(R.string.fgluten_places_error_message) + " [fallback:" + ex.getMessage() + "]";
+                mainHandler.post(() -> {
+                    if (!lastSuccessfulRestaurants.isEmpty() && lastUserLat != null && lastUserLng != null) {
+                        restaurantState.setValue(RestaurantUiState.successWithMessage(
+                                new ArrayList<>(lastSuccessfulRestaurants),
+                                lastUserLat,
+                                lastUserLng,
+                                message
+                        ));
+                    } else {
+                        restaurantState.setValue(RestaurantUiState.error(message));
+                    }
+                });
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                return;
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+
+            if (results.isEmpty()) {
+                Log.w(TAG, "Nearby Search returned 0 results");
+                mainHandler.post(() -> restaurantState.setValue(
+                        RestaurantUiState.error(getApplication().getString(R.string.no_restaurants_found))));
+                return;
+            }
+            // Publish on main thread with distances
+            mainHandler.post(() -> publishWithDistances(userLocation, results));
+        });
     }
 
     private Restaurant mapPlaceToRestaurant(Place place, LatLng latLng) {
@@ -245,6 +366,7 @@ public class RestaurantViewModel extends AndroidViewModel {
 
     private void handlePlacesFailure(Throwable throwable, Location userLocation) {
         String message = buildDetailedError(throwable);
+        Log.e(TAG, "Places failure: " + message, throwable);
         if (userLocation != null) {
             lastUserLat = userLocation.getLatitude();
             lastUserLng = userLocation.getLongitude();
@@ -313,6 +435,7 @@ public class RestaurantViewModel extends AndroidViewModel {
 
     private void postLocationError() {
         String message = getApplication().getString(R.string.location_error);
+        Log.e(TAG, "Location error: " + message);
         if (!lastRestaurantsRaw.isEmpty() && lastUserLat != null && lastUserLng != null) {
             emitFilteredState(getApplication().getString(R.string.using_cached_results));
         } else {
