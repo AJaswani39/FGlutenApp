@@ -11,4 +11,5 @@
     <dimen name="list_title_size">16sp</dimen>
     <dimen name="list_subtitle_size">14sp</dimen>
     <dimen name="list_meta_size">12sp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

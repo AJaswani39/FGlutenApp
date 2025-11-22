@@ -10,6 +10,7 @@ import android.util.Log;
 import android.text.TextUtils;
 import android.os.Handler;
 import android.os.Looper;
+import android.annotation.SuppressLint;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -405,6 +406,7 @@ public class RestaurantViewModel extends AndroidViewModel {
      * @see #fetchRestaurantsViaNearbySearch(Location) for API integration
      * @see #handlePlacesFailure(Throwable, Location) for error handling
      */
+    @SuppressLint("MissingPermission")
     public void loadNearbyRestaurants() {
         Log.d(TAG, "loadNearbyRestaurants called");
         
@@ -453,6 +455,7 @@ public class RestaurantViewModel extends AndroidViewModel {
         return fine == PackageManager.PERMISSION_GRANTED || coarse == PackageManager.PERMISSION_GRANTED;
     }
 
+    @SuppressLint("MissingPermission")
     private void requestFreshLocation() {
         CancellationTokenSource tokenSource = new CancellationTokenSource();
         fusedLocationProviderClient.getCurrentLocation(Priority.PRIORITY_LOW_POWER, tokenSource.getToken())
@@ -474,6 +477,7 @@ public class RestaurantViewModel extends AndroidViewModel {
         fetchRestaurantsViaNearbySearch(userLocation);
     }
 
+    @SuppressLint("MissingPermission")
     private void fetchRestaurantsFromPlaces(Location userLocation) {
         List<Place.Field> fields = Arrays.asList(
                 Place.Field.NAME,

@@ -331,14 +331,10 @@ public class RestaurantListFragment extends Fragment {
         if (googleMap == null) {
             return;
         }
-        if (hasLocationPermission()) {
-            try {
-                googleMap.setMyLocationEnabled(true);
-            } catch (SecurityException ignored) {
-                // Permission revoked while map is active.
-            }
-        } else {
-            googleMap.setMyLocationEnabled(false);
+        try {
+            googleMap.setMyLocationEnabled(hasLocationPermission());
+        } catch (SecurityException ignored) {
+            // Permission may be revoked dynamically; safely ignore.
         }
     }
 

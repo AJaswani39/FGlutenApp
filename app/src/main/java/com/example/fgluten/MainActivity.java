@@ -19,7 +19,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.fgluten.databinding.ActivityMainBinding;
 import com.example.fgluten.ui.settings.SettingsBottomSheet;
 import com.example.fgluten.ui.restaurant.RestaurantViewModel;
-import com.example.fgluten.ui.auth.AuthViewModel;
 import com.example.fgluten.util.SettingsManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
