@@ -150,7 +150,6 @@ public class RestaurantViewModel extends AndroidViewModel {
     private static final String PREF_KEY_CACHE = "restaurant_cache";
     private static final String PREF_KEY_FAVORITES = "favorites_map";
     private static final String PREF_KEY_NOTES = "notes_map";
-    private static final String PREF_KEY_FAVORITES = "favorites_map";
     private static final long MENU_SCAN_TTL_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
     private static final int MENU_MAX_BYTES = 200_000;
     private static final int MAX_SCANS_PER_BATCH = 5;

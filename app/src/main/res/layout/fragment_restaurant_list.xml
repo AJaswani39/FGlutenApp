@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/restaurant_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -193,7 +194,7 @@
         android:padding="8dp"
         android:background="@android:color/white"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/filter_container"
+        app:layout_constraintTop_toBottomOf="@id/filter_sliders"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -305,20 +306,23 @@
             android:layout_marginBottom="8dp">
 
             <View
-                android:layout_width="60%"
+                android:layout_width="0dp"
                 android:layout_height="16dp"
+                android:layout_marginEnd="80dp"
                 android:background="@drawable/bg_skeleton_block" />
 
             <View
-                android:layout_width="80%"
+                android:layout_width="0dp"
                 android:layout_height="12dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="48dp"
                 android:background="@drawable/bg_skeleton_block" />
 
             <View
-                android:layout_width="40%"
+                android:layout_width="0dp"
                 android:layout_height="10dp"
                 android:layout_marginTop="12dp"
+                android:layout_marginEnd="140dp"
                 android:background="@drawable/bg_skeleton_block" />
         </LinearLayout>
 
@@ -331,20 +335,23 @@
             android:layout_marginBottom="8dp">
 
             <View
-                android:layout_width="70%"
+                android:layout_width="0dp"
                 android:layout_height="16dp"
+                android:layout_marginEnd="64dp"
                 android:background="@drawable/bg_skeleton_block" />
 
             <View
-                android:layout_width="50%"
+                android:layout_width="0dp"
                 android:layout_height="12dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="120dp"
                 android:background="@drawable/bg_skeleton_block" />
 
             <View
-                android:layout_width="45%"
+                android:layout_width="0dp"
                 android:layout_height="10dp"
                 android:layout_marginTop="12dp"
+                android:layout_marginEnd="96dp"
                 android:background="@drawable/bg_skeleton_block" />
         </LinearLayout>
     </LinearLayout>
