@@ -119,4 +119,52 @@
         <item quantity="one">%d result found</item>
         <item quantity="other">%d results found</item>
     </plurals>
+
+    <!-- Authentication Strings -->
+    <string name="auth_sign_in">Sign In</string>
+    <string name="auth_sign_up">Sign Up</string>
+    <string name="auth_sign_out">Sign Out</string>
+    <string name="auth_welcome">Welcome to FGluten</string>
+    <string name="auth_subtitle">Join the community to sync your favorites and share your gluten-free dining experiences</string>
+    <string name="auth_email_hint">Email address</string>
+    <string name="auth_password_hint">Password</string>
+    <string name="auth_display_name_hint">Display name</string>
+    <string name="auth_contributor_name_hint">Crowd notes name (optional)</string>
+    <string name="auth_continue">Continue</string>
+    <string name="auth_or">or</string>
+    <string name="auth_google_sign_in">Continue with Google</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    <string name="auth_dont_have_account">Don\'t have an account?</string>
+    <string name="auth_already_have_account">Already have an account?</string>
+    <string name="auth_reset_password">Reset Password</string>
+    <string name="auth_reset_password_description">Enter your email address and we\'ll send you a link to reset your password.</string>
+    <string name="auth_send_reset_email">Send Reset Email</string>
+    <string name="auth_back_to_sign_in">Back to Sign In</string>
+    <string name="auth_sync_prompt">Sign in to sync your data across devices and share with the community</string>
+    <string name="auth_privacy_notice">By continuing, you agree to our Terms of Service and Privacy Policy</string>
+    <string name="auth_error_invalid_email">Please enter a valid email address</string>
+    <string name="auth_error_invalid_password">Password must be at least 6 characters</string>
+    <string name="auth_error_invalid_display_name">Display name must be at least 2 characters</string>
+    <string name="auth_error_sign_in_failed">Sign in failed. Please check your credentials.</string>
+    <string name="auth_error_sign_up_failed">Sign up failed. Please try again.</string>
+    <string name="auth_error_network_error">Network error. Please check your connection.</string>
+    <string name="auth_error_email_not_found">Email address not found</string>
+    <string name="auth_error_wrong_password">Incorrect password</string>
+    <string name="auth_error_user_not_found">User account not found</string>
+    <string name="auth_error_email_already_in_use">Email address already in use</string>
+    <string name="auth_success_sign_in">Welcome back!</string>
+    <string name="auth_success_sign_up">Account created successfully!</string>
+    <string name="auth_success_password_reset">Password reset email sent!</string>
+    <string name="auth_profile">Profile</string>
+    <string name="auth_edit_profile">Edit Profile</string>
+    <string name="auth_change_password">Change Password</string>
+    <string name="auth_delete_account">Delete Account</string>
+    <string name="auth_contribution_stats">Contribution Stats</string>
+    <string name="auth_notes_added">Notes Added</string>
+    <string name="auth_helpful_votes_received">Helpful Votes Received</string>
+    <string name="auth_reputation_score">Reputation Score</string>
+    <string name="auth_trust_level">Trust Level</string>
+    <string name="auth_syncing_data">Syncing your data...</string>
+    <string name="auth_data_synced">Your data is now synced!</string>
+    <string name="auth_sync_failed">Failed to sync data. Will retry automatically.</string>
 </resources>

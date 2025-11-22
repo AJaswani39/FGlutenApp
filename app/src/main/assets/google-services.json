@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "512307622388",
+    "project_id": "fglutenapp",
+    "storage_bucket": "fglutenapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:512307622388:android:ebce2268d801976d5609a1",
+        "android_client_info": {
+          "package_name": "com.example.fgluten"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXDfrlyC4KDRbpa8rQCRtEJ0A-YKq0bFA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
