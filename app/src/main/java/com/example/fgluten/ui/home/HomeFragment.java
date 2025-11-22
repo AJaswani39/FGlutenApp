@@ -142,6 +142,7 @@ public class HomeFragment extends Fragment {
             if (hasData) {
                 int favorites = 0;
                 int scans = 0;
+                long latestScan = 0;
                 for (Restaurant restaurant : restaurants) {
                     if (!TextUtils.isEmpty(restaurant.getFavoriteStatus())) {
                         favorites++;
@@ -149,13 +150,27 @@ public class HomeFragment extends Fragment {
                     if (restaurant.getMenuScanStatus() == Restaurant.MenuScanStatus.SUCCESS) {
                         scans++;
                     }
+                    long scanTimestamp = restaurant.getMenuScanTimestamp();
+                    if (scanTimestamp > latestScan) {
+                        latestScan = scanTimestamp;
+                    }
                 }
                 binding.homeHeroChipGroup.setVisibility(View.VISIBLE);
                 binding.homeChipCached.setText(getString(R.string.home_chip_cached, count));
                 binding.homeChipFavorites.setText(getString(R.string.home_chip_favorites, favorites));
                 binding.homeChipScans.setText(getString(R.string.home_chip_scans, scans));
+                if (latestScan > 0) {
+                    CharSequence relative = DateUtils.getRelativeTimeSpanString(
+                            latestScan, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
+                            DateUtils.FORMAT_ABBREV_RELATIVE);
+                    binding.homeChipTimestamp.setText(getString(R.string.home_last_scan, relative));
+                    binding.homeChipTimestamp.setVisibility(View.VISIBLE);
+                } else {
+                    binding.homeChipTimestamp.setVisibility(View.GONE);
+                }
             } else {
                 binding.homeHeroChipGroup.setVisibility(View.GONE);
+                binding.homeChipTimestamp.setVisibility(View.GONE);
             }
         });
 

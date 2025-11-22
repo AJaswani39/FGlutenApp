@@ -104,6 +104,7 @@
     <string name="home_chip_cached">Cached %d ready</string>
     <string name="home_chip_favorites">%d favorite(s)</string>
     <string name="home_chip_scans">%d menu scans</string>
+    <string name="home_last_scan">Last menu scan: %1$s</string>
     <string name="home_alias_saved">Nickname saved locally</string>
     <string name="home_alias_hint">How others will see your crowd notes (optional)</string>
     <string name="home_alias_note">Nickname is appended to notes you add.</string>
