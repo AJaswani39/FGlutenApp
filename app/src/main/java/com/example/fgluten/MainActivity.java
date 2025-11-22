@@ -19,9 +19,11 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.fgluten.databinding.ActivityMainBinding;
 import com.example.fgluten.ui.settings.SettingsBottomSheet;
 import com.example.fgluten.ui.restaurant.RestaurantViewModel;
+import com.example.fgluten.ui.auth.AuthViewModel;
 import com.example.fgluten.util.SettingsManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.FirebaseApp;
 
 /**
  * Main entry point and primary activity for the FGluten Android application.
@@ -75,6 +77,10 @@ public class MainActivity extends AppCompatActivity {
         SplashScreen.installSplashScreen(this);
         // Apply saved theme before inflating the activity layout
         SettingsManager.setThemeMode(this, SettingsManager.getThemeMode(this));
+        
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this);
+        
         super.onCreate(savedInstanceState);
 
         // Initialize data binding for the activity layout
