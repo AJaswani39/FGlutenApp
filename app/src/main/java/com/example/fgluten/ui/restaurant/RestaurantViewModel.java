@@ -853,7 +853,9 @@ public class RestaurantViewModel extends AndroidViewModel {
         restaurant.addCrowdNote(note);
         Restaurant match = findMatchingInLast(restaurant);
         if (match != null) {
-            match.addCrowdNote(note);
+            if (match != restaurant) {
+                match.addCrowdNote(note);
+            }
         }
         saveNotes();
         emitFilteredState(null);
