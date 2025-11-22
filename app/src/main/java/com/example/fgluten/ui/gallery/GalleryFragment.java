@@ -54,43 +54,128 @@ public class GalleryFragment extends Fragment {
     private FragmentGalleryBinding binding;
 
     /**
-     * Fragment view creation and initialization.
+     * Fragment view creation and initialization with MVVM architecture integration.
      * 
-     * This method performs the essential setup for the gallery interface:
+     * This method performs the essential setup for the gallery interface following
+     * Android Fragment lifecycle best practices and MVVM architecture patterns:
      * 
-     * 1. **ViewModel Integration**: Connects to GalleryViewModel for content management
-     * 2. **Data Binding Setup**: Inflates layout and initializes view references
-     * 3. **UI Initialization**: Configures text display and observer setup
-     * 4. **Lifecycle Management**: Properly manages fragment lifecycle state
+     * **1. ViewModel Integration & Dependency Injection:**
+     * - Creates ViewModelProvider scoped to this fragment lifecycle
+     * - Initializes GalleryViewModel for content management and business logic
+     * - Ensures ViewModel survives configuration changes (rotation, etc.)
+     * - Demonstrates proper MVVM pattern implementation
      * 
-     * The method follows Android Fragment lifecycle best practices and ensures
-     * all components are properly initialized before the view is displayed.
+     * **2. Data Binding Setup & View Generation:**
+     * - Uses View Binding for type-safe view references (FragmentGalleryBinding)
+     * - Inflates fragment_gallery.xml layout automatically by binding system
+     * - Gets root view from binding object for fragment return value
+     * - Eliminates findViewById calls and reduces boilerplate code
      * 
-     * @param inflater Layout inflater for creating fragment views
-     * @param container Parent view group for fragment attachment
-     * @param savedInstanceState Previously saved instance state
-     * @return The root view of the fragment
+     * **3. UI Component Initialization & View References:**
+     * - Extracts text view reference from binding object (binding.textGallery)
+     * - Provides direct access to UI components without runtime lookups
+     * - Maintains type safety and compile-time error detection
+     * - Supports both programmatic and declarative UI updates
+     * 
+     * **4. Reactive Programming with LiveData Integration:**
+     * - Sets up Observer pattern for automatic UI updates when data changes
+     * - Uses getViewLifecycleOwner() for proper lifecycle-aware subscriptions
+     * - Automatically unsubscribes when fragment view is destroyed
+     * - Demonstrates reactive programming principles in Android architecture
+     * - GalleryViewModel.getText() returns LiveData<String> for text content
+     * 
+     * **5. Lifecycle Management & Resource Cleanup:**
+     * - Follows Android Fragment lifecycle best practices
+     * - Ensures proper initialization order: ViewModel → Binding → UI → Observers
+     * - Returns root view for fragment attachment to container
+     * - Provides foundation for future gallery enhancements
+     * 
+     * **Architecture Benefits:**
+     * - Separation of concerns: View (UI), ViewModel (business logic), Model (data)
+     * - Testability: ViewModel can be unit tested without Android dependencies
+     * - Memory management: Automatic cleanup prevents memory leaks
+     * - Configuration changes: ViewModel survives rotation and other config changes
+     * 
+     * @param inflater Layout inflater for creating fragment views from XML layout
+     * @param container Parent ViewGroup that this fragment's UI should be attached to
+     * @param savedInstanceState Previously saved state Bundle for restoring UI state
+     * @return The root View of the fragment's UI hierarchy
      */
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         
-        // ========== VIEWMODEL INTEGRATION ==========
-        // Initialize ViewModel for managing gallery content
+        // ========== VIEWMODEL INTEGRATION & DEPENDENCY INJECTION ==========
+        /**
+         * Initialize ViewModel with proper lifecycle scoping
+         * 
+         * Creates a ViewModelProvider scoped to this fragment instance.
+         * The ViewModel will be automatically cleaned up when the fragment
+         * is completely destroyed, preventing memory leaks and ensuring
+         * proper resource management.
+         * 
+         * MVVM Pattern Benefits:
+         * - Business logic separated from UI concerns
+         * - Data persistence across configuration changes
+         * - Enhanced testability with dependency injection
+         * - Centralized state management
+         */
         GalleryViewModel galleryViewModel =
                 new ViewModelProvider(this).get(GalleryViewModel.class);
 
-        // ========== DATA BINDING SETUP ==========
-        // Inflate the layout and get view binding reference
+        // ========== DATA BINDING SETUP & VIEW GENERATION ==========
+        /**
+         * Initialize View Binding for type-safe view access
+         * 
+         * View Binding generates binding classes for XML layouts automatically,
+         * providing compile-time type safety for view references. This eliminates
+         * the need for findViewById calls and reduces runtime errors.
+         * 
+         * Benefits:
+         * - Null safety for view references
+         * - Compile-time verification of view IDs
+         * - Reduced boilerplate code
+         * - Better performance than runtime view lookups
+         */
         binding = FragmentGalleryBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         // ========== UI COMPONENT INITIALIZATION ==========
-        // Get reference to text view for content display
+        /**
+         * Extract view references from binding object
+         * 
+         * Gets direct reference to textGallery TextView from the generated
+         * binding class. This reference can be used for both programmatic
+         * updates and data binding expressions in XML.
+         * 
+         * Gallery-Specific UI:
+         * - Currently displays text content from ViewModel
+         * - Designed for future image gallery expansion
+         * - Supports both static and dynamic content display
+         */
         final TextView textView = binding.textGallery;
 
-        // ========== OBSERVER SETUP ==========
-        // Set up observer for text content changes from ViewModel
-        // This demonstrates reactive programming with LiveData
+        // ========== REACTIVE PROGRAMMING & OBSERVER SETUP ==========
+        /**
+         * Establish LiveData observer for automatic UI updates
+         * 
+         * Sets up reactive data flow from ViewModel to UI:
+         * 1. GalleryViewModel.getText() returns LiveData<String>
+         * 2. Observer watches for text content changes
+         * 3. textView::setText lambda automatically updates UI
+         * 4. getViewLifecycleOwner() ensures proper lifecycle management
+         * 
+         * Reactive Programming Benefits:
+         * - Automatic UI synchronization with data changes
+         * - No manual update calls needed
+         * - Lifecycle-aware observers prevent memory leaks
+         * - Supports complex data transformation pipelines
+         * 
+         * Future Gallery Enhancements:
+         * - Image loading observers for photo galleries
+         * - Grid layout managers for image display
+         * - Loading state indicators during data fetch
+         * - Error handling observers for failed operations
+         */
         galleryViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         
         return root;
