@@ -77,7 +77,6 @@
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/home_chip_cached"
-                        style="@style/Widget.MaterialComponents.Chip.Assist"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/home_chip_cached"
@@ -85,7 +84,6 @@
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/home_chip_favorites"
-                        style="@style/Widget.MaterialComponents.Chip.Assist"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
@@ -94,12 +92,11 @@
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/home_chip_scans"
-                        style="@style/Widget.MaterialComponents.Chip.Assist"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/home_chip_scans"
-                    android:checkable="false" />
+                        android:layout_marginStart="8dp"
+                        android:text="@string/home_chip_scans"
+                        android:checkable="false" />
                 </LinearLayout>
 
                 <TextView
