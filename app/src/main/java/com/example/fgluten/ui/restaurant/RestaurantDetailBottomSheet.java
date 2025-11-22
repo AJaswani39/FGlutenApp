@@ -247,7 +247,11 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
             if (!note.isEmpty()) {
                 String alias = SettingsManager.getContributorName(requireContext());
                 if (!TextUtils.isEmpty(alias)) {
-                    note = note + " — " + alias;
+                    // strip delimiter/newlines to avoid breaking parsing
+                    alias = alias.replace(" — ", " - ").replace("\n", " ").trim();
+                    if (!TextUtils.isEmpty(alias)) {
+                        note = note + " — " + alias;
+                    }
                 }
                 viewModel.addCrowdNote(current, note);
                 noteInput.setText(""); // Clear input after successful addition

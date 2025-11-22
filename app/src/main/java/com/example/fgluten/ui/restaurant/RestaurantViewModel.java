@@ -297,7 +297,7 @@ public class RestaurantViewModel extends AndroidViewModel {
     private static final String TAG = "RestaurantViewModel";
     
     /** Search radius for nearby restaurants in meters (120km = 120,000m) */
-    private static final int NEARBY_RADIUS_METERS = 120_000;
+    private static final int NEARBY_RADIUS_METERS = 50_000;
     
     /** SharedPreferences key for restaurant cache data */
     private static final String PREF_KEY_CACHE = "restaurant_cache";

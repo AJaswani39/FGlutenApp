@@ -262,10 +262,10 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         private String buildMeta(Restaurant restaurant) {
             StringBuilder sb = new StringBuilder();
             if (restaurant.getRating() != null) {
-                sb.append(String.format("%.1f ?", restaurant.getRating()));
+                sb.append(String.format("%.1f \u2605", restaurant.getRating()));
             }
             if (restaurant.getOpenNow() != null) {
-                if (sb.length() > 0) sb.append("  ");
+                if (sb.length() > 0) sb.append(" \u2022 ");
                 sb.append(restaurant.getOpenNow() ? itemView.getContext().getString(R.string.meta_open_now)
                         : itemView.getContext().getString(R.string.meta_closed));
             }
