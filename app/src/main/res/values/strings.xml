@@ -103,4 +103,6 @@
     <string name="crowd_notes_add_hint">Add a short note (cross-contam, celiac-safe, etc)</string>
     <string name="crowd_notes_add">Add note</string>
     <string name="crowd_notes_count">Notes: %1$d</string>
+    <string name="detail_menu_button">Open menu / website</string>
+    <string name="detail_menu_unavailable">Menu link unavailable</string>
 </resources>

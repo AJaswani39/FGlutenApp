@@ -18,7 +18,6 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -63,12 +62,8 @@ public class RestaurantListFragment extends Fragment {
         binding = FragmentRestaurantListBinding.inflate(inflater, container, false);
         RecyclerView recyclerView = binding.restaurantRecycler;
 
-        adapter = new RestaurantAdapter(new ArrayList<>(), restaurant -> {
-            Bundle bundle = new Bundle();
-            bundle.putParcelable("restaurant", restaurant);
-            NavHostFragment.findNavController(RestaurantListFragment.this)
-                    .navigate(R.id.action_restaurantListFragment_to_restaurantDetailFragment, bundle);
-        });
+        adapter = new RestaurantAdapter(new ArrayList<>(), restaurant ->
+                RestaurantDetailBottomSheet.show(getParentFragmentManager(), restaurant));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
@@ -260,8 +255,7 @@ public class RestaurantListFragment extends Fragment {
         googleMap.setOnMarkerClickListener(marker -> {
             Object tag = marker.getTag();
             if (tag instanceof Restaurant) {
-                RestaurantMarkerBottomSheet.newInstance((Restaurant) tag)
-                        .show(getChildFragmentManager(), "marker_sheet");
+                RestaurantDetailBottomSheet.show(getParentFragmentManager(), (Restaurant) tag);
                 return true;
             }
             return false;
