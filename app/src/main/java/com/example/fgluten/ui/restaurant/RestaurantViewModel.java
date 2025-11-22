@@ -130,13 +130,43 @@ public class RestaurantViewModel extends AndroidViewModel {
         NAME
     }
 
+    // ========== UI STATE DATA CLASS ==========
+    
+    /**
+     * Immutable data class representing the complete state of restaurant data for UI consumption.
+     * 
+     * This class encapsulates all information needed by UI components to render the restaurant
+     * interface, including loading states, data, messages, and user location. Using an immutable
+     * design ensures thread safety and prevents accidental state corruption.
+     * 
+     * The state follows a Unidirectional Data Flow pattern where:
+     * - ViewModel produces RestaurantUiState objects
+     * - UI components observe and react to state changes
+     * - User actions trigger ViewModel methods that produce new states
+     * 
+     * @see Status for possible loading states
+     */
     public static class RestaurantUiState {
+        // Core state data
         private final Status status;
         private final List<Restaurant> restaurants;
         private final String message;
+        
+        // User location for distance calculations and map centering
         private final Double userLatitude;
         private final Double userLongitude;
 
+        /**
+         * Private constructor to enforce use of factory methods.
+         * Ensures all RestaurantUiState objects are created through controlled factory methods
+         * that enforce business rules and state consistency.
+         * 
+         * @param status Current loading/processing status
+         * @param restaurants List of restaurants (may be empty or null)
+         * @param message Optional message for user display (errors, warnings, info)
+         * @param userLatitude User's current latitude for distance calculations
+         * @param userLongitude User's current longitude for distance calculations
+         */
         private RestaurantUiState(Status status, List<Restaurant> restaurants, String message, Double userLatitude, Double userLongitude) {
             this.status = status;
             this.restaurants = restaurants;
@@ -145,82 +175,166 @@ public class RestaurantViewModel extends AndroidViewModel {
             this.userLongitude = userLongitude;
         }
 
+        // ========== FACTORY METHODS FOR DIFFERENT STATES ==========
+        
+        /** Creates an idle state with no active operations */
         public static RestaurantUiState idle() {
             return new RestaurantUiState(Status.IDLE, new ArrayList<>(), null, null, null);
         }
 
+        /** Creates a loading state with optional message */
         public static RestaurantUiState loading(String message) {
             return new RestaurantUiState(Status.LOADING, new ArrayList<>(), message, null, null);
         }
 
+        /** Creates a permission-required state (typically for location access) */
         public static RestaurantUiState permissionRequired(String message) {
             return new RestaurantUiState(Status.PERMISSION_REQUIRED, new ArrayList<>(), message, null, null);
         }
 
+        /** Creates an error state with error message */
         public static RestaurantUiState error(String message) {
             return new RestaurantUiState(Status.ERROR, new ArrayList<>(), message, null, null);
         }
 
+        /** Creates a success state with restaurant data and user location */
         public static RestaurantUiState success(List<Restaurant> restaurants, double userLatitude, double userLongitude) {
             return new RestaurantUiState(Status.SUCCESS, restaurants, null, userLatitude, userLongitude);
         }
 
+        /** Creates a success state with additional message (e.g., cached data notice) */
         public static RestaurantUiState successWithMessage(List<Restaurant> restaurants, double userLatitude, double userLongitude, String message) {
             return new RestaurantUiState(Status.SUCCESS, restaurants, message, userLatitude, userLongitude);
         }
 
+        // ========== ACCESSOR METHODS ==========
+        
+        /** @return Current status of the restaurant loading operation */
         public Status getStatus() {
             return status;
         }
 
+        /** @return List of restaurants (never null, may be empty) */
         public List<Restaurant> getRestaurants() {
             return restaurants;
         }
 
+        /** @return Optional message for user display (error, warning, info) */
         public String getMessage() {
             return message;
         }
 
+        /** @return User's latitude for distance calculations, null if unavailable */
         public Double getUserLatitude() {
             return userLatitude;
         }
 
+        /** @return User's longitude for distance calculations, null if unavailable */
         public Double getUserLongitude() {
             return userLongitude;
         }
     }
 
+    // ========== CORE DEPENDENCIES ==========
+    /** Repository for restaurant data operations */
     private final RestaurantRepository repository;
+    
+    /** Google Play Services client for location services */
     private final FusedLocationProviderClient fusedLocationProviderClient;
+    
+    /** Google Places API client for restaurant search functionality */
     private final PlacesClient placesClient;
+
+    // ========== REACTIVE STATE MANAGEMENT ==========
+    /** LiveData observable for UI components to observe restaurant state changes */
     private final MutableLiveData<RestaurantUiState> restaurantState = new MutableLiveData<>(RestaurantUiState.idle());
+
+    // ========== DATA STORAGE FOR FILTERING & CACHING ==========
+    /** Raw restaurant data from the last successful API call (before filtering) */
     private final List<Restaurant> lastRestaurantsRaw = new ArrayList<>();
+    
+    /** Filtered and sorted restaurants ready for UI display */
     private final List<Restaurant> lastSuccessfulRestaurants = new ArrayList<>();
+    
+    /** Cached user location for distance calculations */
     private Double lastUserLat = null;
     private Double lastUserLng = null;
+
+    // ========== FILTER PREFERENCES ==========
+    /** User preference: show only restaurants with gluten-free options */
     private boolean gfOnly = false;
+    
+    /** Current sorting mode for restaurant display */
     private SortMode sortMode = SortMode.DISTANCE;
+    
+    /** User preference: show only currently open restaurants */
     private boolean openNowOnly = false;
+    
+    /** Maximum distance filter in meters (0 = no limit) */
     private double maxDistanceMeters = 0.0; // 0 means no limit
+    
+    /** Minimum rating filter (0.0 = no minimum) */
     private double minRating = 0.0; // 0 means none
+
+    // ========== PERSISTENT STORAGE ==========
+    /** SharedPreferences for caching restaurant data */
     private final SharedPreferences cachePrefs;
+    
+    /** SharedPreferences for storing user favorites */
     private final SharedPreferences favoritesPrefs;
+    
+    /** SharedPreferences for storing crowd-sourced notes */
     private final SharedPreferences notesPrefs;
+    
+    /** Flag to prevent multiple cache load attempts */
     private boolean cacheAttempted = false;
+    
+    /** Indicates if Google Maps API key is configured */
     private final boolean hasMapsKey;
+
+    // ========== CONSTANTS & CONFIGURATION ==========
+    /** Log tag for debugging and logging purposes */
     private static final String TAG = "RestaurantViewModel";
+    
+    /** Search radius for nearby restaurants in meters (120km = 120,000m) */
     private static final int NEARBY_RADIUS_METERS = 120_000;
+    
+    /** SharedPreferences key for restaurant cache data */
     private static final String PREF_KEY_CACHE = "restaurant_cache";
+    
+    /** SharedPreferences key for favorites data */
     private static final String PREF_KEY_FAVORITES = "favorites_map";
+    
+    /** SharedPreferences key for notes data */
     private static final String PREF_KEY_NOTES = "notes_map";
+    
+    /** Time-to-live for menu scan results in milliseconds (3 days) */
     private static final long MENU_SCAN_TTL_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
+    
+    /** Maximum bytes to fetch when scraping restaurant websites */
     private static final int MENU_MAX_BYTES = 200_000;
+    
+    /** Maximum number of menu scans to perform in a single batch */
     private static final int MAX_SCANS_PER_BATCH = 5;
+    
+    /** User agent string for HTTP requests to restaurant websites */
     private static final String USER_AGENT = "FGlutenApp/1.0";
+
+    // ========== THREADING & EXECUTION ==========
+    /** Background executor for I/O operations (API calls, web scraping, file operations) */
     private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
+    
+    /** Main thread handler for UI updates */
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    // ========== WEB SCRAPING INFRASTRUCTURE ==========
+    /** Cache for robots.txt disallow rules to avoid repeated network requests */
     private final Map<String, List<String>> robotsDisallowCache = new HashMap<>();
+    
+    /** In-memory cache of user favorites for fast access */
     private Map<String, String> favoriteMap = new HashMap<>();
+    
+    /** In-memory cache of crowd-sourced notes for fast access */
     private Map<String, List<String>> notesMap = new HashMap<>();
 
     public RestaurantViewModel(@NonNull Application application) {
@@ -269,15 +383,41 @@ public class RestaurantViewModel extends AndroidViewModel {
         emitFilteredState(null);
     }
 
+    /**
+     * Initiates the main restaurant discovery workflow.
+     * 
+     * This is the primary entry point for finding restaurants near the user's location.
+     * The method implements a robust error-handling and fallback strategy:
+     * 
+     * 1. **API Key Validation**: Checks if Google Maps API key is configured
+     * 2. **Cache Loading**: Attempts to load cached restaurant data for instant display
+     * 3. **Permission Check**: Verifies location permissions before proceeding
+     * 4. **Location Fetching**: Gets user location with fallback strategies
+     * 5. **Restaurant Search**: Uses Google Places API to find nearby restaurants
+     * 6. **Data Processing**: Applies filtering, sorting, and distance calculations
+     * 7. **Menu Scanning**: Automatically scans restaurant websites for GF information
+     * 8. **Caching**: Saves results for offline use and future sessions
+     * 
+     * The method is designed to be resilient, providing cached data when live data
+     * is unavailable and clear error messages for permission or API issues.
+     * 
+     * @see #loadCachedIfAvailable() for offline data loading
+     * @see #fetchRestaurantsViaNearbySearch(Location) for API integration
+     * @see #handlePlacesFailure(Throwable, Location) for error handling
+     */
     public void loadNearbyRestaurants() {
         Log.d(TAG, "loadNearbyRestaurants called");
+        
+        // Step 1: Validate API key configuration
         if (!hasMapsKey) {
             restaurantState.setValue(RestaurantUiState.error(getApplication().getString(R.string.fgluten_missing_maps_key)));
             return;
         }
 
+        // Step 2: Load cached data for immediate display (offline support)
         loadCachedIfAvailable();
 
+        // Step 3: Check location permissions
         boolean hasPermission = hasLocationPermission();
         Log.d(TAG, "hasLocationPermission=" + hasPermission);
         if (!hasPermission) {
@@ -286,14 +426,17 @@ public class RestaurantViewModel extends AndroidViewModel {
             return;
         }
 
+        // Step 4: Show loading state while fetching fresh data
         restaurantState.setValue(RestaurantUiState.loading(getApplication().getString(R.string.loading_restaurants)));
 
+        // Step 5: Fetch user location with graceful fallback
         fusedLocationProviderClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     Log.d(TAG, "getLastLocation success, location=" + (location != null ? location.getLatitude() + "," + location.getLongitude() : "null"));
                     if (location != null) {
                         publishRestaurantsForLocation(location);
                     } else {
+                        // Fallback: request fresh location if cached location is unavailable
                         requestFreshLocation();
                     }
                 })

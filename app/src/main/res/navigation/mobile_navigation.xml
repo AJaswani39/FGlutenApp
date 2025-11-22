@@ -15,16 +15,6 @@
         android:id="@+id/nav_restaurant_list"
         android:name="com.example.fgluten.ui.restaurant.RestaurantListFragment"
         android:label="@string/menu_restaurants"
-        tools:layout="@layout/fragment_restaurant_list">
-        <action
-            android:id="@+id/action_restaurantListFragment_to_restaurantDetailFragment"
-            app:destination="@id/restaurantDetailFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/restaurantDetailFragment"
-        android:name="com.example.fgluten.ui.restaurant.RestaurantDetailFragment"
-        android:label="@string/title_restaurant_detail"
-        tools:layout="@layout/fragment_restaurant_detail" />
+        tools:layout="@layout/fragment_restaurant_list" />
 
 </navigation>

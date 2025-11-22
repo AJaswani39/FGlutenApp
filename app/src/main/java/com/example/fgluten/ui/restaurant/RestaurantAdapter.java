@@ -20,15 +20,68 @@ import com.example.fgluten.util.SettingsManager;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * RecyclerView adapter for displaying Restaurant objects in a scrollable list.
+ * 
+ * This adapter implements the ViewHolder pattern to efficiently display restaurant
+ * information with proper recycling of views. It handles:
+ * 
+ * **Data Display:**
+ * - Restaurant name and address
+ * - Distance from user location
+ * - Gluten-free option indicators
+ * - Rating and operating hours
+ * - Menu scanning status
+ * - User favorites and crowd notes
+ * 
+ * **User Interactions:**
+ * - Click to open restaurant details
+ * - "Open in Maps" button for navigation
+ * - Unit conversion (miles/km) based on user preferences
+ * 
+ * **Performance Optimization:**
+ * - ViewHolder pattern prevents excessive findViewById calls
+ * - Efficient data binding with minimal operations
+ * - Smart formatting for distance and meta information
+ * 
+ * The adapter follows Android's RecyclerView best practices and integrates
+ * with the app's settings system for personalized display.
+ * 
+ * @see Restaurant for the data model being displayed
+ * @see SettingsManager for unit preference integration
+ * 
+ * @author FGluten Development Team
+ */
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.RestaurantViewHolder> {
 
+    // ========== CLICK HANDLER INTERFACE ==========
+    
+    /**
+     * Interface for handling restaurant item clicks from the RecyclerView.
+     * 
+     * This callback allows the containing fragment or activity to respond to
+     * user interactions with restaurant items, typically opening a detail view
+     * or bottom sheet with more information about the selected restaurant.
+     */
     public interface OnRestaurantClickListener {
+        /** Called when a restaurant item is clicked by the user */
         void onRestaurantClick(Restaurant restaurant);
     }
 
+    // ========== DATA & CALLBACKS ==========
+    
+    /** List of restaurants to display in the RecyclerView */
     private List<Restaurant> restaurants = new ArrayList<>();
+    
+    /** Callback for handling restaurant item clicks */
     private final OnRestaurantClickListener listener;
 
+    /**
+     * Constructor for creating the adapter with initial data and click handler.
+     * 
+     * @param restaurants Initial list of restaurants to display (can be null or empty)
+     * @param listener Callback for handling user interactions with restaurant items
+     */
     public RestaurantAdapter(List<Restaurant> restaurants, OnRestaurantClickListener listener) {
         if (restaurants != null) {
             this.restaurants = restaurants;
@@ -36,6 +89,15 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         this.listener = listener;
     }
 
+    /**
+     * Updates the adapter's data and triggers UI refresh.
+     * 
+     * This method replaces the current restaurant list with new data and notifies
+     * the RecyclerView that the underlying data has changed. The RecyclerView will
+     * then update the visible items accordingly.
+     * 
+     * @param restaurants New list of restaurants to display (null results in empty list)
+     */
     public void setRestaurants(List<Restaurant> restaurants) {
         this.restaurants = restaurants != null ? restaurants : new ArrayList<>();
         notifyDataSetChanged();
@@ -59,17 +121,52 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         return restaurants.size();
     }
 
+    // ========== VIEW HOLDER PATTERN IMPLEMENTATION ==========
+    
+    /**
+     * ViewHolder class for recycling restaurant list item views efficiently.
+     * 
+     * This static inner class follows the RecyclerView ViewHolder pattern, which
+     * improves performance by caching view references and reducing findViewById calls.
+     * Each ViewHolder represents a single restaurant item in the list.
+     * 
+     * The ViewHolder holds references to all UI components needed to display
+     * restaurant information, including text views, buttons, and status indicators.
+     */
     static class RestaurantViewHolder extends RecyclerView.ViewHolder {
 
+        // ========== VIEW REFERENCES ==========
+        /** Restaurant name display */
         private final TextView nameTextView;
+        
+        /** Restaurant address display */
         private final TextView addressTextView;
+        
+        /** Distance from user location */
         private final TextView distanceTextView;
+        
+        /** Gluten-free options badge */
         private final TextView gfBadgeView;
+        
+        /** Meta information (rating, hours, status) */
         private final TextView metaView;
+        
+        /** "Open in Maps" navigation button */
         private final Button openMapsButton;
 
+        /**
+         * Constructor that initializes view references from the layout.
+         * 
+         * Uses findViewById to cache references to all UI components in the
+         * restaurant list item layout. These references are reused for each
+         * item that this ViewHolder represents.
+         * 
+         * @param itemView The root view of a single restaurant list item
+         */
         public RestaurantViewHolder(@NonNull View itemView) {
             super(itemView);
+            
+            // Cache all view references for performance
             nameTextView = itemView.findViewById(R.id.restaurant_name);
             addressTextView = itemView.findViewById(R.id.restaurant_address);
             distanceTextView = itemView.findViewById(R.id.restaurant_distance);
