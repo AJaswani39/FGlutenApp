@@ -36,52 +36,144 @@ import com.google.android.gms.maps.model.Marker;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * Main fragment for displaying restaurant search results with dual-view support.
+ * 
+ * This fragment provides the primary user interface for restaurant discovery and browsing,
+ * featuring:
+ * 
+ * **Dual View Modes:**
+ * - List view with detailed restaurant cards
+ * - Map view with restaurant markers and user location
+ * 
+ * **Core Features:**
+ * - Location permission handling with user-friendly prompts
+ * - Real-time restaurant data from Google Places API
+ * - Advanced filtering (GF-only, open hours, distance, rating)
+ * - Sorting options (distance, name)
+ * - Interactive map with markers and info windows
+ * - Pull-to-refresh and manual refresh capabilities
+ * 
+ * **User Experience:**
+ * - Smooth transitions between list and map views
+ * - Loading states and error handling
+ * - Permission request flow with helpful messaging
+ * - Cached data display for offline scenarios
+ * 
+ * **Architecture:**
+ * - MVVM pattern with ViewModel for business logic
+ * - Data binding for efficient UI updates
+ * - Fragment-based navigation integration
+ * - Google Maps SDK for location services
+ * 
+ * The fragment integrates with RestaurantViewModel for data operations and
+ * RestaurantAdapter for list display, providing a complete restaurant browsing experience.
+ * 
+ * @see RestaurantViewModel for data management
+ * @see RestaurantAdapter for list display
+ * 
+ * @author FGluten Development Team
+ */
 public class RestaurantListFragment extends Fragment {
 
+    // ========== DATA BINDING & COMPONENTS ==========
+    
+    /** Data binding object for the fragment's layout views */
     private FragmentRestaurantListBinding binding;
+    
+    /** RecyclerView adapter for displaying restaurant list items */
     private RestaurantAdapter adapter;
+    
+    /** ViewModel for managing restaurant data and business logic */
     private RestaurantViewModel restaurantViewModel;
+    
+    /** Activity result launcher for handling location permission requests */
     private ActivityResultLauncher<String[]> permissionLauncher;
+    
+    /** Google Maps instance for map view functionality */
     private GoogleMap googleMap;
+    
+    /** Flag indicating whether the map is ready for interaction */
     private boolean isMapReady = false;
+    
+    /** Cached UI state for recentering map and other operations */
     private RestaurantViewModel.RestaurantUiState lastUiState = null;
 
+    /**
+     * Fragment initialization for setting up permission handling.
+     * 
+     * This method registers a permission result launcher that will handle
+     * the user's response to location permission requests. The launcher
+     * automatically handles the permission request lifecycle and calls
+     * the appropriate callback method.
+     * 
+     * @param savedInstanceState Previously saved instance state
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Register permission launcher for location access requests
         permissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 this::onPermissionResult
         );
     }
 
+    /**
+     * Main fragment view creation and initialization.
+     * 
+     * This method performs all the setup necessary for the restaurant list interface:
+     * 
+     * 1. **Data Binding**: Inflates layout and gets view references
+     * 2. **RecyclerView Setup**: Configures list display with adapter and layout manager
+     * 3. **ViewModel Integration**: Connects to business logic layer
+     * 4. **Event Handlers**: Sets up click listeners for all interactive elements
+     * 5. **UI Controls**: Initializes filter controls, toggle buttons, and map
+     * 6. **Data Loading**: Initiates the first restaurant search
+     * 
+     * The method follows Android Fragment lifecycle best practices and ensures
+     * all UI components are properly initialized before the view is displayed.
+     * 
+     * @param inflater Layout inflater for creating fragment views
+     * @param container Parent view group for fragment attachment
+     * @param savedInstanceState Previously saved instance state
+     * @return The root view of the fragment
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
+        // ========== DATA BINDING SETUP ==========
         binding = FragmentRestaurantListBinding.inflate(inflater, container, false);
         RecyclerView recyclerView = binding.restaurantRecycler;
 
+        // ========== RECYCLERVIEW CONFIGURATION ==========
         adapter = new RestaurantAdapter(new ArrayList<>(), restaurant ->
                 RestaurantDetailBottomSheet.show(getParentFragmentManager(), restaurant));
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 
+        // ========== VIEWMODEL INTEGRATION ==========
         restaurantViewModel = new ViewModelProvider(requireActivity()).get(RestaurantViewModel.class);
         restaurantViewModel.getRestaurantState().observe(getViewLifecycleOwner(), this::renderUiState);
 
+        // ========== EVENT HANDLERS ==========
         binding.stateAction.setOnClickListener(v -> requestLocationFlow());
         binding.buttonRefresh.setOnClickListener(v -> requestLocationFlow());
         binding.cachedDismiss.setOnClickListener(v -> binding.cachedBanner.setVisibility(View.GONE));
         binding.stateSettings.setOnClickListener(v -> openAppSettings());
         binding.errorRetry.setOnClickListener(v -> requestLocationFlow());
         binding.errorDismiss.setOnClickListener(v -> binding.errorBanner.setVisibility(View.GONE));
+        
+        // ========== UI CONTROL SETUP ==========
         setupToggleButtons();
         setupFilterControls();
         setupMap();
         binding.buttonRecenter.setOnClickListener(v -> recenterMap());
 
+        // ========== DATA INITIALIZATION ==========
         // kick off first load to show permission state or fetch if already granted
         restaurantViewModel.loadNearbyRestaurants();
 

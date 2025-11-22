@@ -175,10 +175,30 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
             openMapsButton = itemView.findViewById(R.id.restaurant_open_maps);
         }
 
+        /**
+         * Binds restaurant data to the ViewHolder's UI components.
+         * 
+         * This method performs all data binding operations needed to display
+         * restaurant information in the list item. It handles:
+         * 
+         * 1. **Basic Information**: Name and address display
+         * 2. **Distance Calculation**: Formats distance based on user preferences
+         * 3. **Visual Indicators**: Shows GF badge when applicable
+         * 4. **Meta Information**: Displays rating, hours, menu status, etc.
+         * 5. **Click Handlers**: Sets up interactions for item click and maps button
+         * 
+         * The method follows a defensive programming approach, checking for null
+         * values and handling edge cases gracefully.
+         * 
+         * @param restaurant Restaurant data to display
+         * @param listener Callback for handling restaurant item clicks
+         */
         public void bind(Restaurant restaurant, OnRestaurantClickListener listener) {
+            // ========== BASIC INFORMATION DISPLAY ==========
             nameTextView.setText(restaurant.getName());
             addressTextView.setText(restaurant.getAddress());
 
+            // ========== DISTANCE DISPLAY ==========
             double distanceMeters = restaurant.getDistanceMeters();
             String distanceLabel = formatDistance(itemView.getContext(), distanceMeters);
             if (distanceLabel != null) {
@@ -188,12 +208,14 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                 distanceTextView.setVisibility(View.GONE);
             }
 
+            // ========== GLUTEN-FREE BADGE ==========
             if (restaurant.hasGlutenFreeOptions()) {
                 gfBadgeView.setVisibility(View.VISIBLE);
             } else {
                 gfBadgeView.setVisibility(View.GONE);
             }
 
+            // ========== META INFORMATION ==========
             String meta = buildMeta(restaurant);
             if (meta != null && !meta.isEmpty()) {
                 metaView.setVisibility(View.VISIBLE);
@@ -202,12 +224,15 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                 metaView.setVisibility(View.GONE);
             }
 
+            // ========== CLICK HANDLERS ==========
+            // Handle clicks on the entire item to open details
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onRestaurantClick(restaurant);
                 }
             });
 
+            // Handle "Open in Maps" button to start navigation
             openMapsButton.setOnClickListener(v -> openInMaps(restaurant));
         }
 

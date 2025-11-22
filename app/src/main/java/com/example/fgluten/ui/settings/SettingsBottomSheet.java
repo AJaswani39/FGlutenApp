@@ -16,6 +16,35 @@ import com.example.fgluten.R;
 import com.example.fgluten.util.SettingsManager;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
+/**
+ * Bottom sheet dialog for managing application settings.
+ * 
+ * This fragment provides a modal interface for users to configure application-wide
+ * preferences including:
+ * 
+ * **Theme Settings:**
+ * - Light theme mode
+ * - Dark theme mode
+ * - System default (follows device setting)
+ * 
+ * **Unit Preferences:**
+ * - Distance measurement in kilometers/meters (metric)
+ * - Distance measurement in miles/feet (imperial)
+ * 
+ * **User Experience:**
+ * - Modal bottom sheet design for focused settings access
+ * - Immediate application of theme changes
+ * - Persistent storage via SettingsManager
+ * - Intuitive radio button selection interface
+ * 
+ * The dialog integrates with SettingsManager for seamless preference management
+ * and provides immediate visual feedback when settings are changed.
+ * 
+ * @see SettingsManager for underlying preference storage
+ * @see AppCompatDelegate for theme management
+ * 
+ * @author FGluten Development Team
+ */
 public class SettingsBottomSheet extends BottomSheetDialogFragment {
 
     public static SettingsBottomSheet newInstance() {
