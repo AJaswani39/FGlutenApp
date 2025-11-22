@@ -102,4 +102,8 @@
     <string name="crowd_notes_count">Notes: %1$d</string>
     <string name="detail_menu_button">Open menu / website</string>
     <string name="detail_menu_unavailable">Menu link unavailable</string>
+    <plurals name="results_found">
+        <item quantity="one">%d result found</item>
+        <item quantity="other">%d results found</item>
+    </plurals>
 </resources>

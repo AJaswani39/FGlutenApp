@@ -111,6 +111,9 @@ public class RestaurantListFragment extends Fragment {
         binding.skeletonContainer.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         binding.stateSettings.setVisibility(View.GONE);
 
+        // updates the count of restaurant results
+        updateResultsCount(state);
+
         if (state.getRestaurants() != null) {
             adapter.setRestaurants(state.getRestaurants());
         }
@@ -288,6 +291,21 @@ public class RestaurantListFragment extends Fragment {
             } catch (IllegalStateException ignored) {
                 // Map view not laid out yet; skip animation.
             }
+        }
+    }
+
+    private void updateResultsCount(RestaurantViewModel.RestaurantUiState state) {
+        if (binding == null || state == null) {
+            return;
+        }
+        int count = state.getRestaurants() != null ? state.getRestaurants().size() : 0;
+        boolean showCount = state.getStatus() == RestaurantViewModel.Status.SUCCESS && count > 0;
+        if (showCount) {
+            String label = getResources().getQuantityString(R.plurals.results_found, count, count);
+            binding.resultsCount.setText(label);
+            binding.resultsCount.setVisibility(View.VISIBLE);
+        } else {
+            binding.resultsCount.setVisibility(View.GONE);
         }
     }
 
