@@ -335,12 +335,19 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
         // ========== CROWD-SOURCED NOTES ==========
         List<String> notes = restaurant.getCrowdNotes();
         if (notes != null && !notes.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
+            SpannableStringBuilder sb = new SpannableStringBuilder();
             for (String n : notes) {
                 if (TextUtils.isEmpty(n)) continue;
-                sb.append("• ").append(n.trim()).append("\n");
+                appendNoteWithAlias(sb, n.trim());
             }
-            notesListView.setText(sb.toString().trim());
+            if (sb.length() > 0) {
+                if (sb.charAt(sb.length() - 1) == '\n') {
+                    sb.delete(sb.length() - 1, sb.length());
+                }
+                notesListView.setText(sb);
+            } else {
+                notesListView.setText(getString(R.string.crowd_notes_empty));
+            }
         } else {
             notesListView.setText(getString(R.string.crowd_notes_empty));
         }
@@ -461,6 +468,28 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
             return getString(R.string.menu_scan_unavailable);
         }
         return getString(R.string.menu_scan_not_started);
+    }
+
+    private void appendNoteWithAlias(SpannableStringBuilder builder, String note) {
+        if (TextUtils.isEmpty(note)) {
+            return;
+        }
+        String mainText = note;
+        String alias = null;
+        int split = note.lastIndexOf(" — ");
+        if (split > 0 && split < note.length() - 3) {
+            mainText = note.substring(0, split).trim();
+            alias = note.substring(split + 3).trim();
+        }
+        builder.append("\u2022 ").append(mainText);
+        if (!TextUtils.isEmpty(alias)) {
+            builder.append("\n   ");
+            int aliasStart = builder.length();
+            builder.append(alias);
+            builder.setSpan(new StyleSpan(Typeface.ITALIC), aliasStart, builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            builder.setSpan(new RelativeSizeSpan(0.85f), aliasStart, builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        builder.append("\n");
     }
 
     // ========== EXTERNAL ACTION METHODS ==========
