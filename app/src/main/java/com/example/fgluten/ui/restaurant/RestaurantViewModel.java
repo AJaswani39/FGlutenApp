@@ -53,18 +53,80 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * ViewModel for restaurant-related functionality in the FGluten Android application.
+ * 
+ * This is the central business logic component that handles:
+ * 
+ * **Core Functionality:**
+ * - Google Places API integration for restaurant discovery
+ * - Location-based restaurant search with proximity filtering
+ * - Real-time restaurant data fetching and caching
+ * - Offline support through local data persistence
+ * 
+ * **Advanced Features:**
+ * - Automated menu scanning and gluten-free evidence extraction
+ * - Website scraping for restaurant menus and GF information
+ * - User favorites system with persistent storage
+ * - Crowd-sourced notes and reviews
+ * - Robots.txt compliance for ethical web scraping
+ * 
+ * **Data Management:**
+ * - Complex filtering (GF-only, open hours, rating, distance)
+ * - Sorting capabilities (distance, name)
+ * - SharedPreferences-based caching system
+ * - Batch processing for performance optimization
+ * 
+ * **Architecture:**
+ * - Uses AndroidViewModel for application-wide state management
+ * - Implements reactive programming with LiveData
+ * - Thread separation: UI work on main thread, I/O on background executor
+ * - Error handling with graceful fallbacks and cached data usage
+ * 
+ * The ViewModel follows the Single Responsibility Principle, focusing entirely
+ * on restaurant data operations while delegating UI concerns to fragments.
+ * 
+ * @author FGluten Development Team
+ */
 public class RestaurantViewModel extends AndroidViewModel {
 
+    // ========== ENUMS FOR STATE MANAGEMENT ==========
+    
+    /**
+     * Enumeration representing the current state of restaurant loading operations.
+     * 
+     * These states are used throughout the UI to show appropriate loading indicators,
+     * error messages, and content. The state machine ensures consistent user experience
+     * across different loading scenarios.
+     */
     public enum Status {
+        /** No operation in progress, ready for new requests */
         IDLE,
+        
+        /** Currently fetching restaurant data from APIs or cache */
         LOADING,
+        
+        /** Restaurant data successfully loaded and available for display */
         SUCCESS,
+        
+        /** Location permission required before proceeding with restaurant search */
         PERMISSION_REQUIRED,
+        
+        /** An error occurred during restaurant loading (network, API, or permission issues) */
         ERROR
     }
 
+    /**
+     * Enumeration defining available sorting methods for restaurant lists.
+     * 
+     * Determines how restaurants are ordered when displayed to users.
+     * Different sorting modes serve different user needs and use cases.
+     */
     public enum SortMode {
+        /** Sort restaurants by distance from user's current location (default) */
         DISTANCE,
+        
+        /** Sort restaurants alphabetically by name */
         NAME
     }
 
