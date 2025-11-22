@@ -88,7 +88,7 @@
     <string name="menu_scan_scanned_no_gf">Menu scanned; no gluten-free mentions found.</string>
     <string name="menu_scan_not_started">Menu not yet scanned</string>
     <string name="rescan_menu">Re-scan menu</string>
-    <string name="menu_scan_requested">Re-scanning menu…</string>
+    <string name="menu_scan_requested">Re-scanning menu...</string>
     <string name="loading_app">Loading FGluten…</string>
     <string name="favorite_safe">Safe</string>
     <string name="favorite_avoid">Avoid</string>
