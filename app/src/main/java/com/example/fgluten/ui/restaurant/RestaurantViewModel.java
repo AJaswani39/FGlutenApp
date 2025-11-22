@@ -147,6 +147,7 @@ public class RestaurantViewModel extends AndroidViewModel {
     private boolean cacheAttempted = false;
     private final boolean hasMapsKey;
     private static final String TAG = "RestaurantViewModel";
+    private static final int NEARBY_RADIUS_METERS = 120_000;
     private static final String PREF_KEY_CACHE = "restaurant_cache";
     private static final String PREF_KEY_FAVORITES = "favorites_map";
     private static final String PREF_KEY_NOTES = "notes_map";
@@ -317,7 +318,7 @@ public class RestaurantViewModel extends AndroidViewModel {
                 double lng = userLocation.getLongitude();
                 String urlStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
                         + "?location=" + lat + "," + lng
-                        + "&radius=5000"
+                        + "&radius=" + NEARBY_RADIUS_METERS
                         + "&type=restaurant"
                         + "&keyword=gluten%20free"
                         + "&key=" + BuildConfig.MAPS_API_KEY;
