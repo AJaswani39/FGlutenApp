@@ -62,6 +62,13 @@
     <string name="settings_units">Distance units</string>
     <string name="settings_units_km">Kilometers</string>
     <string name="settings_units_miles">Miles</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_account_description">Manage your account settings and data</string>
+    <string name="settings_delete_account">Delete Account</string>
+    <string name="delete_account_confirmation">Are you sure you want to delete your account?</string>
+    <string name="delete_account_warning">This action will permanently delete your account and all associated data including your favorites, notes, and reviews. This cannot be undone.</string>
+    <string name="delete_account_confirm">Delete Account</string>
+    <string name="delete_account_cancel">Cancel</string>
     <string name="close">Close</string>
     <string name="distance_miles_away">%1$.1f mi away</string>
     <string name="distance_feet_away">%1$d ft away</string>

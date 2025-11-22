@@ -293,6 +293,35 @@ class AuthViewModel(
         }
     }
 
+    /**
+     * Delete user account and all associated data
+     * 
+     * @param context Android context for resource access
+     */
+    fun deleteAccount(context: Context) {
+        _isLoading.value = true
+        _errorMessage.value = null
+        
+        viewModelScope.launch {
+            try {
+                val result = authRepository.deleteAccount(context)
+                
+                if (result.isSuccess) {
+                    // Account deletion successful - user will be signed out automatically
+                    _authState.value = AuthState.Unauthenticated
+                    _userProfile.value = null
+                } else {
+                    _errorMessage.value = "Failed to delete account: ${result.exceptionOrNull()?.message}"
+                    _isLoading.value = false // Reset loading state on error
+                }
+                // Don't reset loading state on success as user will be signed out
+            } catch (e: Exception) {
+                _errorMessage.value = "Error deleting account: ${e.message}"
+                _isLoading.value = false
+            }
+        }
+    }
+
     // ========== VALIDATION METHODS ==========
 
     /**
