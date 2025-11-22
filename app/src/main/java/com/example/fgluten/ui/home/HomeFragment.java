@@ -101,6 +101,7 @@ public class HomeFragment extends Fragment {
         binding.ctaFindRestaurants.setOnClickListener(v ->
                 NavHostFragment.findNavController(HomeFragment.this)
                         .navigate(R.id.nav_restaurant_list));
+        binding.homeCtaMeta.setText(getString(R.string.home_cta_meta));
 
         // ========== RECYCLERVIEW CONFIGURATION ==========
         // Setup RecyclerView for displaying cached restaurants from previous sessions
@@ -122,6 +123,10 @@ public class HomeFragment extends Fragment {
             // Show/hide the cached restaurants card based on data availability
             binding.lastNearbyCard.setVisibility(hasData ? View.VISIBLE : View.GONE);
             cachedAdapter.setRestaurants(restaurants);
+            int count = restaurants != null ? restaurants.size() : 0;
+            String label = getResources().getQuantityString(R.plurals.cached_restaurants_count, count, count);
+            binding.homeCachedSummary.setText(label);
+            binding.homeCachedSummary.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
         });
 
         // Observe location permission status for showing/hiding permission banner

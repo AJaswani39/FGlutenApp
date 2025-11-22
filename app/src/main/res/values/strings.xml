@@ -34,7 +34,8 @@
     <string name="fgluten_places_error_message">Unable to load restaurants right now</string>
     <string name="fgluten_missing_maps_key">Missing MAPS_API_KEY. Add it to local.properties for package com.example.fgluten.</string>
     <string name="home_title">Find gluten-safe spots nearby</string>
-    <string name="home_subtitle">See what’s safe around you, with crowd notes and GF badges.</string>
+    <string name="home_subtitle">See what's safe around you, with crowd notes and GF badges.</string>
+    <string name="home_cta_meta">Crowd notes, menu scans, and favorites all centralized for instant decisions.</string>
     <string name="cta_find_restaurants">Find restaurants</string>
     <string name="home_permission_prompt">Allow location to show places near you.</string>
     <string name="home_tips_title">Ordering tips</string>
@@ -100,6 +101,10 @@
     <string name="crowd_notes_add_hint">Add a short note (cross-contam, celiac-safe, etc)</string>
     <string name="crowd_notes_add">Add note</string>
     <string name="crowd_notes_count">Notes: %1$d</string>
+    <plurals name="cached_restaurants_count">
+        <item quantity="one">%d cached restaurant ready</item>
+        <item quantity="other">%d cached restaurants ready</item>
+    </plurals>
     <string name="detail_menu_button">Open menu / website</string>
     <string name="detail_menu_unavailable">Menu link unavailable</string>
     <plurals name="results_found">
