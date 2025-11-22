@@ -82,9 +82,9 @@ class AuthRepository(
                 displayName = displayName,
                 contributorName = contributorName
             )
-            
-            saveUserProfile(userProfile).await()
-            
+
+            saveUserProfile(userProfile).getOrThrow()
+
             Result.success(userProfile)
         } catch (e: Exception) {
             Result.failure(e)
@@ -138,13 +138,13 @@ class AuthRepository(
                     displayName = displayName.ifBlank { user.displayName ?: "User" },
                     contributorName = contributorName ?: displayName.ifBlank { user.displayName }
                 )
-                saveUserProfile(userProfile).await()
+                saveUserProfile(userProfile).getOrThrow()
                 Result.success(userProfile)
             } else {
                 // Update last active time for existing user
                 val profile = existingProfile.getOrThrow()
                 val updatedProfile = profile.copy(lastActiveAt = System.currentTimeMillis())
-                saveUserProfile(updatedProfile).await()
+                saveUserProfile(updatedProfile).getOrThrow()
                 Result.success(updatedProfile)
             }
         } catch (e: Exception) {
@@ -278,8 +278,8 @@ class AuthRepository(
             firestore.collection("users").document(user.uid).delete().await()
             
             // Delete user's notes and reviews
-            deleteUserNotes(user.uid).await()
-            deleteUserReviews(user.uid).await()
+            deleteUserNotes(user.uid)
+            deleteUserReviews(user.uid)
             
             // Delete Firebase Auth account
             user.delete().await()

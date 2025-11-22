@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-parcelize")
 }
 
 val localProperties = Properties().apply {
@@ -59,6 +60,8 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment:2.9.3")
     implementation("androidx.navigation:navigation-ui:2.9.3")
     implementation("androidx.fragment:fragment-ktx:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
