@@ -1,10 +1,12 @@
 package com.example.fgluten.ui.home;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -103,6 +105,16 @@ public class HomeFragment extends Fragment {
                         .navigate(R.id.nav_restaurant_list));
         binding.homeCtaMeta.setText(getString(R.string.home_cta_meta));
 
+        String savedAlias = SettingsManager.getContributorName(requireContext());
+        binding.homeAliasInput.setText(savedAlias);
+        binding.homeAliasSave.setOnClickListener(v -> {
+            String alias = binding.homeAliasInput.getText() != null
+                    ? binding.homeAliasInput.getText().toString().trim()
+                    : "";
+            SettingsManager.setContributorName(requireContext(), alias);
+            Toast.makeText(requireContext(), R.string.home_alias_saved, Toast.LENGTH_SHORT).show();
+        });
+
         // ========== RECYCLERVIEW CONFIGURATION ==========
         // Setup RecyclerView for displaying cached restaurants from previous sessions
         cachedAdapter = new CachedAdapter();
@@ -127,6 +139,24 @@ public class HomeFragment extends Fragment {
             String label = getResources().getQuantityString(R.plurals.cached_restaurants_count, count, count);
             binding.homeCachedSummary.setText(label);
             binding.homeCachedSummary.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+            if (hasData) {
+                int favorites = 0;
+                int scans = 0;
+                for (Restaurant restaurant : restaurants) {
+                    if (!TextUtils.isEmpty(restaurant.getFavoriteStatus())) {
+                        favorites++;
+                    }
+                    if (restaurant.getMenuScanStatus() == Restaurant.MenuScanStatus.SUCCESS) {
+                        scans++;
+                    }
+                }
+                binding.homeHeroChipGroup.setVisibility(View.VISIBLE);
+                binding.homeChipCached.setText(getString(R.string.home_chip_cached, count));
+                binding.homeChipFavorites.setText(getString(R.string.home_chip_favorites, favorites));
+                binding.homeChipScans.setText(getString(R.string.home_chip_scans, scans));
+            } else {
+                binding.homeHeroChipGroup.setVisibility(View.GONE);
+            }
         });
 
         // Observe location permission status for showing/hiding permission banner

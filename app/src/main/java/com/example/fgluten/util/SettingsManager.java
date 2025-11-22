@@ -32,6 +32,9 @@ public class SettingsManager {
     /** Preference key for distance unit preference (miles vs kilometers) */
     private static final String KEY_USE_MILES = "use_miles";
 
+    /** Preference key for contributor nickname (crowd note attribution) */
+    private static final String KEY_CONTRIBUTOR_NAME = "contributor_name";
+
     /**
      * Private constructor to enforce static usage and prevent instantiation.
      * This is a utility class that should not be instantiated.
@@ -113,5 +116,27 @@ public class SettingsManager {
      */
     public static void setUseMiles(Context context, boolean useMiles) {
         prefs(context).edit().putBoolean(KEY_USE_MILES, useMiles).apply();
+    }
+
+    // ========== CONTRIBUTOR ATTRIBUTION ==========
+
+    /**
+     * Retrieves the contributor nickname that will be appended to crowd notes.
+     *
+     * @param context Application context
+     * @return Nickname string or empty string if not set
+     */
+    public static String getContributorName(Context context) {
+        return prefs(context).getString(KEY_CONTRIBUTOR_NAME, "");
+    }
+
+    /**
+     * Stores the contributor nickname used for crowd note attribution.
+     *
+     * @param context Application context
+     * @param name Nickname to store (null clears the value)
+     */
+    public static void setContributorName(Context context, String name) {
+        prefs(context).edit().putString(KEY_CONTRIBUTOR_NAME, name != null ? name : "").apply();
     }
 }
