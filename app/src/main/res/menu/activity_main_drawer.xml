@@ -11,10 +11,10 @@
         <item
             android:id="@+id/nav_restaurant_list"
             android:icon="@drawable/ic_menu_gallery"
+            android:title="@string/menu_restaurants" />
         <item
             android:id="@+id/nav_auth"
             android:icon="@drawable/ic_launcher_foreground"
             android:title="Sign In" />
-            android:title="@string/menu_restaurants" />
     </group>
 </menu>
