@@ -75,7 +75,7 @@ dependencies {
     // AI/ML Dependencies for Menu Analysis
     implementation("com.google.mlkit:translate:17.0.1")
     implementation("com.google.mlkit:text-recognition:16.0.0")
-    implementation("com.google.mlkit:entity-extraction:16.0.2-beta7")
+    implementation("com.google.mlkit:entity-extraction:16.0.0-beta4")
     implementation("org.tensorflow:tensorflow-lite:2.13.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.3")
     implementation("org.tensorflow:tensorflow-lite-metadata:0.4.3")
