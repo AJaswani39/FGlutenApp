@@ -93,6 +93,14 @@
                 android:text="@string/rescan_menu" />
 
             <Button
+                android:id="@+id/sheet_ai_analyze"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/ai_analyze_menu" />
+
+            <Button
                 android:id="@+id/sheet_open_maps"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"

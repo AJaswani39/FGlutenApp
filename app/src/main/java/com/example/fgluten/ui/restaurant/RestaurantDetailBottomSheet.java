@@ -23,6 +23,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
+import com.example.fgluten.data.ai.AnalysisSource;
+import com.example.fgluten.ui.ai.MenuAnalysisBottomSheet;
 import com.example.fgluten.util.SettingsManager;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -194,6 +196,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
         Button openMaps = view.findViewById(R.id.sheet_open_maps);
         Button openMenu = view.findViewById(R.id.sheet_open_menu);
         Button rescanButton = view.findViewById(R.id.sheet_rescan);
+        Button aiAnalyzeButton = view.findViewById(R.id.sheet_ai_analyze);
         MaterialButtonToggleGroup favToggle = view.findViewById(R.id.sheet_favorite_toggle);
         Button favClear = view.findViewById(R.id.sheet_fav_clear);
 
@@ -215,6 +218,27 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
                 menuStatusView.setText(R.string.menu_scan_pending_detail);
                 viewModel.requestMenuRescan(current);
             }
+        });
+        
+        // Launch AI-powered menu analysis
+        aiAnalyzeButton.setOnClickListener(v -> {
+            if (current == null) return;
+            String menuText = buildAiMenuText(current);
+            if (TextUtils.isEmpty(menuText)) {
+                menuText = getString(R.string.ai_sample_menu_text);
+            }
+            AnalysisSource source = AnalysisSource.MANUAL;
+            List<String> menu = current.getGlutenFreeMenu();
+            if (menu != null && !menu.isEmpty()) {
+                source = AnalysisSource.CACHED;
+            } else if (!TextUtils.isEmpty(current.getMenuUrl())) {
+                source = AnalysisSource.WEBSITE;
+            }
+            MenuAnalysisBottomSheet.Companion.newInstance(
+                    current.getName(),
+                    menuText,
+                    source
+            ).show(getParentFragmentManager(), "menu_analysis_sheet");
         });
 
         // ========== FAVORITE STATUS MANAGEMENT ==========
@@ -472,6 +496,25 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
             return getString(R.string.menu_scan_unavailable);
         }
         return getString(R.string.menu_scan_not_started);
+    }
+
+    /**
+     * Build AI input text from any cached menu evidence.
+     */
+    private String buildAiMenuText(Restaurant restaurant) {
+        if (restaurant == null) {
+            return "";
+        }
+        List<String> menu = restaurant.getGlutenFreeMenu();
+        if (menu != null && !menu.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (String line : menu) {
+                if (TextUtils.isEmpty(line)) continue;
+                sb.append(line.trim()).append("\n");
+            }
+            return sb.toString().trim();
+        }
+        return "";
     }
 
     private void appendNoteWithAlias(SpannableStringBuilder builder, String note) {

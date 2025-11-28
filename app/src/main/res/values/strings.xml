@@ -7,6 +7,7 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_restaurants">Restaurants</string>
+    <string name="menu_profile">Profile</string>
 
     <string name="home_fragment_text">This is home fragment</string>
     <string name="gallery_fragment_text">Where you will see all the gluten free restaurants..</string>
@@ -122,6 +123,8 @@
     </plurals>
     <string name="detail_menu_button">Open menu / website</string>
     <string name="detail_menu_unavailable">Menu link unavailable</string>
+    <string name="ai_analyze_menu">Analyze menu with AI</string>
+    <string name="ai_sample_menu_text">Gluten-free quinoa bowl with roasted vegetables; GF pizza margherita; dedicated gluten-free pasta; grilled salmon with herbs.</string>
     <plurals name="results_found">
         <item quantity="one">%d result found</item>
         <item quantity="other">%d results found</item>
@@ -174,4 +177,27 @@
     <string name="auth_syncing_data">Syncing your data...</string>
     <string name="auth_data_synced">Your data is now synced!</string>
     <string name="auth_sync_failed">Failed to sync data. Will retry automatically.</string>
+
+    <!-- Profile Fragment Strings -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_picture">Profile picture</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="my_favorites">My Favorites</string>
+    <string name="my_reviews">My Reviews</string>
+    <string name="my_notes">My Notes</string>
+    <string name="loading_profile">Loading profile...</string>
+    <string name="profile_not_loaded">Profile could not be loaded</string>
+    <string name="retry">Retry</string>
+    <string name="sign_out_confirmation">Sign Out</string>
+    <string name="sign_out_message">Are you sure you want to sign out?</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="cancel">Cancel</string>
+    <string name="trust_level">Trust Level</string>
+    <string name="trust_level_title">Trust Level</string>
+    <string name="trust_level_explanation">Your trust level is based on your contributions, verification status, and community feedback. Higher trust levels indicate more reliable community members.</string>
+    <string name="ok">OK</string>
+    <string name="reputation_score">Reputation</string>
+    <string name="helpful_votes">Helpful Votes</string>
+    <string name="contributions">Contributions</string>
 </resources>

@@ -12,7 +12,20 @@
           "package_name": "com.example.fgluten"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "512307622388-4olvr3gk98c23rnso4ucac96tu01hufk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fgluten",
+            "certificate_hash": "9b466fd9c2c5de97cb8ad3cbcea2fc074b2dd30a"
+          }
+        },
+        {
+          "client_id": "512307622388-0020rdbkfn1dqg71vi4na3d454ldln6e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBXDfrlyC4KDRbpa8rQCRtEJ0A-YKq0bFA"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "512307622388-0020rdbkfn1dqg71vi4na3d454ldln6e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -7,20 +7,17 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.splashscreen.SplashScreen;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.NavOptions;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.core.view.GravityCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.fgluten.databinding.ActivityMainBinding;
 import com.example.fgluten.ui.settings.SettingsBottomSheet;
 import com.example.fgluten.ui.restaurant.RestaurantViewModel;
 import com.example.fgluten.util.SettingsManager;
-import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
 
@@ -28,14 +25,14 @@ import com.google.firebase.FirebaseApp;
  * Main entry point and primary activity for the FGluten Android application.
  * 
  * This activity serves as the host for the app's navigation architecture, providing:
- * - Navigation drawer for primary app destinations
+ * - Bottom navigation for primary app destinations
  * - Toolbar with action bar functionality
  * - Fragment container for different app screens
  * - Global loading overlay management
  * - Settings access and theme management
  * 
  * The activity follows Android's single-activity pattern using Navigation Component,
- * with a drawer layout providing access to Home and Restaurant List sections.
+ * with bottom navigation providing access to Home, Restaurant List, and Profile sections.
  * It also manages global UI state and loading indicators across all fragments.
  * 
  * Architecture:
@@ -52,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
     /** AppBar configuration for navigation component integration */
     private AppBarConfiguration mAppBarConfiguration;
     
+    /** Bottom navigation view for primary app destinations */
+    private BottomNavigationView bottomNavigationView;
+    
     /** Global loading overlay that spans across all fragments */
     private View globalLoadingOverlay;
     
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
      * 2. Theme application from user preferences
      * 3. Data binding setup for view references
      * 4. Navigation component configuration
-     * 5. Drawer layout and navigation view setup
+     * 5. Bottom navigation setup
      * 6. Global loading state observation
      * 
      * @param savedInstanceState Previously saved instance state (null for new instances)
@@ -86,55 +86,26 @@ public class MainActivity extends AppCompatActivity {
         com.example.fgluten.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         super.setContentView(binding.getRoot());
         
-        // Cache references to global loading overlays for performance
+        // Cache references to global loading overlays and bottom navigation for performance
         globalLoadingOverlay = findViewById(R.id.global_loading_overlay);
         startupLoadingOverlay = findViewById(R.id.startup_loading_overlay);
+        bottomNavigationView = findViewById(R.id.bottom_nav);
 
         // ========== TOOLBAR SETUP ==========
         setSupportActionBar(binding.appBarMain.toolbar);
         
         // ========== NAVIGATION COMPONENT SETUP ==========
-        DrawerLayout drawer = binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
         
         // Configure navigation destinations - these are top-level destinations
         // that should be considered as app sections rather than sub-navigation
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_restaurant_list)
-                .setOpenableLayout(drawer)
+                R.id.nav_home, R.id.nav_restaurant_list, R.id.nav_profile)
                 .build();
         
         // Set up navigation between fragments using the Navigation Component
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
-
-        // Custom navigation item selection handler for proper drawer behavior
-        navigationView.setNavigationItemSelectedListener(item -> {
-            boolean handled = false;
-            
-            // Clear back stack for primary navigation items (home, restaurant list)
-            NavOptions options = new NavOptions.Builder()
-                    .setPopUpTo(R.id.mobile_navigation, true)
-                    .build();
-                    
-            if (item.getItemId() == R.id.nav_home || item.getItemId() == R.id.nav_restaurant_list) {
-                navController.navigate(item.getItemId(), null, options);
-                handled = true;
-            }
-            
-            // Handle other navigation items using default NavigationUI behavior
-            if (!handled) {
-                handled = NavigationUI.onNavDestinationSelected(item, navController);
-            }
-            
-            // Close drawer and mark item as checked if navigation was handled
-            if (handled) {
-                drawer.closeDrawer(GravityCompat.START);
-                item.setChecked(true);
-            }
-            return handled;
-        });
+        NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
         // Start observing global loading state across all fragments
         observeGlobalLoading();
@@ -216,8 +187,8 @@ public class MainActivity extends AppCompatActivity {
      * Handles navigation up (back button) behavior for the app.
      * 
      * Integrates with the Navigation Component to provide proper back navigation
-     * behavior. If the current destination is a top-level destination, it will
-     * open the navigation drawer instead of going back.
+     * behavior. Bottom navigation doesn't require special back handling as it's
+     * designed to stay on the current tab rather than navigate back.
      * 
      * @return true if navigation was handled, false otherwise
      */

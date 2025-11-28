@@ -28,4 +28,22 @@
     <style name="Theme.FGlutenApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.FGlutenApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- Custom styles -->
+    <style name="CircleImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <!-- Trust level colors -->
+    <color name="trust_expert_bg">#FF6B35</color>
+    <color name="trust_expert_text">#FFFFFF</color>
+    <color name="trust_verified_bg">#4CAF50</color>
+    <color name="trust_verified_text">#FFFFFF</color>
+    <color name="trust_trusted_bg">#2196F3</color>
+    <color name="trust_trusted_text">#FFFFFF</color>
+    <color name="trust_active_bg">#FF9800</color>
+    <color name="trust_active_text">#FFFFFF</color>
+    <color name="trust_new_bg">#9E9E9E</color>
+    <color name="trust_new_text">#FFFFFF</color>
 </resources>
