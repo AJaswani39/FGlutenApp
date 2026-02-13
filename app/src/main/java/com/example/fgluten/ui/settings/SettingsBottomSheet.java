@@ -137,6 +137,13 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         /** Delete account button */
         Button deleteAccountButton = view.findViewById(R.id.delete_account_button);
 
+        // Defensive null-safety: if any required view is missing, dismiss to avoid crashes
+        if (themeGroup == null || unitsGroup == null || closeButton == null || deleteAccountButton == null) {
+            // Views failed to inflate correctly; dismiss and bail out
+            dismiss();
+            return;
+        }
+
         // ========== THEME SETTINGS INITIALIZATION ==========
         /**
          * Load current theme mode from persistent storage
