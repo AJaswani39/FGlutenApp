@@ -120,13 +120,15 @@
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface" />
 
-            <com.google.android.flexbox.FlexboxLayout
+            <com.google.android.material.chip.ChipGroup
                 android:id="@+id/keywords_flow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:flexWrap="wrap"
-                app:justifyContent="flex_start" />
+                app:chipSpacingHorizontal="6dp"
+                app:chipSpacingVertical="6dp"
+                app:singleLine="false"
+                app:singleSelection="false" />
 
             <!-- Warnings -->
             <TextView
@@ -140,13 +142,15 @@
                 android:textColor="?attr/colorError"
                 android:visibility="gone" />
 
-            <com.google.android.flexbox.FlexboxLayout
+            <com.google.android.material.chip.ChipGroup
                 android:id="@+id/warnings_flow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                app:flexWrap="wrap"
-                app:justifyContent="flex_start"
+                app:chipSpacingHorizontal="6dp"
+                app:chipSpacingVertical="6dp"
+                app:singleLine="false"
+                app:singleSelection="false"
                 android:visibility="gone" />
 
         </LinearLayout>

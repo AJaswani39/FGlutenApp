@@ -10,9 +10,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fgluten.R
 import com.example.fgluten.data.ai.*
+import com.example.fgluten.data.repository.AIStatus
 import com.example.fgluten.databinding.MenuAnalysisBottomSheetBinding
 import com.example.fgluten.databinding.ItemAiMenuAnalysisBinding
-import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.launch
 

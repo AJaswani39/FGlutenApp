@@ -11,7 +11,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.fgluten.R
 import com.example.fgluten.databinding.FragmentProfileBinding
+import com.example.fgluten.ui.auth.AuthState
 import com.example.fgluten.ui.auth.AuthViewModel
+import com.example.fgluten.ui.settings.SettingsBottomSheet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
@@ -108,9 +110,11 @@ class ProfileFragment : Fragment() {
         }
 
         // Observe auth state for sign out handling
-        authViewModel.authState.collect { authState ->
-            if (authState.isUnauthenticated()) {
-                findNavController().navigate(R.id.action_to_auth)
+        lifecycleScope.launch {
+            authViewModel.authState.collect { authState ->
+                if (authState is AuthState.Unauthenticated) {
+                    findNavController().navigate(R.id.nav_auth)
+                }
             }
         }
     }
@@ -235,27 +239,27 @@ class ProfileFragment : Fragment() {
 
     // Navigation methods
     private fun navigateToEditProfile() {
-        findNavController().navigate(R.id.action_profile_to_edit_profile)
+        showError("Edit profile feature coming soon")
     }
     
     private fun navigateToSettings() {
-        findNavController().navigate(R.id.action_profile_to_settings)
+        SettingsBottomSheet.newInstance().show(parentFragmentManager, "settings_bottom_sheet")
     }
     
     private fun navigateToFavorites() {
-        findNavController().navigate(R.id.action_profile_to_favorites)
+        showError("Favorites feature coming soon")
     }
     
     private fun navigateToReviews() {
-        findNavController().navigate(R.id.action_profile_to_reviews)
+        showError("Reviews feature coming soon")
     }
     
     private fun navigateToNotes() {
-        findNavController().navigate(R.id.action_profile_to_notes)
+        showError("Notes feature coming soon")
     }
     
     private fun navigateToContributions() {
-        findNavController().navigate(R.id.action_profile_to_contributions)
+        showError("Contributions feature coming soon")
     }
 
     /**

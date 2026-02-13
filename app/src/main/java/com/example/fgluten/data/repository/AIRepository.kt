@@ -64,7 +64,7 @@ sealed class AIStatus {
     data object Ready : AIStatus()                    // All models loaded and ready
     data object Downloading : AIStatus()              // Models currently downloading
     data object NotAvailable : AIStatus()             // AI services not available
-    data object Error(val message: String) : AIStatus() // Error state with message
+    data class Error(val message: String) : AIStatus() // Error state with message
 }
 
 /**

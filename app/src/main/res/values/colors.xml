@@ -7,4 +7,28 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- AI status colors -->
+    <color name="ai_status_ready">#2E7D32</color>
+    <color name="ai_status_downloading">#F9A825</color>
+    <color name="ai_status_not_available">#616161</color>
+    <color name="ai_status_error">#C62828</color>
+
+    <!-- Menu safety colors -->
+    <color name="safety_excellent_bg">#E8F5E9</color>
+    <color name="safety_excellent_text">#1B5E20</color>
+    <color name="safety_good_bg">#E3F2FD</color>
+    <color name="safety_good_text">#0D47A1</color>
+    <color name="safety_limited_bg">#FFF8E1</color>
+    <color name="safety_limited_text">#F57F17</color>
+    <color name="safety_poor_bg">#FBE9E7</color>
+    <color name="safety_poor_text">#BF360C</color>
+    <color name="safety_unknown_bg">#ECEFF1</color>
+    <color name="safety_unknown_text">#37474F</color>
+
+    <!-- Keyword chip colors -->
+    <color name="keyword_positive_bg">#E8F5E9</color>
+    <color name="keyword_positive_text">#1B5E20</color>
+    <color name="keyword_warning_bg">#FFEBEE</color>
+    <color name="keyword_warning_text">#B71C1C</color>
 </resources>
