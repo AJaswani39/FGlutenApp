@@ -25,6 +25,7 @@ import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
 import com.example.fgluten.databinding.FragmentRestaurantListBinding;
 import com.example.fgluten.ui.restaurant.RestaurantViewModel.SortMode;
+import com.example.fgluten.util.SettingsManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -285,9 +286,27 @@ public class RestaurantListFragment extends Fragment {
             }
         });
 
+        // Configure slider units based on settings (km vs miles)
+        boolean useMiles = SettingsManager.useMiles(requireContext());
+        if (useMiles) {
+            float kmMax = 20f; // original km max from layout
+            float milesMax = Math.max(1f, (float) Math.floor(kmMax / 1.609344f));
+            binding.sliderDistance.setValueFrom(0f);
+            binding.sliderDistance.setValueTo(milesMax);
+            binding.sliderDistance.setStepSize(1f);
+            // convert current km value to miles for slider position
+            float currentKm = binding.sliderDistance.getValue();
+            binding.sliderDistance.setValue(currentKm / 1.609344f);
+        } else {
+            binding.sliderDistance.setValueFrom(0f);
+            binding.sliderDistance.setValueTo(20f);
+            binding.sliderDistance.setStepSize(1f);
+        }
+
         binding.sliderDistance.addOnChangeListener((slider, value, fromUser) -> {
-            updateDistanceLabel(value);
-            double meters = value <= 0 ? 0 : value * 1000.0;
+            boolean milesNow = SettingsManager.useMiles(requireContext());
+            updateDistanceLabel(value, milesNow);
+            double meters = value <= 0 ? 0 : (milesNow ? value * 1609.344 : value * 1000.0);
             restaurantViewModel.setMaxDistanceMeters(meters);
         });
         binding.sliderRating.addOnChangeListener((slider, value, fromUser) -> {
@@ -295,13 +314,19 @@ public class RestaurantListFragment extends Fragment {
             restaurantViewModel.setMinRating(value);
         });
         // initialize labels
-        updateDistanceLabel(binding.sliderDistance.getValue());
+        updateDistanceLabel(binding.sliderDistance.getValue(), SettingsManager.useMiles(requireContext()));
         updateRatingLabel(binding.sliderRating.getValue());
     }
 
-    private void updateDistanceLabel(float valueKm) {
-        String text = valueKm <= 0 ? getString(R.string.filter_distance_any)
-                : getString(R.string.filter_distance_km_value, (int) valueKm);
+    private void updateDistanceLabel(float value, boolean useMiles) {
+        String text;
+        if (!useMiles) {
+            text = value <= 0 ? getString(R.string.filter_distance_any)
+                    : getString(R.string.filter_distance_km_value, (int) value);
+        } else {
+            text = value <= 0 ? getString(R.string.filter_distance_any)
+                    : getString(R.string.filter_distance_miles_value, (int) value);
+        }
         binding.valueMaxDistance.setText(text);
     }
 

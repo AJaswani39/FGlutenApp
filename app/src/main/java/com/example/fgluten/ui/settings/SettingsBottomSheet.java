@@ -203,6 +203,10 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         unitsGroup.setOnCheckedChangeListener((group, checkedId) -> {
             boolean miles = checkedId == R.id.unit_miles;
             SettingsManager.setUseMiles(requireContext(), miles);
+            // Recreate activity so UI (filters, labels) update immediately to new units
+            if (getActivity() != null) {
+                getActivity().recreate();
+            }
         });
 
         // ========== CLOSE BUTTON HANDLER ==========

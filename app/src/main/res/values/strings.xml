@@ -53,6 +53,7 @@
     <string name="filter_min_rating">Min rating</string>
     <string name="filter_distance_any">Any</string>
     <string name="filter_distance_km_value">%1$d km</string>
+    <string name="filter_distance_miles_value">%1$d mi</string>
     <string name="filter_rating_any">Any</string>
     <string name="filter_rating_value">%1$.1f+</string>
     <string name="settings_title">Settings</string>
