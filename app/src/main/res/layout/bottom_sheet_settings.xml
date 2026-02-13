@@ -78,31 +78,6 @@
             android:textColor="?attr/colorOnSurface" />
     </RadioGroup>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/settings_account"
-        android:textAppearance="?attr/textAppearanceBodyLarge"
-        android:textColor="?attr/colorOnSurface" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="@string/settings_account_description"
-        android:textAppearance="?attr/textAppearanceBodySmall"
-        android:textColor="?attr/colorOnSurfaceVariant" />
-
-    <Button
-        android:id="@+id/delete_account_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/settings_delete_account"
-        style="@style/Widget.Material3.Button.TonalButton"
-        android:textColor="?attr/colorError" />
-
     <Button
         android:id="@+id/close_button"
         android:layout_width="wrap_content"

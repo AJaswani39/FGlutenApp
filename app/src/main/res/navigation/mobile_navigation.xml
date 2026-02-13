@@ -16,16 +16,4 @@
         android:name="com.example.fgluten.ui.restaurant.RestaurantListFragment"
         android:label="@string/menu_restaurants"
         tools:layout="@layout/fragment_restaurant_list" />
-
-    <fragment
-        android:id="@+id/nav_auth"
-        android:name="com.example.fgluten.ui.auth.AuthFragment"
-        android:label="Sign In"
-        tools:layout="@layout/fragment_auth" />
-
-    <fragment
-        android:id="@+id/nav_profile"
-        android:name="com.example.fgluten.ui.profile.ProfileFragment"
-        android:label="@string/menu_profile"
-        tools:layout="@layout/fragment_profile" />
 </navigation>

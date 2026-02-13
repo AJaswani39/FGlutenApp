@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -105,16 +104,6 @@ public class HomeFragment extends Fragment {
                 NavHostFragment.findNavController(HomeFragment.this)
                         .navigate(R.id.nav_restaurant_list));
         binding.homeCtaMeta.setText(getString(R.string.home_cta_meta));
-
-        String savedAlias = SettingsManager.getContributorName(requireContext());
-        binding.homeAliasInput.setText(savedAlias);
-        binding.homeAliasSave.setOnClickListener(v -> {
-            String alias = binding.homeAliasInput.getText() != null
-                    ? binding.homeAliasInput.getText().toString().trim()
-                    : "";
-            SettingsManager.setContributorName(requireContext(), alias);
-            Toast.makeText(requireContext(), R.string.home_alias_saved, Toast.LENGTH_SHORT).show();
-        });
 
         // ========== RECYCLERVIEW CONFIGURATION ==========
         // Setup RecyclerView for displaying cached restaurants from previous sessions

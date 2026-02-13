@@ -32,7 +32,7 @@ import com.google.firebase.FirebaseApp;
  * - Settings access and theme management
  * 
  * The activity follows Android's single-activity pattern using Navigation Component,
- * with bottom navigation providing access to Home, Restaurant List, and Profile sections.
+ * with bottom navigation providing access to Home and Restaurant List sections.
  * It also manages global UI state and loading indicators across all fragments.
  * 
  * Architecture:
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         // Configure navigation destinations - these are top-level destinations
         // that should be considered as app sections rather than sub-navigation
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_restaurant_list, R.id.nav_profile)
+                R.id.nav_home, R.id.nav_restaurant_list)
                 .build();
         
         // Set up navigation between fragments using the Navigation Component

@@ -3,17 +3,11 @@ package com.example.fgluten.ui.restaurant;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.StyleSpan;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -185,14 +179,9 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
         TextView gfStatusView = view.findViewById(R.id.sheet_gf_status);
         TextView menuStatusView = view.findViewById(R.id.sheet_menu_status);
         TextView menuItemsView = view.findViewById(R.id.sheet_menu_items);
-        TextView notesList = view.findViewById(R.id.sheet_notes_list);
         TextView favStatus = view.findViewById(R.id.sheet_fav_status);
         
-        // Input components
-        EditText noteInput = view.findViewById(R.id.sheet_note_input);
-        
         // Action buttons
-        Button addNote = view.findViewById(R.id.sheet_note_add);
         Button openMaps = view.findViewById(R.id.sheet_open_maps);
         Button openMenu = view.findViewById(R.id.sheet_open_menu);
         Button rescanButton = view.findViewById(R.id.sheet_rescan);
@@ -202,7 +191,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
 
         // ========== INITIAL DATA RENDERING ==========
         render(current, nameView, addressView, metaView, gfStatusView, menuStatusView, 
-               menuItemsView, notesList, favStatus, openMenu, rescanButton, favToggle);
+               menuItemsView, favStatus, openMenu, rescanButton, favToggle);
 
         // ========== EVENT HANDLERS ==========
         
@@ -264,24 +253,6 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
             favStatus.setText("");
         });
 
-        // ========== CROWD NOTE MANAGEMENT ==========
-        addNote.setOnClickListener(v -> {
-            if (current == null) return;
-            String note = noteInput.getText() != null ? noteInput.getText().toString().trim() : "";
-            if (!note.isEmpty()) {
-                String alias = SettingsManager.getContributorName(requireContext());
-                if (!TextUtils.isEmpty(alias)) {
-                    // strip delimiter/newlines to avoid breaking parsing
-                    alias = alias.replace(" — ", " - ").replace("\n", " ").trim();
-                    if (!TextUtils.isEmpty(alias)) {
-                        note = note + " — " + alias;
-                    }
-                }
-                viewModel.addCrowdNote(current, note);
-                noteInput.setText(""); // Clear input after successful addition
-            }
-        });
-
         // ========== REACTIVE DATA UPDATES ==========
         // Observe ViewModel for real-time updates to restaurant data
         viewModel.getRestaurantState().observe(getViewLifecycleOwner(), state -> {
@@ -293,7 +264,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
                 current = updated; // Update local reference
                 // Re-render UI with new data
                 render(updated, nameView, addressView, metaView, gfStatusView, 
-                       menuStatusView, menuItemsView, notesList, favStatus, 
+                       menuStatusView, menuItemsView, favStatus, 
                        openMenu, rescanButton, favToggle);
             }
         });
@@ -314,7 +285,6 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
      * @param gfStatusView Gluten-free status summary
      * @param menuStatusView Menu scan status details
      * @param menuItemsView List of discovered gluten-free menu items
-     * @param notesListView Crowd-sourced notes display
      * @param favStatusView Favorite status display
      * @param openMenuButton Menu opening button
      * @param rescanButton Menu rescan button
@@ -327,7 +297,6 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
                         TextView gfStatusView,
                         TextView menuStatusView,
                         TextView menuItemsView,
-                        TextView notesListView,
                         TextView favStatusView,
                         Button openMenuButton,
                         Button rescanButton,
@@ -358,26 +327,6 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
             menuItemsView.setText(sb.toString().trim());
         } else {
             menuItemsView.setText(getString(R.string.gf_menu_unknown));
-        }
-
-        // ========== CROWD-SOURCED NOTES ==========
-        List<String> notes = restaurant.getCrowdNotes();
-        if (notes != null && !notes.isEmpty()) {
-            SpannableStringBuilder sb = new SpannableStringBuilder();
-            for (String n : notes) {
-                if (TextUtils.isEmpty(n)) continue;
-                appendNoteWithAlias(sb, n.trim());
-            }
-            if (sb.length() > 0) {
-                if (sb.charAt(sb.length() - 1) == '\n') {
-                    sb.delete(sb.length() - 1, sb.length());
-                }
-                notesListView.setText(sb);
-            } else {
-                notesListView.setText(getString(R.string.crowd_notes_empty));
-            }
-        } else {
-            notesListView.setText(getString(R.string.crowd_notes_empty));
         }
 
         // ========== FAVORITE STATUS ==========
@@ -515,28 +464,6 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
             return sb.toString().trim();
         }
         return "";
-    }
-
-    private void appendNoteWithAlias(SpannableStringBuilder builder, String note) {
-        if (TextUtils.isEmpty(note)) {
-            return;
-        }
-        String mainText = note;
-        String alias = null;
-        int split = note.lastIndexOf(" — ");
-        if (split > 0 && split < note.length() - 3) {
-            mainText = note.substring(0, split).trim();
-            alias = note.substring(split + 3).trim();
-        }
-        builder.append("\u2022 ").append(mainText);
-        if (!TextUtils.isEmpty(alias)) {
-            builder.append("\n   ");
-            int aliasStart = builder.length();
-            builder.append(alias);
-            builder.setSpan(new StyleSpan(Typeface.ITALIC), aliasStart, builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            builder.setSpan(new RelativeSizeSpan(0.85f), aliasStart, builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        builder.append("\n");
     }
 
     // ========== EXTERNAL ACTION METHODS ==========

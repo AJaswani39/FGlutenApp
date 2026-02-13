@@ -8,10 +8,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.example.fgluten.R
 import com.example.fgluten.databinding.FragmentProfileBinding
-import com.example.fgluten.ui.auth.AuthState
 import com.example.fgluten.ui.auth.AuthViewModel
 import com.example.fgluten.ui.settings.SettingsBottomSheet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -109,14 +107,6 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        // Observe auth state for sign out handling
-        lifecycleScope.launch {
-            authViewModel.authState.collect { authState ->
-                if (authState is AuthState.Unauthenticated) {
-                    findNavController().navigate(R.id.nav_auth)
-                }
-            }
-        }
     }
 
     /**

@@ -1,7 +1,5 @@
 package com.example.fgluten.ui.settings;
 
-import android.app.AlertDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +11,8 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.fgluten.R;
-import com.example.fgluten.ui.auth.AuthViewModel;
 import com.example.fgluten.util.SettingsManager;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
@@ -50,8 +46,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
  * @author FGluten Development Team
  */
 public class SettingsBottomSheet extends BottomSheetDialogFragment {
-
-    private AuthViewModel authViewModel;
 
     /**
      * Factory method for creating a new instance of the settings bottom sheet.
@@ -134,11 +128,8 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         /** Close button to dismiss the bottom sheet */
         Button closeButton = view.findViewById(R.id.close_button);
         
-        /** Delete account button */
-        Button deleteAccountButton = view.findViewById(R.id.delete_account_button);
-
         // Defensive null-safety: if any required view is missing, dismiss to avoid crashes
-        if (themeGroup == null || unitsGroup == null || closeButton == null || deleteAccountButton == null) {
+        if (themeGroup == null || unitsGroup == null || closeButton == null) {
             // Views failed to inflate correctly; dismiss and bail out
             dismiss();
             return;
@@ -214,25 +205,6 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
             SettingsManager.setUseMiles(requireContext(), miles);
         });
 
-        // ========== AUTH VIEWMODEL INITIALIZATION ==========
-        /**
-         * Initialize AuthViewModel for account management functionality
-         * 
-         * Creates a ViewModel instance to handle authentication operations
-         * including account deletion.
-         */
-        authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
-
-        // ========== DELETE ACCOUNT BUTTON HANDLER ==========
-        /**
-         * Delete account button click handler
-         * 
-         * Shows a confirmation dialog when the user attempts to delete their account.
-         * If confirmed, initiates the account deletion process through the AuthViewModel.
-         * The deletion includes removing user profile, notes, reviews, and Firebase Auth account.
-         */
-        deleteAccountButton.setOnClickListener(v -> showDeleteAccountConfirmation());
-
         // ========== CLOSE BUTTON HANDLER ==========
         /**
          * Close button click handler
@@ -241,35 +213,5 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
          * providing a clear way to exit the settings interface.
          */
         closeButton.setOnClickListener(v -> dismiss());
-    }
-
-    /**
-     * Show delete account confirmation dialog
-     * 
-     * Displays a confirmation dialog to ensure the user really wants to delete their account.
-     * The dialog explains the consequences and requires explicit confirmation before proceeding
-     * with the deletion process which includes:
-     * - Deleting user profile from Firestore
-     * - Deleting user's notes and reviews
-     * - Deleting Firebase Auth account
-     */
-    private void showDeleteAccountConfirmation() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(R.string.delete_account_confirmation);
-        builder.setMessage(R.string.delete_account_warning);
-        
-        builder.setPositiveButton(R.string.delete_account_confirm, (dialog, which) -> {
-            // User confirmed, proceed with account deletion
-            authViewModel.deleteAccount(requireContext());
-            dismiss(); // Close the settings sheet
-        });
-        
-        builder.setNegativeButton(R.string.delete_account_cancel, (dialog, which) -> {
-            // User cancelled, just dismiss the dialog
-            dialog.dismiss();
-        });
-        
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 }

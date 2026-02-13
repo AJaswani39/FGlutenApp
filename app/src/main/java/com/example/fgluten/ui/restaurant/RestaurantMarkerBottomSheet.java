@@ -154,13 +154,6 @@ public class RestaurantMarkerBottomSheet extends BottomSheetDialogFragment {
             sb.append(favLabel);
         }
         
-        // Add crowd notes count if available
-        String notesLabel = notesLabel(restaurant);
-        if (notesLabel != null && !notesLabel.isEmpty()) {
-            if (sb.length() > 0) sb.append(" • ");
-            sb.append(notesLabel);
-        }
-        
         // Add menu scan status if available
         String scanLabel = menuScanLabel(restaurant);
         if (scanLabel != null && !scanLabel.isEmpty()) {
@@ -192,19 +185,6 @@ public class RestaurantMarkerBottomSheet extends BottomSheetDialogFragment {
         if ("try".equals(status)) return getString(R.string.favorite_try);
         if ("avoid".equals(status)) return getString(R.string.favorite_avoid);
         return null;
-    }
-
-    /**
-     * Generates a label indicating the number of crowd-sourced notes available.
-     * 
-     * @param restaurant Restaurant to check for crowd notes
-     * @return Localized label showing notes count, or null if no notes
-     */
-    private String notesLabel(Restaurant restaurant) {
-        if (restaurant.getCrowdNotes() == null || restaurant.getCrowdNotes().isEmpty()) {
-            return null;
-        }
-        return getString(R.string.crowd_notes_count, restaurant.getCrowdNotes().size());
     }
 
     /**

@@ -279,11 +279,6 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                 if (sb.length() > 0) sb.append(" \u2022 ");
                 sb.append(favLabel);
             }
-            String notesLabel = notesLabel(itemView.getContext(), restaurant);
-            if (!TextUtils.isEmpty(notesLabel)) {
-                if (sb.length() > 0) sb.append(" \u2022 ");
-                sb.append(notesLabel);
-            }
             return sb.toString();
         }
 
@@ -305,13 +300,6 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                 return context.getString(R.string.menu_scan_unavailable);
             }
             return null;
-        }
-
-        private String notesLabel(Context context, Restaurant restaurant) {
-            List<String> notes = restaurant.getCrowdNotes();
-            int count = notes != null ? notes.size() : 0;
-            if (count <= 0) return null;
-            return context.getString(R.string.crowd_notes_count, count);
         }
 
         private String favoriteLabel(Context context, Restaurant restaurant) {
