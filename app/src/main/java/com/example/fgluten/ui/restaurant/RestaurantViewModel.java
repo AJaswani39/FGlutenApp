@@ -21,21 +21,14 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.fgluten.BuildConfig;
 import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
-import com.example.fgluten.data.RestaurantRepository;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.json.JSONArray;
@@ -237,14 +230,8 @@ public class RestaurantViewModel extends AndroidViewModel {
     }
 
     // ========== CORE DEPENDENCIES ==========
-    /** Repository for restaurant data operations */
-    private final RestaurantRepository repository;
-    
     /** Google Play Services client for location services */
     private final FusedLocationProviderClient fusedLocationProviderClient;
-    
-    /** Google Places API client for restaurant search functionality */
-    private final PlacesClient placesClient;
 
     // ========== REACTIVE STATE MANAGEMENT ==========
     /** LiveData observable for UI components to observe restaurant state changes */
@@ -346,14 +333,12 @@ public class RestaurantViewModel extends AndroidViewModel {
 
     public RestaurantViewModel(@NonNull Application application) {
         super(application);
-        repository = new RestaurantRepository();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(application);
         String apiKey = BuildConfig.MAPS_API_KEY;
         hasMapsKey = !TextUtils.isEmpty(apiKey);
         if (!Places.isInitialized() && hasMapsKey) {
             Places.initialize(application, apiKey);
         }
-        placesClient = Places.createClient(application);
         cachePrefs = application.getSharedPreferences("restaurant_cache", Context.MODE_PRIVATE);
         favoritesPrefs = application.getSharedPreferences("restaurant_favorites", Context.MODE_PRIVATE);
         notesPrefs = application.getSharedPreferences("restaurant_notes", Context.MODE_PRIVATE);
@@ -483,47 +468,6 @@ public class RestaurantViewModel extends AndroidViewModel {
         fetchRestaurantsViaNearbySearch(userLocation);
     }
 
-    @SuppressLint("MissingPermission")
-    private void fetchRestaurantsFromPlaces(Location userLocation) {
-        List<Place.Field> fields = Arrays.asList(
-                Place.Field.NAME,
-                Place.Field.ADDRESS,
-                Place.Field.LAT_LNG,
-                Place.Field.TYPES,
-                Place.Field.RATING,
-                Place.Field.OPENING_HOURS
-        );
-        FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(fields);
-
-        placesClient.findCurrentPlace(request)
-                .addOnSuccessListener(response -> {
-                    List<Restaurant> results = new ArrayList<>();
-                    for (PlaceLikelihood likelihood : response.getPlaceLikelihoods()) {
-                        Place place = likelihood.getPlace();
-                        if (place.getTypes() != null && place.getTypes().contains(Place.Type.RESTAURANT)) {
-                            LatLng latLng = place.getLatLng();
-                            if (latLng != null) {
-                                results.add(mapPlaceToRestaurant(place, latLng));
-                            }
-                        }
-                    }
-                    Log.d(TAG, "Places success, restaurant candidates=" + results.size());
-                    if (results.isEmpty()) {
-                        results.addAll(repository.getRestaurants());
-                    }
-                    if (results.isEmpty()) {
-                        Log.w(TAG, "No restaurants returned from Places; attempting Nearby Search REST fallback");
-                        fetchRestaurantsViaNearbySearch(userLocation);
-                        return;
-                    }
-                    publishWithDistances(userLocation, results);
-                })
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "Places request failed", e);
-                    handlePlacesFailure(e, userLocation);
-                });
-    }
-
     private void fetchRestaurantsViaNearbySearch(Location userLocation) {
         ioExecutor.execute(() -> {
             List<Restaurant> results = new ArrayList<>();
@@ -615,24 +559,6 @@ public class RestaurantViewModel extends AndroidViewModel {
             // Publish on main thread with distances
             mainHandler.post(() -> publishWithDistances(userLocation, results));
         });
-    }
-
-    private Restaurant mapPlaceToRestaurant(Place place, LatLng latLng) {
-        String name = place.getName() != null ? place.getName() : getApplication().getString(R.string.missing_data);
-        String address = place.getAddress() != null ? place.getAddress() : "";
-        boolean likelyHasGf = false;
-        if (name != null) {
-            String lower = name.toLowerCase();
-            likelyHasGf = lower.contains("gluten") || lower.contains("gf");
-        }
-        Double rating = place.getRating();
-        Boolean openNow = null;
-        if (place.getOpeningHours() != null) {
-            // OpeningHours does not expose open-now directly here; leave null.
-            openNow = null;
-        }
-        String placeId = place.getId();
-        return new Restaurant(name, address, likelyHasGf, new ArrayList<>(), latLng.latitude, latLng.longitude, rating, openNow, placeId);
     }
 
     private void handlePlacesFailure(Throwable throwable, Location userLocation) {

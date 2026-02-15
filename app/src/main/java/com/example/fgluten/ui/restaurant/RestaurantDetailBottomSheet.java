@@ -70,7 +70,6 @@ import java.util.List;
  * restaurant details in depth and actively contribute to the app's community
  * features through favorites and crowd-sourced content.
  * 
- * @see RestaurantMarkerBottomSheet for lightweight marker interactions
  * @see RestaurantViewModel for business logic integration
  * @see Restaurant for comprehensive data model
  * 

@@ -71,16 +71,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:23.0.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("androidx.recyclerview:recyclerview:1.3.0")
-    
-    // AI/ML Dependencies for Menu Analysis
-    implementation("com.google.mlkit:translate:17.0.1")
-    implementation("com.google.mlkit:text-recognition:16.0.0")
-    implementation("com.google.mlkit:entity-extraction:16.0.0-beta4")
-    implementation("org.tensorflow:tensorflow-lite:2.13.0")
-    implementation("org.tensorflow:tensorflow-lite-support:0.4.3")
-    implementation("org.tensorflow:tensorflow-lite-metadata:0.4.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     
     // Testing dependencies
     testImplementation("junit:junit:4.13.2")
