@@ -317,6 +317,12 @@ public class RestaurantViewModel extends AndroidViewModel {
     
     /** Maximum number of menu scans to perform in a single batch */
     private static final int MAX_SCANS_PER_BATCH = 5;
+
+    /** Maximum number of place reviews to cache per restaurant */
+    private static final int MAX_REVIEWS_PER_PLACE = 5;
+
+    /** Maximum length for a single scraped review snippet */
+    private static final int MAX_REVIEW_CHARS = 220;
     
     /** User agent string for HTTP requests to restaurant websites */
     private static final String USER_AGENT = "FGlutenApp/1.0";
@@ -818,6 +824,9 @@ public class RestaurantViewModel extends AndroidViewModel {
     }
 
     private void scanMenu(Restaurant restaurant) {
+        List<String> scrapedReviews = fetchPlaceReviewsForPlace(restaurant.getPlaceId());
+        mergeScrapedReviewsIntoCrowdNotes(restaurant, scrapedReviews);
+
         String website = fetchWebsiteForPlace(restaurant.getPlaceId());
         if (TextUtils.isEmpty(website)) {
             restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.NO_WEBSITE);
@@ -851,6 +860,112 @@ public class RestaurantViewModel extends AndroidViewModel {
             restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.SUCCESS);
         }
         mainHandler.post(() -> emitFilteredState(null));
+    }
+
+    private void mergeScrapedReviewsIntoCrowdNotes(Restaurant restaurant, List<String> scrapedReviews) {
+        if (restaurant == null || scrapedReviews == null || scrapedReviews.isEmpty()) {
+            return;
+        }
+        List<String> merged = new ArrayList<>();
+        List<String> existing = restaurant.getCrowdNotes();
+        if (existing != null) {
+            for (String note : existing) {
+                if (!TextUtils.isEmpty(note) && !merged.contains(note)) {
+                    merged.add(note);
+                }
+            }
+        }
+        for (String review : scrapedReviews) {
+            if (!TextUtils.isEmpty(review) && !merged.contains(review)) {
+                merged.add(review);
+            }
+        }
+        restaurant.setCrowdNotes(merged);
+    }
+
+    private List<String> fetchPlaceReviewsForPlace(String placeId) {
+        List<String> reviews = new ArrayList<>();
+        if (TextUtils.isEmpty(placeId) || !hasMapsKey) {
+            return reviews;
+        }
+        HttpURLConnection connection = null;
+        try {
+            String encodedPlaceId = placeId;
+            try {
+                encodedPlaceId = URLEncoder.encode(placeId, "UTF-8");
+            } catch (Exception ignored) {
+                // best-effort; continue with raw value
+            }
+            String urlStr = "https://maps.googleapis.com/maps/api/place/details/json"
+                    + "?place_id=" + encodedPlaceId
+                    + "&fields=reviews"
+                    + "&reviews_no_translations=true"
+                    + "&key=" + BuildConfig.MAPS_API_KEY;
+            URL url = new URL(urlStr);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(8000);
+            connection.setReadTimeout(8000);
+            int code = connection.getResponseCode();
+            if (code != HttpURLConnection.HTTP_OK) {
+                return reviews;
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            reader.close();
+
+            JSONObject root = new JSONObject(sb.toString());
+            JSONObject result = root.optJSONObject("result");
+            if (result == null) {
+                return reviews;
+            }
+            JSONArray reviewArray = result.optJSONArray("reviews");
+            if (reviewArray == null) {
+                return reviews;
+            }
+            int max = Math.min(reviewArray.length(), MAX_REVIEWS_PER_PLACE);
+            for (int i = 0; i < max; i++) {
+                JSONObject review = reviewArray.optJSONObject(i);
+                if (review == null) {
+                    continue;
+                }
+                String text = review.optString("text", "").trim();
+                if (TextUtils.isEmpty(text)) {
+                    continue;
+                }
+                String author = review.optString("author_name", "").trim();
+                double rating = review.has("rating") ? review.optDouble("rating", 0.0) : 0.0;
+                if (text.length() > MAX_REVIEW_CHARS) {
+                    text = text.substring(0, MAX_REVIEW_CHARS).trim() + "...";
+                }
+                StringBuilder formatted = new StringBuilder("Google review");
+                if (!TextUtils.isEmpty(author)) {
+                    formatted.append(" (").append(author);
+                    if (rating > 0.0) {
+                        formatted.append(", ").append(String.format("%.1f", rating)).append("★");
+                    }
+                    formatted.append(")");
+                } else if (rating > 0.0) {
+                    formatted.append(" (").append(String.format("%.1f", rating)).append("★)");
+                }
+                formatted.append(": ").append(text);
+                String note = formatted.toString();
+                if (!reviews.contains(note)) {
+                    reviews.add(note);
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "fetchPlaceReviewsForPlace failed for placeId=" + placeId, e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return reviews;
     }
 
     private String fetchWebsiteForPlace(String placeId) {
@@ -1077,7 +1192,24 @@ public class RestaurantViewModel extends AndroidViewModel {
         for (Restaurant r : restaurants) {
             String key = favoriteKey(r);
             if (!TextUtils.isEmpty(key) && notesMap.containsKey(key)) {
-                r.setCrowdNotes(notesMap.get(key));
+                List<String> merged = new ArrayList<>();
+                List<String> existing = r.getCrowdNotes();
+                if (existing != null) {
+                    for (String note : existing) {
+                        if (!TextUtils.isEmpty(note) && !merged.contains(note)) {
+                            merged.add(note);
+                        }
+                    }
+                }
+                List<String> savedNotes = notesMap.get(key);
+                if (savedNotes != null) {
+                    for (String note : savedNotes) {
+                        if (!TextUtils.isEmpty(note) && !merged.contains(note)) {
+                            merged.add(note);
+                        }
+                    }
+                }
+                r.setCrowdNotes(merged);
             }
         }
     }

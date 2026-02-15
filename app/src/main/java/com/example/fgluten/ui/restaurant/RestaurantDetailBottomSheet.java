@@ -179,6 +179,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
         TextView gfStatusView = view.findViewById(R.id.sheet_gf_status);
         TextView menuStatusView = view.findViewById(R.id.sheet_menu_status);
         TextView menuItemsView = view.findViewById(R.id.sheet_menu_items);
+        TextView reviewsView = view.findViewById(R.id.sheet_reviews);
         TextView favStatus = view.findViewById(R.id.sheet_fav_status);
         
         // Action buttons
@@ -191,7 +192,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
 
         // ========== INITIAL DATA RENDERING ==========
         render(current, nameView, addressView, metaView, gfStatusView, menuStatusView, 
-               menuItemsView, favStatus, openMenu, rescanButton, favToggle);
+               menuItemsView, reviewsView, favStatus, openMenu, rescanButton, favToggle);
 
         // ========== EVENT HANDLERS ==========
         
@@ -264,7 +265,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
                 current = updated; // Update local reference
                 // Re-render UI with new data
                 render(updated, nameView, addressView, metaView, gfStatusView, 
-                       menuStatusView, menuItemsView, favStatus, 
+                       menuStatusView, menuItemsView, reviewsView, favStatus,
                        openMenu, rescanButton, favToggle);
             }
         });
@@ -285,6 +286,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
      * @param gfStatusView Gluten-free status summary
      * @param menuStatusView Menu scan status details
      * @param menuItemsView List of discovered gluten-free menu items
+     * @param reviewsView Restaurant reviews and notes
      * @param favStatusView Favorite status display
      * @param openMenuButton Menu opening button
      * @param rescanButton Menu rescan button
@@ -297,6 +299,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
                         TextView gfStatusView,
                         TextView menuStatusView,
                         TextView menuItemsView,
+                        TextView reviewsView,
                         TextView favStatusView,
                         Button openMenuButton,
                         Button rescanButton,
@@ -327,6 +330,38 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
             menuItemsView.setText(sb.toString().trim());
         } else {
             menuItemsView.setText(getString(R.string.gf_menu_unknown));
+        }
+
+        // ========== REVIEWS ==========
+        List<String> reviews = restaurant.getCrowdNotes();
+        if (reviews != null && !reviews.isEmpty()) {
+            StringBuilder googleSb = new StringBuilder();
+            StringBuilder userSb = new StringBuilder();
+            for (String raw : reviews) {
+                if (TextUtils.isEmpty(raw)) continue;
+                String line = raw.trim();
+                if (line.toLowerCase().startsWith("google review")) {
+                    googleSb.append("• ").append(line).append("\n");
+                } else {
+                    userSb.append("• ").append(line).append("\n");
+                }
+            }
+
+            StringBuilder sb = new StringBuilder();
+            if (googleSb.length() > 0) {
+                sb.append(getString(R.string.detail_reviews_google_label)).append("\n");
+                sb.append(googleSb.toString().trim());
+            }
+            if (userSb.length() > 0) {
+                if (sb.length() > 0) {
+                    sb.append("\n\n");
+                }
+                sb.append(getString(R.string.detail_reviews_user_label)).append("\n");
+                sb.append(userSb.toString().trim());
+            }
+            reviewsView.setText(sb.toString().trim());
+        } else {
+            reviewsView.setText(getString(R.string.detail_reviews_empty));
         }
 
         // ========== FAVORITE STATUS ==========
