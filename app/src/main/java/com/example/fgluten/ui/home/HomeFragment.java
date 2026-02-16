@@ -20,6 +20,8 @@ import com.example.fgluten.databinding.FragmentHomeBinding;
 import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
 import com.example.fgluten.util.SettingsManager;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,12 +63,18 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
     // ========== DATA BINDING & COMPONENTS ==========
-    
+
     /** Data binding object for the fragment's layout views */
     private FragmentHomeBinding binding;
-    
+
     /** RecyclerView adapter for displaying cached restaurants */
     private CachedAdapter cachedAdapter;
+
+    /** ViewModel for generating personalized recommendations */
+    private RecommendationViewModel recommendationViewModel;
+
+    /** Adapter for recommended restaurants */
+    private RecommendedRestaurantAdapter recommendedAdapter;
 
     /**
      * Fragment view creation and initialization.
@@ -112,6 +120,18 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(cachedAdapter);
 
+        // ========== RECOMMENDATIONS SETUP ==========
+        recommendationViewModel = new ViewModelProvider(this).get(RecommendationViewModel.class);
+        recommendedAdapter = new RecommendedRestaurantAdapter(recommendation -> {
+            NavHostFragment.findNavController(HomeFragment.this)
+                    .navigate(R.id.nav_restaurant_list);
+            return kotlin.Unit.INSTANCE;
+        });
+        RecyclerView rvRecommendations = binding.rvRecommendations;
+        rvRecommendations.setLayoutManager(new LinearLayoutManager(
+                requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvRecommendations.setAdapter(recommendedAdapter);
+
         // ========== OBSERVERS FOR UI STATE ==========
         // Observe text content for dynamic titles and subtitles
         homeViewModel.getText().observe(getViewLifecycleOwner(), title -> {
@@ -125,6 +145,14 @@ public class HomeFragment extends Fragment {
             // Show/hide the cached restaurants card based on data availability
             binding.lastNearbyCard.setVisibility(hasData ? View.VISIBLE : View.GONE);
             cachedAdapter.setRestaurants(restaurants);
+
+            // Generate recommendations from cached restaurants
+            if (hasData) {
+                recommendationViewModel.generateRecommendations(restaurants);
+            } else {
+                recommendationViewModel.clearRecommendations();
+            }
+
             int count = restaurants != null ? restaurants.size() : 0;
             String label = getResources().getQuantityString(R.plurals.cached_restaurants_count, count, count);
             binding.homeCachedSummary.setText(label);
@@ -164,11 +192,21 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        // Observe recommendations data for display
+        recommendationViewModel.getRecommendations().observe(getViewLifecycleOwner(), recommendations -> {
+            if (recommendations != null && !recommendations.isEmpty()) {
+                binding.recommendationsCard.setVisibility(View.VISIBLE);
+                recommendedAdapter.submitList(recommendations);
+            } else {
+                binding.recommendationsCard.setVisibility(View.GONE);
+            }
+        });
+
         // Observe location permission status for showing/hiding permission banner
         homeViewModel.isPermissionGranted().observe(getViewLifecycleOwner(), granted -> {
             boolean showBanner = granted != null && !granted;
             binding.permissionBanner.setVisibility(showBanner ? View.VISIBLE : View.GONE);
-            
+
             // Setup permission banner click handler to navigate to restaurant discovery
             // This provides a clear path for users to grant permission when ready
             binding.permissionButton.setOnClickListener(v -> {
@@ -176,7 +214,7 @@ public class HomeFragment extends Fragment {
                         .navigate(R.id.nav_restaurant_list);
             });
         });
-        
+
         return root;
     }
 

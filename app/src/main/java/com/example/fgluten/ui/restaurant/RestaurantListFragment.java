@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fgluten.R;
 import com.example.fgluten.data.Restaurant;
 import com.example.fgluten.databinding.FragmentRestaurantListBinding;
+import com.example.fgluten.data.recommendation.UserInteractionTracker;
 import com.example.fgluten.ui.restaurant.RestaurantViewModel.SortMode;
 import com.example.fgluten.util.SettingsManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -150,8 +151,15 @@ public class RestaurantListFragment extends Fragment {
         RecyclerView recyclerView = binding.restaurantRecycler;
 
         // ========== RECYCLERVIEW CONFIGURATION ==========
-        adapter = new RestaurantAdapter(new ArrayList<>(), restaurant ->
-                RestaurantDetailBottomSheet.show(getParentFragmentManager(), restaurant));
+        adapter = new RestaurantAdapter(new ArrayList<>(), restaurant -> {
+            // Track interaction: user opened detail sheet
+            UserInteractionTracker.recordInteraction(
+                    requireContext(),
+                    restaurant.getPlaceId(),
+                    UserInteractionTracker.InteractionType.DETAIL_OPEN
+            );
+            RestaurantDetailBottomSheet.show(getParentFragmentManager(), restaurant);
+        });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
@@ -209,6 +217,16 @@ public class RestaurantListFragment extends Fragment {
 
         if (state.getRestaurants() != null) {
             adapter.setRestaurants(state.getRestaurants());
+            // Track interaction: user saw these restaurants in the list
+            for (Restaurant restaurant : state.getRestaurants()) {
+                if (restaurant.getPlaceId() != null) {
+                    UserInteractionTracker.recordInteraction(
+                            requireContext(),
+                            restaurant.getPlaceId(),
+                            UserInteractionTracker.InteractionType.VIEW
+                    );
+                }
+            }
         }
         boolean hasData = state.getRestaurants() != null && !state.getRestaurants().isEmpty();
         if (isLoading) {

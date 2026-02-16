@@ -39,6 +39,11 @@
     <string name="home_cta_meta">Menu scans and favorites in one place for fast decisions.</string>
     <string name="cta_find_restaurants">Find restaurants</string>
     <string name="home_permission_prompt">Allow location to show places near you.</string>
+    <string name="home_recommendations_title">Recommended for You</string>
+    <string name="home_recommendations_subtitle">Personalized picks based on your favorites and preferences</string>
+    <string name="recommendation_safe">Marked Safe</string>
+    <string name="recommendation_try">Want to Try</string>
+    <string name="recommendation_avoid">Previously Avoided</string>
     <string name="home_tips_title">Ordering tips</string>
     <string name="home_tip_one">Ask about dedicated fryers and separate prep areas.</string>
     <string name="home_tip_two">Confirm gluten-free soy sauce for Asian dishes.</string>

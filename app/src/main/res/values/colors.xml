@@ -31,4 +31,8 @@
     <color name="keyword_positive_text">#1B5E20</color>
     <color name="keyword_warning_bg">#FFEBEE</color>
     <color name="keyword_warning_text">#B71C1C</color>
+
+    <!-- Recommendation colors -->
+    <color name="material_green">#4CAF50</color>
+    <color name="chip_bg_light">#E8F5E9</color>
 </resources>
