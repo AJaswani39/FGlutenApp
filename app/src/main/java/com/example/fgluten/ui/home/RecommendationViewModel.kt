@@ -11,6 +11,7 @@ import com.example.fgluten.data.recommendation.RecommendedRestaurant
 import com.example.fgluten.data.repository.DefaultRecommendationRepository
 import com.example.fgluten.data.repository.RecommendationRepository
 import kotlinx.coroutines.launch
+import kotlin.jvm.JvmOverloads
 
 /**
  * ViewModel for restaurant recommendations feature
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
  *
  * @property recommendationRepository Repository providing recommendation scoring logic
  */
-class RecommendationViewModel(
+class RecommendationViewModel @JvmOverloads constructor(
     application: Application,
     private val recommendationRepository: RecommendationRepository = DefaultRecommendationRepository()
 ) : AndroidViewModel(application) {
