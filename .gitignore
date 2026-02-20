@@ -14,3 +14,4 @@
 .cxx
 local.properties
 app/src/main/shared_prefs/*.xml
+app/src/main/assets/google-services.json

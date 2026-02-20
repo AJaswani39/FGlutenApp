@@ -229,9 +229,18 @@ class AuthRepository(
      */
     suspend fun updateUserProfile(userId: String, updates: Map<String, Any>): Result<Unit> {
         return try {
+            // Whitelist allowed fields to prevent privilege escalation
+            val allowedFields = setOf(
+                "displayName", "contributorName", "profilePictureUrl",
+                "dietaryRestrictions", "isProfileVisible", "lastActiveAt"
+            )
+            val sanitized = updates.filterKeys { it in allowedFields }
+            if (sanitized.isEmpty()) {
+                return Result.failure(Exception("No valid fields to update"))
+            }
             firestore.collection("users")
                 .document(userId)
-                .update(updates)
+                .update(sanitized)
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {

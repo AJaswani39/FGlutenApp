@@ -35,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -313,6 +314,9 @@ public class RestaurantViewModel extends AndroidViewModel {
     
     /** User agent string for HTTP requests to restaurant websites */
     private static final String USER_AGENT = "FGlutenApp/1.0";
+
+    /** Maximum length for a user-submitted crowd note */
+    private static final int MAX_NOTE_LENGTH = 1000;
 
     // ========== THREADING & EXECUTION ==========
     /** Background executor for I/O operations (API calls, web scraping, file operations) */
@@ -947,6 +951,9 @@ public class RestaurantViewModel extends AndroidViewModel {
     private String fetchHtml(String urlStr) {
         HttpURLConnection connection = null;
         try {
+            if (!isSafeUrl(urlStr)) {
+                return null;
+            }
             URL url = new URL(urlStr);
             if (!isAllowedByRobots(urlStr)) {
                 Log.d(TAG, "Blocked by robots.txt for url=" + urlStr);
@@ -1010,6 +1017,40 @@ public class RestaurantViewModel extends AndroidViewModel {
             return resolved.toString();
         } catch (Exception ignored) {
             return null;
+        }
+    }
+
+    /**
+     * Validates that a URL is safe to fetch (SSRF protection).
+     * Blocks private/loopback IPs, non-HTTP(S) schemes, and metadata endpoints.
+     */
+    private boolean isSafeUrl(String urlStr) {
+        try {
+            URL url = new URL(urlStr);
+            String protocol = url.getProtocol();
+            if (!"https".equalsIgnoreCase(protocol) && !"http".equalsIgnoreCase(protocol)) {
+                Log.w(TAG, "Blocked non-HTTP URL scheme: " + protocol);
+                return false;
+            }
+            String host = url.getHost();
+            if (TextUtils.isEmpty(host)) {
+                return false;
+            }
+            InetAddress addr = InetAddress.getByName(host);
+            if (addr.isLoopbackAddress() || addr.isLinkLocalAddress()
+                    || addr.isSiteLocalAddress() || addr.isAnyLocalAddress()) {
+                Log.w(TAG, "Blocked private/loopback address: " + host);
+                return false;
+            }
+            // Block cloud metadata endpoints
+            if ("169.254.169.254".equals(addr.getHostAddress())) {
+                Log.w(TAG, "Blocked metadata endpoint: " + host);
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "URL safety check failed for: " + urlStr, e);
+            return false;
         }
     }
 
@@ -1097,14 +1138,22 @@ public class RestaurantViewModel extends AndroidViewModel {
         if (restaurant == null || TextUtils.isEmpty(note)) return;
         String key = favoriteKey(restaurant); // reuse key logic
         if (TextUtils.isEmpty(key)) return;
+        // Sanitize: trim, limit length, strip HTML tags and control characters
+        String sanitized = note.trim();
+        if (sanitized.length() > MAX_NOTE_LENGTH) {
+            sanitized = sanitized.substring(0, MAX_NOTE_LENGTH);
+        }
+        sanitized = sanitized.replaceAll("<[^>]*>", "")
+                .replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]", "");
+        if (TextUtils.isEmpty(sanitized)) return;
         List<String> notes = notesMap.containsKey(key) ? notesMap.get(key) : new ArrayList<>();
-        notes.add(note.trim());
+        notes.add(sanitized);
         notesMap.put(key, notes);
-        restaurant.addCrowdNote(note);
+        restaurant.addCrowdNote(sanitized);
         Restaurant match = findMatchingInLast(restaurant);
         if (match != null) {
             if (match != restaurant) {
-                match.addCrowdNote(note);
+                match.addCrowdNote(sanitized);
             }
         }
         saveNotes();

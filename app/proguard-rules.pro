@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep Firestore/Parcelable data models (required for serialization/deserialization)
+-keep class com.example.fgluten.data.user.** { *; }
+-keep class com.example.fgluten.data.Restaurant { *; }
+-keep class com.example.fgluten.data.ai.** { *; }
