@@ -92,51 +92,6 @@ object UserInteractionTracker {
         return getInteractionCount(context, placeId, "detailOpens")
     }
 
-    /**
-     * Get the total engagement count (views + detail opens)
-     *
-     * @param context Android context
-     * @param placeId Google Places ID
-     * @return Total number of interactions
-     */
-    fun getTotalEngagementCount(context: Context, placeId: String): Int {
-        return getViewCount(context, placeId) + getDetailOpenCount(context, placeId)
-    }
-
-    /**
-     * Get timestamp of last view
-     *
-     * @param context Android context
-     * @param placeId Google Places ID
-     * @return Milliseconds since epoch, or 0 if never viewed
-     */
-    fun getLastViewedTime(context: Context, placeId: String): Long {
-        return getInteractionTimestamp(context, placeId, "lastViewed")
-    }
-
-    /**
-     * Get timestamp of last detail open
-     *
-     * @param context Android context
-     * @param placeId Google Places ID
-     * @return Milliseconds since epoch, or 0 if never opened
-     */
-    fun getLastDetailOpenTime(context: Context, placeId: String): Long {
-        return getInteractionTimestamp(context, placeId, "lastDetailOpen")
-    }
-
-    /**
-     * Clear all interactions for testing purposes
-     *
-     * @param context Android context
-     */
-    fun clearAll(context: Context) {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .clear()
-            .apply()
-    }
-
     // ========== PRIVATE HELPERS ==========
 
     /**
@@ -162,26 +117,4 @@ object UserInteractionTracker {
         }
     }
 
-    /**
-     * Generic method to get an interaction timestamp field
-     */
-    private fun getInteractionTimestamp(context: Context, placeId: String, field: String): Long {
-        return try {
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val interactionsJson = prefs.getString(INTERACTIONS_KEY, "{}")
-                ?: "{}"
-
-            val interactions = JSONObject(interactionsJson)
-            val key = "pid:$placeId"
-
-            if (interactions.has(key)) {
-                interactions.getJSONObject(key).optLong(field, 0L)
-            } else {
-                0L
-            }
-        } catch (e: JSONException) {
-            e.printStackTrace()
-            0L
-        }
-    }
 }

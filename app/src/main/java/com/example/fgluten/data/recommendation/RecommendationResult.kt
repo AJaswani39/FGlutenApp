@@ -18,17 +18,6 @@ data class RecommendedRestaurant(
 )
 
 /**
- * Summary of multiple recommendations for display
- *
- * @property recommendations Sorted list of recommended restaurants
- * @property totalCount Total number of recommendations
- */
-data class RecommendationSummary(
-    val recommendations: List<RecommendedRestaurant>,
-    val totalCount: Int
-)
-
-/**
  * Enumeration of reasons why a restaurant is recommended
  */
 enum class RecommendationReason(

@@ -1,15 +1,11 @@
 package com.example.fgluten.ui.auth
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.viewModelScope
 import com.example.fgluten.data.repository.AuthRepository
 import com.example.fgluten.data.user.UserProfile
-import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -179,77 +175,6 @@ class AuthViewModel(
     }
 
     /**
-     * Sign in with Google account
-     * 
-     * @param idToken Google ID token from Google Sign-In
-     * @param displayName User's chosen display name
-     * @param contributorName Optional name for crowd notes attribution
-     */
-    fun signInWithGoogle(
-        idToken: String,
-        displayName: String,
-        contributorName: String? = null
-    ) {
-        if (!validateDisplayName(displayName)) {
-            return
-        }
-
-        _isLoading.value = true
-        _errorMessage.value = null
-
-        viewModelScope.launch {
-            try {
-                val result = authRepository.signInWithGoogle(
-                    idToken, displayName, contributorName
-                )
-                
-                if (result.isSuccess) {
-                    _authState.value = AuthState.Authenticated
-                    _userProfile.value = result.getOrNull()
-                } else {
-                    _errorMessage.value = "Google sign in failed: ${result.exceptionOrNull()?.message}"
-                    _authState.value = AuthState.Unauthenticated
-                }
-            } catch (e: Exception) {
-                _errorMessage.value = "Google sign in error: ${e.message}"
-                _authState.value = AuthState.Unauthenticated
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    /**
-     * Send password reset email
-     * 
-     * @param email Email address to send reset link to
-     */
-    fun sendPasswordResetEmail(email: String) {
-        if (!validateEmail(email)) {
-            return
-        }
-
-        _isLoading.value = true
-        _errorMessage.value = null
-
-        viewModelScope.launch {
-            try {
-                val result = authRepository.sendPasswordResetEmail(email)
-                
-                if (result.isSuccess) {
-                    _errorMessage.value = "Password reset email sent. Check your inbox."
-                } else {
-                    _errorMessage.value = "Failed to send reset email: ${result.exceptionOrNull()?.message}"
-                }
-            } catch (e: Exception) {
-                _errorMessage.value = "Error sending reset email: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    /**
      * Sign out current user
      */
     fun signOut() {
@@ -264,63 +189,6 @@ class AuthViewModel(
      */
     fun clearError() {
         _errorMessage.value = null
-    }
-
-    /**
-     * Update user profile information
-     * 
-     * @param updates Map of field names to new values
-     */
-    fun updateUserProfile(updates: Map<String, Any>) {
-        val currentUser = authRepository.getCurrentUser() ?: return
-        
-        _isLoading.value = true
-        
-        viewModelScope.launch {
-            try {
-                val result = authRepository.updateUserProfile(currentUser.uid, updates)
-                
-                if (result.isSuccess) {
-                    // Reload user profile to reflect changes
-                    loadUserProfile(currentUser.uid)
-                } else {
-                    _errorMessage.value = "Failed to update profile: ${result.exceptionOrNull()?.message}"
-                }
-            } catch (e: Exception) {
-                _errorMessage.value = "Error updating profile: ${e.message}"
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    /**
-     * Delete user account and all associated data
-     * 
-     * @param context Android context for resource access
-     */
-    fun deleteAccount(context: Context) {
-        _isLoading.value = true
-        _errorMessage.value = null
-        
-        viewModelScope.launch {
-            try {
-                val result = authRepository.deleteAccount(context)
-                
-                if (result.isSuccess) {
-                    // Account deletion successful - user will be signed out automatically
-                    _authState.value = AuthState.Unauthenticated
-                    _userProfile.value = null
-                } else {
-                    _errorMessage.value = "Failed to delete account: ${result.exceptionOrNull()?.message}"
-                    _isLoading.value = false // Reset loading state on error
-                }
-                // Don't reset loading state on success as user will be signed out
-            } catch (e: Exception) {
-                _errorMessage.value = "Error deleting account: ${e.message}"
-                _isLoading.value = false
-            }
-        }
     }
 
     // ========== VALIDATION METHODS ==========
@@ -354,27 +222,6 @@ class AuthViewModel(
     }
 
     /**
-     * Validate email address
-     * 
-     * @param email Email address to validate
-     * @return true if validation passes, false otherwise
-     */
-    private fun validateEmail(email: String): Boolean {
-        val emailError = when {
-            email.isBlank() -> "Email is required"
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Invalid email format"
-            else -> null
-        }
-        
-        if (emailError != null) {
-            _errorMessage.value = emailError
-            return false
-        }
-        
-        return true
-    }
-
-    /**
      * Validate display name
      * 
      * @param displayName Display name to validate
@@ -394,23 +241,5 @@ class AuthViewModel(
         }
         
         return true
-    }
-}
-
-/**
- * Factory for creating AuthViewModel with custom AuthRepository
- * 
- * This allows for dependency injection and testing.
- */
-class AuthViewModelFactory(
-    private val authRepository: AuthRepository
-) : ViewModelProvider.Factory {
-    
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return AuthViewModel(authRepository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
