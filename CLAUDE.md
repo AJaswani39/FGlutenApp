@@ -157,7 +157,7 @@ UI (Fragments) ──LiveData──► ViewModels ──► Repositories ──�
 ./gradlew testDebugUnitTest
 
 # Single test class
-./gradlew test --tests "com.example.fgluten.ui.home.HomeViewModelTest"
+./gradlew test --tests "io.fgluten.ui.home.HomeViewModelTest"
 
 # Instrumentation tests (requires connected device/emulator)
 ./gradlew connectedAndroidTest

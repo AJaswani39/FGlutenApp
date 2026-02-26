@@ -17,11 +17,11 @@ val mapsApiKey: String = (localProperties.getProperty("MAPS_API_KEY") ?: "").tri
 val escapedMapsApiKey = mapsApiKey.replace("\"", "\\\"")
 
 android {
-    namespace = "com.example.fgluten"
+    namespace = "io.fgluten"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.fgluten"
+        applicationId = "io.fgluten"
         minSdk = 27
         targetSdk = 34
         versionCode = 1

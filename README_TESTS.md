@@ -64,19 +64,19 @@ gradlew.bat test
 #### Run Specific Test Class
 ```bash
 # Unit test
-./gradlew test --tests "com.example.fgluten.data.RestaurantTest"
+./gradlew test --tests "io.fgluten.data.RestaurantTest"
 
 # Instrumentation test
-./gradlew connectedAndroidTest --tests "com.example.fgluten.ExampleInstrumentedTest"
+./gradlew connectedAndroidTest --tests "io.fgluten.ExampleInstrumentedTest"
 ```
 
 #### Run Specific Test Method
 ```bash
 # Unit test method
-./gradlew test --tests "com.example.fgluten.data.RestaurantTest.hasGlutenFreeOptions_hasGFMenuTrue_returnsTrue"
+./gradlew test --tests "io.fgluten.data.RestaurantTest.hasGlutenFreeOptions_hasGFMenuTrue_returnsTrue"
 
 # Instrumentation test method
-./gradlew connectedAndroidTest --tests "com.example.fgluten.ExampleInstrumentedTest.useAppContext"
+./gradlew connectedAndroidTest --tests "io.fgluten.ExampleInstrumentedTest.useAppContext"
 ```
 
 ## Testing Configuration

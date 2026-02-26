@@ -33,7 +33,7 @@
     <string name="sort_distance">Distance</string>
     <string name="sort_name">Name</string>
     <string name="fgluten_places_error_message">Unable to load restaurants right now</string>
-    <string name="fgluten_missing_maps_key">Missing MAPS_API_KEY. Add it to local.properties for package com.example.fgluten.</string>
+    <string name="fgluten_missing_maps_key">Missing MAPS_API_KEY. Add it to local.properties for package io.fgluten.</string>
     <string name="home_title">Find gluten-safe spots nearby</string>
     <string name="home_subtitle">See what is safe around you with clear gluten-free signals.</string>
     <string name="home_cta_meta">Menu scans and favorites in one place for fast decisions.</string>

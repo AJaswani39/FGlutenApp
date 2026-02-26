@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:512307622388:android:ebce2268d801976d5609a1",
         "android_client_info": {
-          "package_name": "com.example.fgluten"
+          "package_name": "io.fgluten"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "512307622388-4olvr3gk98c23rnso4ucac96tu01hufk.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.fgluten",
+            "package_name": "io.fgluten",
             "certificate_hash": "9b466fd9c2c5de97cb8ad3cbcea2fc074b2dd30a"
           }
         },
