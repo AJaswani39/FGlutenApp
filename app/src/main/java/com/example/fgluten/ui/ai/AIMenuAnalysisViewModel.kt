@@ -1,6 +1,5 @@
 package com.example.fgluten.ui.ai
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fgluten.data.ai.MenuAnalysisResult
@@ -122,122 +121,6 @@ class AIMenuAnalysisViewModel(
         _uiState.value = AIMenuAnalysisUiState.Initial
     }
 
-    /**
-     * Download AI models for offline functionality
-     * 
-     * @param context Android context for model storage
-     */
-    fun downloadModels(context: Context) {
-        viewModelScope.launch {
-            try {
-                _aiStatus.value = AIStatus.Downloading
-                val result = aiRepository.downloadModels(context)
-                
-                if (result.isSuccess) {
-                    _aiStatus.value = AIStatus.Ready
-                } else {
-                    _aiStatus.value = AIStatus.Error("Failed to download AI models: ${result.exceptionOrNull()?.message}")
-                }
-            } catch (e: Exception) {
-                _aiStatus.value = AIStatus.Error("Download failed: ${e.message}")
-            }
-        }
-    }
-
-    /**
-     * Refresh AI service status
-     */
-    fun refreshStatus() {
-        viewModelScope.launch {
-            try {
-                _aiStatus.value = aiRepository.getStatus()
-            } catch (e: Exception) {
-                _aiStatus.value = AIStatus.Error("Status check failed: ${e.message}")
-            }
-        }
-    }
-
-    /**
-     * Check if AI analysis should be triggered for a restaurant
-     * 
-     * This method provides smart triggers for when to analyze menus
-     * based on restaurant data availability and analysis cache.
-     * 
-     * @param restaurantName Name of the restaurant
-     * @param menuUrl URL to restaurant menu (if available)
-     * @param hasExistingAnalysis Whether this restaurant already has analysis
-     * @return true if analysis should be triggered, false otherwise
-     */
-    fun shouldAnalyzeMenu(
-        restaurantName: String,
-        menuUrl: String?,
-        hasExistingAnalysis: Boolean
-    ): Boolean {
-        // Don't re-analyze if we already have results
-        if (hasExistingAnalysis) return false
-        
-        // Analyze if we have menu text or URL
-        return menuUrl != null || restaurantName.isNotBlank()
-    }
-
-    /**
-     * Generate sample menu text for testing purposes
-     * 
-     * This is useful for development and testing the AI analysis functionality
-     * without requiring real restaurant data.
-     */
-    fun generateSampleMenuText(): Pair<String, String> {
-        val sampleRestaurants = listOf(
-            Pair(
-                "Bella Vista Italian Restaurant",
-                """
-                Appetizers
-                Bruschetta - Grilled bread with fresh tomatoes, basil, and garlic - $8
-                Calamari Fritti - Lightly breaded and fried squid with marinara sauce - $12
-                
-                Pasta
-                Spaghetti Carbonara - Traditional Roman pasta with eggs, cheese, pancetta, and black pepper - $16
-                Gluten-Free Pasta with Bolognese - House-made GF pasta with meat sauce - $18
-                Fettuccine Alfredo - Creamy sauce with parmesan and butter - $15
-                
-                Main Courses
-                Grilled Salmon - Fresh Atlantic salmon with herbs and lemon - $24
-                Gluten-Free Pizza Margherita - Dedicated gluten-free oven, fresh mozzarella and basil - $20
-                Chicken Parmesan - Breaded chicken with marinara and mozzarella - $22
-                Risotto ai Funghi - Creamy mushroom risotto (naturally gluten-free) - $19
-                
-                Desserts
-                Tiramisu - Traditional Italian dessert with ladyfingers - $8
-                Gluten-Free Panna Cotta - Vanilla bean custard with berry sauce - $7
-                """
-            ),
-            Pair(
-                "American Grill & Sports Bar",
-                """
-                Starters
-                Buffalo Wings - Chicken wings tossed in buffalo sauce - $11
-                Loaded Nachos - Tortilla chips with cheese, jalapeños, and sour cream - $13
-                Onion Rings - Beer-battered onion rings - $9
-                
-                Burgers & Sandwiches
-                Classic Cheeseburger - Beef patty with cheese, lettuce, tomato, onion - $14
-                Grilled Chicken Sandwich - Marinated chicken breast with avocado and mayo - $13
-                Turkey Club - Roasted turkey with bacon, lettuce, and tomato - $12
-                
-                Salads
-                Caesar Salad - Romaine lettuce with parmesan and croutons - $11
-                Gluten-Free Quinoa Bowl - Quinoa with roasted vegetables and tahini dressing - $14
-                
-                Main Courses
-                Ribeye Steak - 12oz ribeye with garlic mashed potatoes - $28
-                Salmon Teriyaki - Grilled salmon with teriyaki glaze and rice - $26
-                Fish & Chips - Beer-battered cod with coleslaw - $18
-                """
-            )
-        )
-        
-        return sampleRestaurants.random()
-    }
 }
 
 /**

@@ -24,11 +24,6 @@ sealed class AuthState {
     object Unauthenticated : AuthState()
     
     /**
-     * User is in the process of signing in/up
-     */
-    object SigningIn : AuthState()
-    
-    /**
      * Authentication failed due to an error
      */
     data class Error(val message: String) : AuthState()

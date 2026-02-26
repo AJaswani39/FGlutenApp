@@ -68,40 +68,4 @@ data class CrowdNote(
         DANGER("Warning", 3)
     }
 
-    /**
-     * Determines if this note should be displayed based on moderation status
-     */
-    fun isVisible(): Boolean {
-        return !isDeleted && reportedCount < 3 // Hide if reported 3+ times
-    }
-
-    /**
-     * Gets the calculated quality score for this note based on various factors
-     */
-    fun getQualityScore(): Double {
-        var score = 0.0
-        
-        // Base score from helpful votes
-        score += helpfulVotes * 2.0
-        
-        // Bonus for verification
-        if (isVerified) score += 10.0
-        
-        // Bonus for specific note types that are more valuable
-        when (noteType) {
-            NoteType.CROSS_CONTAMINATION -> score += 5.0
-            NoteType.MENU_ITEM -> score += 3.0
-            NoteType.DEDICATED_FACILITY -> score += 4.0
-            else -> { /* no bonus */ }
-        }
-        
-        // Penalty for reports
-        score -= reportedCount * 3.0
-        
-        // Bonus for longer, detailed notes (within reason)
-        if (noteText.length > 50) score += 2.0
-        if (noteText.length > 150) score += 1.0
-        
-        return maxOf(0.0, score) // Ensure score doesn't go negative
-    }
 }

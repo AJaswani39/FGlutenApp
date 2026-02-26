@@ -395,7 +395,6 @@ public class RestaurantViewModel extends AndroidViewModel {
      * 
      * @see #loadCachedIfAvailable() for offline data loading
      * @see #fetchRestaurantsViaNearbySearch(Location) for API integration
-     * @see #handlePlacesFailure(Throwable, Location) for error handling
      */
     @SuppressLint("MissingPermission")
     public void loadNearbyRestaurants() {
@@ -559,25 +558,6 @@ public class RestaurantViewModel extends AndroidViewModel {
             // Publish on main thread with distances
             mainHandler.post(() -> publishWithDistances(userLocation, results));
         });
-    }
-
-    private void handlePlacesFailure(Throwable throwable, Location userLocation) {
-        String message = buildDetailedError(throwable);
-        Log.e(TAG, "Places failure: " + message, throwable);
-        if (userLocation != null) {
-            lastUserLat = userLocation.getLatitude();
-            lastUserLng = userLocation.getLongitude();
-        }
-        if (!lastSuccessfulRestaurants.isEmpty() && lastUserLat != null && lastUserLng != null) {
-            restaurantState.setValue(RestaurantUiState.successWithMessage(
-                    new ArrayList<>(lastSuccessfulRestaurants),
-                    lastUserLat,
-                    lastUserLng,
-                    message
-            ));
-        } else {
-            restaurantState.setValue(RestaurantUiState.error(message));
-        }
     }
 
     private String buildDetailedError(Throwable throwable) {

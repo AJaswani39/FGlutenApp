@@ -181,15 +181,8 @@ class AuthFragment : Fragment() {
         // 1. Google Sign-In SDK integration
         // 2. Google Sign-In button configuration
         // 3. ID token retrieval and passing to AuthViewModel
-        
+
         Toast.makeText(context, "Google Sign-In coming soon!", Toast.LENGTH_SHORT).show()
-        
-        // For now, show the sign-in prompt
-        val displayName = "Google User" // This would come from Google Sign-In result
-        val contributorName = "Anonymous" // Optional contributor name
-        
-        // This is a placeholder - real implementation needed
-        // authViewModel.signInWithGoogle(idToken, displayName, contributorName)
     }
 
     /**
@@ -262,9 +255,6 @@ class AuthFragment : Fragment() {
             is AuthState.Unauthenticated -> {
                 // User is signed out, ensure we're showing auth form
                 // This should be the default state when fragment loads
-            }
-            is AuthState.SigningIn -> {
-                // Show signing in state
             }
             is AuthState.Error -> {
                 showError(state.message)

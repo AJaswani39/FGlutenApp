@@ -1,7 +1,6 @@
 package com.example.fgluten.ui.home
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -35,18 +34,6 @@ class RecommendationViewModel @JvmOverloads constructor(
     private val _recommendations = MutableLiveData<List<RecommendedRestaurant>>(emptyList())
     val recommendations: LiveData<List<RecommendedRestaurant>> = _recommendations
 
-    /**
-     * Loading state for recommendation computation
-     */
-    private val _isLoading = MutableLiveData<Boolean>(false)
-    val isLoading: LiveData<Boolean> = _isLoading
-
-    /**
-     * Error message if recommendation generation fails
-     */
-    private val _errorMessage = MutableLiveData<String?>(null)
-    val errorMessage: LiveData<String?> = _errorMessage
-
     // ========== PUBLIC METHODS ==========
 
     /**
@@ -58,9 +45,6 @@ class RecommendationViewModel @JvmOverloads constructor(
      * @param restaurants List of all available restaurants
      */
     fun generateRecommendations(restaurants: List<Restaurant>) {
-        _isLoading.value = true
-        _errorMessage.value = null
-
         viewModelScope.launch {
             try {
                 val ranked = recommendationRepository.getTopRecommendations(
@@ -70,10 +54,8 @@ class RecommendationViewModel @JvmOverloads constructor(
                 )
 
                 _recommendations.postValue(ranked)
-                _isLoading.postValue(false)
             } catch (e: Exception) {
-                _errorMessage.postValue("Failed to generate recommendations: ${e.message}")
-                _isLoading.postValue(false)
+                // Log error but don't crash - recommendations are non-critical
             }
         }
     }
@@ -83,28 +65,5 @@ class RecommendationViewModel @JvmOverloads constructor(
      */
     fun clearRecommendations() {
         _recommendations.value = emptyList()
-        _errorMessage.value = null
-    }
-
-    /**
-     * Get recommendations that meet a minimum score threshold
-     *
-     * Useful for filtering out lower-quality recommendations
-     *
-     * @param minScore Minimum recommendation score (0-100)
-     * @return Filtered list of recommendations above the threshold
-     */
-    fun getRecommendationsAboveScore(minScore: Float): List<RecommendedRestaurant> {
-        return _recommendations.value?.filter { it.score >= minScore } ?: emptyList()
-    }
-
-    /**
-     * Get a single recommendation by restaurant place ID
-     *
-     * @param placeId Google Places ID
-     * @return The recommendation if found, null otherwise
-     */
-    fun getRecommendationByPlaceId(placeId: String?): RecommendedRestaurant? {
-        return _recommendations.value?.find { it.restaurant.placeId == placeId }
     }
 }

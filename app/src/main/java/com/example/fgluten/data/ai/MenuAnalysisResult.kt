@@ -71,18 +71,7 @@ data class AnalysisSummary(
     val likelyGFCount: Int,
     val warningCount: Int,
     val confidence: Float
-) {
-    /**
-     * Calculate percentage of items that are likely safe
-     */
-    fun getSafetyPercentage(): Float {
-        return if (totalItemsAnalyzed > 0) {
-            ((gfSafeCount + likelyGFCount).toFloat() / totalItemsAnalyzed) * 100f
-        } else {
-            0f
-        }
-    }
-}
+)
 
 /**
  * Classification levels for gluten-free safety
