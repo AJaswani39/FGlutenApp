@@ -4,9 +4,5 @@
         <include domain="sharedpref" path="settings.xml"/>
         <include domain="database" path="app.db"/>
         <include domain="file" path="user_data/"/>
-        <exclude domain="file" path="cache/"/>
-        <exclude domain="file" path="logs/"/>
-        <exclude domain="file" path="media/"/>
-        <exclude domain="sharedpref" path="auth_token.xml"/>
     </cloud-backup>
 </data-extraction-rules>
