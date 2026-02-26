@@ -20,6 +20,18 @@ android {
     namespace = "io.fgluten"
     compileSdk = 34
 
+    signingConfigs {
+        create("release") {
+            val storeFilePath = localProperties.getProperty("STORE_FILE")
+            if (storeFilePath != null) {
+                storeFile = file(storeFilePath)
+                storePassword = localProperties.getProperty("STORE_PASSWORD")
+                keyAlias = localProperties.getProperty("KEY_ALIAS")
+                keyPassword = localProperties.getProperty("KEY_PASSWORD")
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "io.fgluten"
         minSdk = 27
@@ -37,6 +49,7 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
