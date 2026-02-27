@@ -18,7 +18,7 @@ val escapedMapsApiKey = mapsApiKey.replace("\"", "\\\"")
 
 android {
     namespace = "io.fgluten"
-    compileSdk = 34
+    compileSdk = 35
 
     signingConfigs {
         create("release") {
@@ -35,7 +35,7 @@ android {
     defaultConfig {
         applicationId = "io.fgluten"
         minSdk = 27
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
