@@ -106,9 +106,7 @@ public class HomeFragment extends Fragment {
 
         // ========== NAVIGATION SETUP ==========
         // Main call-to-action button that navigates to restaurant discovery
-        binding.ctaFindRestaurants.setOnClickListener(v ->
-                NavHostFragment.findNavController(HomeFragment.this)
-                        .navigate(R.id.nav_restaurant_list));
+        binding.ctaFindRestaurants.setOnClickListener(v -> navigateToRestaurantsTab());
         binding.homeCtaMeta.setText(getString(R.string.home_cta_meta));
 
         // ========== RECYCLERVIEW CONFIGURATION ==========
@@ -121,8 +119,7 @@ public class HomeFragment extends Fragment {
         // ========== RECOMMENDATIONS SETUP ==========
         recommendationViewModel = new ViewModelProvider(this).get(RecommendationViewModel.class);
         recommendedAdapter = new RecommendedRestaurantAdapter(recommendation -> {
-            NavHostFragment.findNavController(HomeFragment.this)
-                    .navigate(R.id.nav_restaurant_list);
+            navigateToRestaurantsTab();
             return kotlin.Unit.INSTANCE;
         });
         RecyclerView rvRecommendations = binding.rvRecommendations;
@@ -207,13 +204,25 @@ public class HomeFragment extends Fragment {
 
             // Setup permission banner click handler to navigate to restaurant discovery
             // This provides a clear path for users to grant permission when ready
-            binding.permissionButton.setOnClickListener(v -> {
-                NavHostFragment.findNavController(HomeFragment.this)
-                        .navigate(R.id.nav_restaurant_list);
-            });
+            binding.permissionButton.setOnClickListener(v -> navigateToRestaurantsTab());
         });
 
         return root;
+    }
+
+    /**
+     * Helper method to safely switch to the restaurants tab.
+     * Uses BottomNavigationView to preserve Navigation Component's multiple back stack state.
+     */
+    private void navigateToRestaurantsTab() {
+        com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = 
+                requireActivity().findViewById(R.id.bottom_nav);
+        if (bottomNav != null) {
+            bottomNav.setSelectedItemId(R.id.nav_restaurant_list);
+        } else {
+            // Fallback just in case
+            NavHostFragment.findNavController(this).navigate(R.id.nav_restaurant_list);
+        }
     }
 
     /**
