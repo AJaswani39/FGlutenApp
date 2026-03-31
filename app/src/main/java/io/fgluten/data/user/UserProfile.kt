@@ -4,13 +4,13 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 /**
- * User profile data model for Firebase Authentication integration.
+ * User profile data model.
  * 
- * This class represents a user's profile information stored in Firestore.
- * It complements Firebase Auth's built-in user data with additional
+ * This class represents a user's profile information.
+ * It contains
  * application-specific information for the FGluten app.
  * 
- * @property userId Firebase Auth user ID (UID)
+ * @property userId user ID
  * @property email User's email address
  * @property displayName User's chosen display name
  * @property contributorName Name used for crowd notes attribution
