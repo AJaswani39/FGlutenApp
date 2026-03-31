@@ -110,18 +110,10 @@
     <string name="favorite_clear">Clear</string>
     <string name="favorite_status_label">Marked: %1$s</string>
     <string name="favorites_section_title">Mark this place</string>
-    <string name="crowd_notes_title">Crowd notes</string>
-    <string name="crowd_notes_empty">No notes yet. Add one?</string>
-    <string name="crowd_notes_add_hint">Add a short note (cross-contam, celiac-safe, etc)</string>
-    <string name="crowd_notes_add">Add note</string>
-    <string name="crowd_notes_count">Notes: %1$d</string>
     <string name="home_chip_cached">Cached %d ready</string>
     <string name="home_chip_favorites">%d favorite(s)</string>
     <string name="home_chip_scans">%d menu scans</string>
     <string name="home_last_scan">Last menu scan: %1$s</string>
-    <string name="home_alias_saved">Nickname saved locally</string>
-    <string name="home_alias_hint">How others will see your crowd notes (optional)</string>
-    <string name="home_alias_note">Nickname is appended to notes you add.</string>
     <string name="save">Save</string>
     <plurals name="cached_restaurants_count">
         <item quantity="one">%d cached restaurant ready</item>
@@ -129,10 +121,6 @@
     </plurals>
     <string name="detail_menu_button">Open menu / website</string>
     <string name="detail_menu_unavailable">Menu link unavailable</string>
-    <string name="detail_reviews_title">Reviews</string>
-    <string name="detail_reviews_google_label">Google reviews</string>
-    <string name="detail_reviews_user_label">User notes</string>
-    <string name="detail_reviews_empty">No reviews available yet.</string>
     <string name="ai_analyze_menu">Analyze menu with AI</string>
     <string name="ai_sample_menu_text">Gluten-free quinoa bowl with roasted vegetables; GF pizza margherita; dedicated gluten-free pasta; grilled salmon with herbs.</string>
     <plurals name="results_found">
@@ -153,11 +141,4 @@
     <string name="loading_profile">Loading profile...</string>
     <string name="profile_not_loaded">Profile could not be loaded</string>
     <string name="cancel">Cancel</string>
-    <string name="trust_level">Trust Level</string>
-    <string name="trust_level_title">Trust Level</string>
-    <string name="trust_level_explanation">Your trust level is based on your contributions, verification status, and community feedback. Higher trust levels indicate more reliable community members.</string>
-    <string name="ok">OK</string>
-    <string name="reputation_score">Reputation</string>
-    <string name="helpful_votes">Helpful Votes</string>
-    <string name="contributions">Contributions</string>
 </resources>

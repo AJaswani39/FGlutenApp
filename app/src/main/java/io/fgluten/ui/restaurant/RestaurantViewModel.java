@@ -271,9 +271,7 @@ public class RestaurantViewModel extends AndroidViewModel {
     /** SharedPreferences for storing user favorites */
     private final SharedPreferences favoritesPrefs;
     
-    /** SharedPreferences for storing crowd-sourced notes */
-    private final SharedPreferences notesPrefs;
-    
+
     /** Flag to prevent multiple cache load attempts */
     private boolean cacheAttempted = false;
     
@@ -292,9 +290,6 @@ public class RestaurantViewModel extends AndroidViewModel {
     
     /** SharedPreferences key for favorites data */
     private static final String PREF_KEY_FAVORITES = "favorites_map";
-    
-    /** SharedPreferences key for notes data */
-    private static final String PREF_KEY_NOTES = "notes_map";
     
     /** Time-to-live for menu scan results in milliseconds (3 days) */
     private static final long MENU_SCAN_TTL_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
@@ -327,9 +322,6 @@ public class RestaurantViewModel extends AndroidViewModel {
     
     /** In-memory cache of user favorites for fast access */
     private Map<String, String> favoriteMap = new HashMap<>();
-    
-    /** In-memory cache of crowd-sourced notes for fast access */
-    private Map<String, List<String>> notesMap = new HashMap<>();
 
     public RestaurantViewModel(@NonNull Application application) {
         super(application);
@@ -341,9 +333,7 @@ public class RestaurantViewModel extends AndroidViewModel {
         }
         cachePrefs = application.getSharedPreferences("restaurant_cache", Context.MODE_PRIVATE);
         favoritesPrefs = application.getSharedPreferences("restaurant_favorites", Context.MODE_PRIVATE);
-        notesPrefs = application.getSharedPreferences("restaurant_notes", Context.MODE_PRIVATE);
         favoriteMap = loadFavorites();
-        notesMap = loadNotes();
     }
 
     public LiveData<RestaurantUiState> getRestaurantState() {
@@ -592,7 +582,6 @@ public class RestaurantViewModel extends AndroidViewModel {
             restaurants = new ArrayList<>();
         }
         applyFavorites(restaurants);
-        applyNotes(restaurants);
         for (Restaurant restaurant : restaurants) {
             float[] results = new float[1];
             Location.distanceBetween(
@@ -730,9 +719,6 @@ public class RestaurantViewModel extends AndroidViewModel {
     }
 
     private void scanMenu(Restaurant restaurant) {
-        List<String> scrapedReviews = fetchPlaceReviewsForPlace(restaurant.getPlaceId());
-        mergeScrapedReviewsIntoCrowdNotes(restaurant, scrapedReviews);
-
         String website = fetchWebsiteForPlace(restaurant.getPlaceId());
         if (TextUtils.isEmpty(website)) {
             restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.NO_WEBSITE);
@@ -768,26 +754,6 @@ public class RestaurantViewModel extends AndroidViewModel {
         mainHandler.post(() -> emitFilteredState(null));
     }
 
-    private void mergeScrapedReviewsIntoCrowdNotes(Restaurant restaurant, List<String> scrapedReviews) {
-        if (restaurant == null || scrapedReviews == null || scrapedReviews.isEmpty()) {
-            return;
-        }
-        List<String> merged = new ArrayList<>();
-        List<String> existing = restaurant.getCrowdNotes();
-        if (existing != null) {
-            for (String note : existing) {
-                if (!TextUtils.isEmpty(note) && !merged.contains(note)) {
-                    merged.add(note);
-                }
-            }
-        }
-        for (String review : scrapedReviews) {
-            if (!TextUtils.isEmpty(review) && !merged.contains(review)) {
-                merged.add(review);
-            }
-        }
-        restaurant.setCrowdNotes(merged);
-    }
 
     private List<String> fetchPlaceReviewsForPlace(String placeId) {
         List<String> reviews = new ArrayList<>();
@@ -1073,101 +1039,6 @@ public class RestaurantViewModel extends AndroidViewModel {
         }
     }
 
-    public void addCrowdNote(Restaurant restaurant, String note) {
-        if (restaurant == null || TextUtils.isEmpty(note)) return;
-        String key = favoriteKey(restaurant); // reuse key logic
-        if (TextUtils.isEmpty(key)) return;
-        List<String> notes = notesMap.containsKey(key) ? notesMap.get(key) : new ArrayList<>();
-        notes.add(note.trim());
-        notesMap.put(key, notes);
-        restaurant.addCrowdNote(note);
-        Restaurant match = findMatchingInLast(restaurant);
-        if (match != null) {
-            if (match != restaurant) {
-                match.addCrowdNote(note);
-            }
-        }
-        saveNotes();
-        emitFilteredState(null);
-    }
-
-    private void applyNotes(List<Restaurant> restaurants) {
-        if (restaurants == null || restaurants.isEmpty() || notesMap.isEmpty()) {
-            return;
-        }
-        for (Restaurant r : restaurants) {
-            String key = favoriteKey(r);
-            if (!TextUtils.isEmpty(key) && notesMap.containsKey(key)) {
-                List<String> merged = new ArrayList<>();
-                List<String> existing = r.getCrowdNotes();
-                if (existing != null) {
-                    for (String note : existing) {
-                        if (!TextUtils.isEmpty(note) && !merged.contains(note)) {
-                            merged.add(note);
-                        }
-                    }
-                }
-                List<String> savedNotes = notesMap.get(key);
-                if (savedNotes != null) {
-                    for (String note : savedNotes) {
-                        if (!TextUtils.isEmpty(note) && !merged.contains(note)) {
-                            merged.add(note);
-                        }
-                    }
-                }
-                r.setCrowdNotes(merged);
-            }
-        }
-    }
-
-    private Map<String, List<String>> loadNotes() {
-        Map<String, List<String>> map = new HashMap<>();
-        String raw = notesPrefs.getString(PREF_KEY_NOTES, null);
-        if (TextUtils.isEmpty(raw)) {
-            return map;
-        }
-        try {
-            JSONObject obj = new JSONObject(raw);
-            JSONArray names = obj.names();
-            if (names != null) {
-                for (int i = 0; i < names.length(); i++) {
-                    String key = names.optString(i, null);
-                    if (key == null) continue;
-                    JSONArray arr = obj.optJSONArray(key);
-                    if (arr == null) continue;
-                    List<String> notes = new ArrayList<>();
-                    for (int j = 0; j < arr.length(); j++) {
-                        String n = arr.optString(j, null);
-                        if (!TextUtils.isEmpty(n)) {
-                            notes.add(n);
-                        }
-                    }
-                    if (!notes.isEmpty()) {
-                        map.put(key, notes);
-                    }
-                }
-            }
-        } catch (JSONException e) {
-            Log.w(TAG, "Failed to parse notes map", e);
-        }
-        return map;
-    }
-
-    private void saveNotes() {
-        try {
-            JSONObject root = new JSONObject();
-            for (Map.Entry<String, List<String>> entry : notesMap.entrySet()) {
-                JSONArray arr = new JSONArray();
-                for (String n : entry.getValue()) {
-                    arr.put(n);
-                }
-                root.put(entry.getKey(), arr);
-            }
-            notesPrefs.edit().putString(PREF_KEY_NOTES, root.toString()).apply();
-        } catch (JSONException e) {
-            Log.w(TAG, "Failed to save notes map", e);
-        }
-    }
 
     private boolean isAllowedByRobots(String urlStr) {
         try {
@@ -1308,13 +1179,6 @@ public class RestaurantViewModel extends AndroidViewModel {
                 if (r.getFavoriteStatus() != null) {
                     obj.put("favoriteStatus", r.getFavoriteStatus());
                 }
-                JSONArray notesArr = new JSONArray();
-                if (r.getCrowdNotes() != null) {
-                    for (String note : r.getCrowdNotes()) {
-                        notesArr.put(note);
-                    }
-                }
-                obj.put("notes", notesArr);
                 obj.put("menu", menu);
                 items.put(obj);
             }
@@ -1382,7 +1246,6 @@ public class RestaurantViewModel extends AndroidViewModel {
                     r.setMenuScanStatus(Restaurant.MenuScanStatus.NOT_STARTED);
                 }
                 r.setMenuScanTimestamp(scanTimestamp);
-                r.setCrowdNotes(notes);
                 if (obj.has("favoriteStatus")) {
                     r.setFavoriteStatus(obj.optString("favoriteStatus", null));
                 }
@@ -1394,7 +1257,6 @@ public class RestaurantViewModel extends AndroidViewModel {
             lastRestaurantsRaw.clear();
             lastRestaurantsRaw.addAll(restored);
             applyFavorites(lastRestaurantsRaw);
-            applyNotes(lastRestaurantsRaw);
             lastUserLat = lat;
             lastUserLng = lng;
             String message = getApplication().getString(R.string.using_cached_results);
@@ -1408,3 +1270,4 @@ public class RestaurantViewModel extends AndroidViewModel {
         }
     }
 }
+

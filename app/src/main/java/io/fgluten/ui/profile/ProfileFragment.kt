@@ -124,9 +124,6 @@ class ProfileFragment : Fragment() {
             navigateToNotes()
         }
         
-        binding.cardContributions.setOnClickListener {
-            navigateToContributions()
-        }
 
         // Profile action buttons
         binding.editProfileButton.setOnClickListener {
@@ -154,16 +151,7 @@ class ProfileFragment : Fragment() {
             // Basic profile info
             profileName.text = userProfile.displayName
             profileEmail.text = userProfile.email
-            contributorName.text = userProfile.getAttributionName()
-            
-            // Trust level and reputation
-            trustLevel.text = userProfile.getTrustLevel()
-            reputationScore.text = "%.1f".format(userProfile.reputationScore)
-            helpfulVotes.text = userProfile.helpfulVotes.toString()
-            
-            // Contribution stats
-            contributionCount.text = userProfile.contributionCount.toString()
-            
+
             // Profile picture (placeholder for now)
             profileImage.setImageResource(R.drawable.ic_launcher_foreground)
             
@@ -242,9 +230,6 @@ class ProfileFragment : Fragment() {
         showError("Notes feature coming soon")
     }
     
-    private fun navigateToContributions() {
-        showError("Contributions feature coming soon")
-    }
 
     /**
      * Show trust level information dialog

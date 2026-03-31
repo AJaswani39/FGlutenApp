@@ -30,7 +30,6 @@ class ProfileViewModel : ViewModel() {
                 userId = "local_user",
                 email = "guest@fgluten.io",
                 displayName = "Guest User",
-                contributionCount = 0,
                 helpfulVotes = 0,
                 reputationScore = 0.0,
                 isVerified = false

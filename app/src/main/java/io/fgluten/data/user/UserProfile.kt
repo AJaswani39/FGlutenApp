@@ -5,20 +5,16 @@ import kotlinx.parcelize.Parcelize
 
 /**
  * User profile data model.
- * 
+ *
  * This class represents a user's profile information.
- * It contains
- * application-specific information for the FGluten app.
- * 
+ *
  * @property userId user ID
  * @property email User's email address
  * @property displayName User's chosen display name
- * @property contributorName Name used for crowd notes attribution
  * @property profilePictureUrl URL to user's profile picture
  * @property dietaryRestrictions List of dietary restrictions beyond gluten-free
- * @property contributionCount Total number of crowd notes contributed
- * @property helpfulVotes Total helpful votes received on notes
- * @property reputationScore Calculated reputation score based on note quality
+ * @property helpfulVotes Total helpful votes received
+ * @property reputationScore Calculated reputation score
  * @property badges List of achievement badges
  * @property isProfileVisible Whether profile should be visible to other users
  * @property createdAt Timestamp when profile was created
@@ -31,10 +27,8 @@ data class UserProfile(
     val userId: String,
     val email: String,
     val displayName: String,
-    val contributorName: String? = null,
     val profilePictureUrl: String? = null,
     val dietaryRestrictions: List<String> = emptyList(),
-    val contributionCount: Int = 0,
     val helpfulVotes: Int = 0,
     val reputationScore: Double = 0.0,
     val badges: List<String> = emptyList(),
@@ -44,10 +38,10 @@ data class UserProfile(
     val isVerified: Boolean = false,
     val verificationType: String? = null
 ) : Parcelable {
-    
+
     /**
      * Calculates the user's trust level based on reputation and verification status.
-     * 
+     *
      * @return Trust level string: "New", "Trusted", "Verified", "Expert"
      */
     fun getTrustLevel(): String {
@@ -55,16 +49,7 @@ data class UserProfile(
             isVerified && reputationScore >= 100.0 -> "Expert"
             isVerified && reputationScore >= 50.0 -> "Verified"
             reputationScore >= 25.0 -> "Trusted"
-            contributionCount >= 5 -> "Active"
             else -> "New"
         }
-    }
-    
-    /**
-     * Returns the name to display for crowd notes attribution.
-     * Uses contributorName if available, otherwise falls back to displayName.
-     */
-    fun getAttributionName(): String {
-        return contributorName?.takeIf { it.isNotBlank() } ?: displayName
     }
 }

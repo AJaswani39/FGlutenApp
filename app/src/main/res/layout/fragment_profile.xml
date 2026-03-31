@@ -242,30 +242,6 @@
 
                             </LinearLayout>
 
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical"
-                                android:gravity="center">
-
-                                <TextView
-                                    android:id="@+id/contribution_count"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="?attr/textAppearanceHeadlineMedium"
-                                    android:textStyle="bold"
-                                    android:textColor="?attr/colorTertiary"
-                                    tools:text="8" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/contributions"
-                                    android:textAppearance="?attr/textAppearanceBodySmall"
-                                    android:textColor="?attr/colorOnSurfaceVariant" />
-
-                            </LinearLayout>
 
                         </LinearLayout>
 
@@ -414,44 +390,6 @@
 
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Contributions Card -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/card_contributions"
-                        android:layout_width="0dp"
-                        android:layout_height="120dp"
-                        android:layout_columnWeight="1"
-                        android:layout_margin="4dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="2dp"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:foreground="?attr/selectableItemBackground">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:padding="16dp">
-
-                            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:src="@drawable/ic_trending_up"
-                                app:fabSize="mini"
-                                app:backgroundTint="?attr/colorErrorContainer" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="@string/contributions"
-                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                android:textColor="?attr/colorOnSurface" />
-
-                        </LinearLayout>
-
-                    </com.google.android.material.card.MaterialCardView>
 
                 </GridLayout>
 

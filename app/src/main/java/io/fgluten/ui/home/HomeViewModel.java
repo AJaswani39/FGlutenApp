@@ -266,11 +266,6 @@ public class HomeViewModel extends AndroidViewModel {
                     r.setFavoriteStatus(fav);
                 }
                 
-                // Restore crowd-sourced notes
-                if (!notes.isEmpty()) {
-                    r.setCrowdNotes(notes);
-                }
-                
                 // Restore menu URL
                 if (menuUrl != null && !menuUrl.isEmpty()) {
                     r.setMenuUrl(menuUrl);
