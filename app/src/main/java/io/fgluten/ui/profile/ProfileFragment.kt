@@ -10,7 +10,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import io.fgluten.R
 import io.fgluten.databinding.FragmentProfileBinding
-import io.fgluten.ui.auth.AuthViewModel
 import io.fgluten.ui.settings.SettingsBottomSheet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
@@ -38,7 +37,6 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val profileViewModel: ProfileViewModel by viewModels()
-    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -133,10 +131,6 @@ class ProfileFragment : Fragment() {
         // Profile action buttons
         binding.editProfileButton.setOnClickListener {
             navigateToEditProfile()
-        }
-        
-        binding.signOutButton.setOnClickListener {
-            showSignOutConfirmation()
         }
 
         // Trust level info
@@ -250,20 +244,6 @@ class ProfileFragment : Fragment() {
     
     private fun navigateToContributions() {
         showError("Contributions feature coming soon")
-    }
-
-    /**
-     * Show sign out confirmation dialog
-     */
-    private fun showSignOutConfirmation() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.sign_out_confirmation)
-            .setMessage(R.string.sign_out_message)
-            .setPositiveButton(R.string.sign_out) { _, _ ->
-                authViewModel.signOut()
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
     }
 
     /**
