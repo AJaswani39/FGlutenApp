@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * 
  * This class stores comprehensive information about restaurants, including basic details
  * (name, address, location), gluten-free specific data (menu items, status), user-generated
- * content (favorites, crowd notes), and caching metadata. Implements Parcelable to allow
+ * content (favorites), and caching metadata. Implements Parcelable to allow
  * passing Restaurant objects between Android components (fragments, activities, etc.).
  * 
  * GF = Gluten Free - this abbreviation is used throughout the class for brevity.
@@ -65,11 +65,6 @@ public class Restaurant implements Parcelable {
      */
     private final List<String> gfMenu;
     
-    /** 
-     * Crowd-sourced notes about the restaurant from other users.
-     * Used for sharing experiences, warnings, or positive feedback about gluten-free options.
-     */
-    private final List<String> crowdNotes;
 
     // ========== LOCATION & PROXIMITY ==========
     /** Restaurant latitude coordinate for mapping and distance calculations */
@@ -186,7 +181,6 @@ public class Restaurant implements Parcelable {
         this.address = address;
         this.hasGFMenu = hasGFMenu;
         this.gfMenu = gfMenu != null ? gfMenu : new ArrayList<>();
-        this.crowdNotes = new ArrayList<>();
         this.latitude = latitude;
         this.longitude = longitude;
         this.distanceMeters = 0.0;
@@ -214,7 +208,6 @@ public class Restaurant implements Parcelable {
         address = in.readString();
         hasGFMenu = in.readByte() != 0;
         gfMenu = in.createStringArrayList();
-        crowdNotes = in.createStringArrayList();
         latitude = in.readDouble();
         longitude = in.readDouble();
         distanceMeters = in.readDouble();
@@ -329,31 +322,6 @@ public class Restaurant implements Parcelable {
         }
     }
 
-    public List<String> getCrowdNotes() {
-        return crowdNotes;
-    }
-
-    public void setCrowdNotes(List<String> notes) {
-        crowdNotes.clear();
-        if (notes != null) {
-            crowdNotes.addAll(notes);
-        }
-    }
-
-    /**
-     * Adds a crowd-sourced note about this restaurant with validation.
-     * 
-     * This method allows users to contribute their experiences about the restaurant's
-     * gluten-free options. Notes are stored locally and can help other users make
-     * informed decisions. Empty or null notes are rejected to maintain data quality.
-     * 
-     * @param note The note text to add (will be trimmed and validated)
-     */
-    public void addCrowdNote(String note) {
-        if (note != null && !note.trim().isEmpty()) {
-            crowdNotes.add(note.trim());
-        }
-    }
 
     public String getFavoriteStatus() {
         return favoriteStatus;
@@ -374,7 +342,6 @@ public class Restaurant implements Parcelable {
         dest.writeString(address);
         dest.writeByte((byte) (hasGFMenu ? 1 : 0));
         dest.writeStringList(gfMenu);
-        dest.writeStringList(crowdNotes);
         dest.writeDouble(latitude);
         dest.writeDouble(longitude);
         dest.writeDouble(distanceMeters);
@@ -408,30 +375,11 @@ public class Restaurant implements Parcelable {
         }
     };
 
-    /**
-     * String representation of Restaurant for debugging and logging purposes.
-     * 
-     * This method provides a comprehensive string representation that includes
-     * all key restaurant information. Note that it intentionally excludes some
-     * sensitive or verbose data (like crowd notes list) to keep log output manageable.
-     * 
-     * @return Formatted string containing essential restaurant information
-     */
     @Override
-    public String toString(){
+    public String toString() {
         return String.format(
                 "Restaurant{name=%s, address=%s, hasGFMenu=%s, gfMenu=%s, latitude=%s, longitude=%s, distanceMeters=%s, placeId=%s, menuScanStatus=%s, favoriteStatus=%s}",
-                name,
-                address,
-                hasGFMenu,
-                gfMenu,
-                latitude,
-                longitude,
-                distanceMeters,
-                placeId,
-                menuScanStatus,
-                favoriteStatus
-
+                name, address, hasGFMenu, gfMenu, latitude, longitude, distanceMeters, placeId, menuScanStatus, favoriteStatus
         );
     }
 

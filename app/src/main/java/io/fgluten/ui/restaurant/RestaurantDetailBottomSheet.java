@@ -192,6 +192,8 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
         // ========== INITIAL DATA RENDERING ==========
         render(current, nameView, addressView, metaView, gfStatusView, menuStatusView, 
                menuItemsView, reviewsView, favStatus, openMenu, rescanButton, favToggle);
+        // Hide reviews section (crowd notes removed)
+        view.findViewById(R.id.sheet_reviews_title).setVisibility(android.view.View.GONE);
 
         // ========== EVENT HANDLERS ==========
         
@@ -332,36 +334,8 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
         }
 
         // ========== REVIEWS ==========
-        List<String> reviews = restaurant.getCrowdNotes();
-        if (reviews != null && !reviews.isEmpty()) {
-            StringBuilder googleSb = new StringBuilder();
-            StringBuilder userSb = new StringBuilder();
-            for (String raw : reviews) {
-                if (TextUtils.isEmpty(raw)) continue;
-                String line = raw.trim();
-                if (line.toLowerCase().startsWith("google review")) {
-                    googleSb.append("• ").append(line).append("\n");
-                } else {
-                    userSb.append("• ").append(line).append("\n");
-                }
-            }
-
-            StringBuilder sb = new StringBuilder();
-            if (googleSb.length() > 0) {
-                sb.append(getString(R.string.detail_reviews_google_label)).append("\n");
-                sb.append(googleSb.toString().trim());
-            }
-            if (userSb.length() > 0) {
-                if (sb.length() > 0) {
-                    sb.append("\n\n");
-                }
-                sb.append(getString(R.string.detail_reviews_user_label)).append("\n");
-                sb.append(userSb.toString().trim());
-            }
-            reviewsView.setText(sb.toString().trim());
-        } else {
-            reviewsView.setText(getString(R.string.detail_reviews_empty));
-        }
+        // Reviews section removed (crowd notes feature removed)
+        reviewsView.setVisibility(android.view.View.GONE);
 
         // ========== FAVORITE STATUS ==========
         favToggle.clearChecked();
