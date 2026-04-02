@@ -125,9 +125,9 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
                 Restaurant oldItem = RestaurantAdapter.this.restaurants.get(oldItemPosition);
                 Restaurant newItem = newList.get(newItemPosition);
                 return oldItem.getMenuScanStatus() == newItem.getMenuScanStatus()
-                        && oldItem.getFavoriteStatus() == null ? newItem.getFavoriteStatus() == null : oldItem.getFavoriteStatus().equals(newItem.getFavoriteStatus())
+                        && (oldItem.getFavoriteStatus() == null ? newItem.getFavoriteStatus() == null : oldItem.getFavoriteStatus().equals(newItem.getFavoriteStatus()))
                         && oldItem.getDistanceMeters() == newItem.getDistanceMeters()
-                        && oldItem.getRating() == null ? newItem.getRating() == null : oldItem.getRating().equals(newItem.getRating());
+                        && (oldItem.getRating() == null ? newItem.getRating() == null : oldItem.getRating().equals(newItem.getRating()));
             }
         });
         this.restaurants = newList;
