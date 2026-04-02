@@ -21,6 +21,11 @@
         <item name="colorOnErrorContainer">#410E0B</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        
+        <!-- App wide custom font -->
+        <item name="android:fontFamily">@font/lato</item>
+        <item name="fontFamily">@font/lato</item>
+        
         <!-- Customize your theme here. -->
         <!-- Surface / on-surface colors used by Material components -->
         <item name="colorSurface">@color/white</item>

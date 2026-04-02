@@ -21,6 +21,11 @@
         <item name="colorOnErrorContainer">#F9DEDC</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        
+        <!-- App wide custom font -->
+        <item name="android:fontFamily">@font/lato</item>
+        <item name="fontFamily">@font/lato</item>
+        
         <!-- Customize your theme here. -->
         <!-- Night overrides for surface colors -->
         <item name="colorSurface">@color/black</item>
