@@ -143,4 +143,5 @@
     <string name="helpful_votes">Helpful Votes</string>
     <string name="trust_level_title">Trust Level</string>
     <string name="trust_level_explanation">Your trust level reflects your activity and helpfulness in the community.</string>
+    <string name="ok">OK</string>
 </resources>

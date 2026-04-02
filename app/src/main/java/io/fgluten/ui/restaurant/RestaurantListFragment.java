@@ -24,7 +24,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import io.fgluten.R;
 import io.fgluten.data.Restaurant;
 import io.fgluten.databinding.FragmentRestaurantListBinding;
-import io.fgluten.data.recommendation.UserInteractionTracker;
 import io.fgluten.ui.restaurant.RestaurantViewModel.SortMode;
 import io.fgluten.util.SettingsManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -152,12 +151,6 @@ public class RestaurantListFragment extends Fragment {
 
         // ========== RECYCLERVIEW CONFIGURATION ==========
         adapter = new RestaurantAdapter(new ArrayList<>(), restaurant -> {
-            // Track interaction: user opened detail sheet
-            UserInteractionTracker.recordInteraction(
-                    requireContext(),
-                    restaurant.getPlaceId(),
-                    UserInteractionTracker.InteractionType.DETAIL_OPEN
-            );
             RestaurantDetailBottomSheet.show(getParentFragmentManager(), restaurant);
         });
 
@@ -217,16 +210,6 @@ public class RestaurantListFragment extends Fragment {
 
         if (state.getRestaurants() != null) {
             adapter.setRestaurants(state.getRestaurants());
-            // Track interaction: user saw these restaurants in the list
-            for (Restaurant restaurant : state.getRestaurants()) {
-                if (restaurant.getPlaceId() != null) {
-                    UserInteractionTracker.recordInteraction(
-                            requireContext(),
-                            restaurant.getPlaceId(),
-                            UserInteractionTracker.InteractionType.VIEW
-                    );
-                }
-            }
         }
         boolean hasData = state.getRestaurants() != null && !state.getRestaurants().isEmpty();
         if (isLoading) {
