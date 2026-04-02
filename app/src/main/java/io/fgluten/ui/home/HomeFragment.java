@@ -68,11 +68,6 @@ public class HomeFragment extends Fragment {
     /** RecyclerView adapter for displaying cached restaurants */
     private CachedAdapter cachedAdapter;
 
-    /** ViewModel for generating personalized recommendations */
-    private RecommendationViewModel recommendationViewModel;
-
-    /** Adapter for recommended restaurants */
-    private RecommendedRestaurantAdapter recommendedAdapter;
 
     /**
      * Fragment view creation and initialization.
@@ -116,16 +111,6 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(cachedAdapter);
 
-        // ========== RECOMMENDATIONS SETUP ==========
-        recommendationViewModel = new ViewModelProvider(this).get(RecommendationViewModel.class);
-        recommendedAdapter = new RecommendedRestaurantAdapter(recommendation -> {
-            navigateToRestaurantsTab();
-            return kotlin.Unit.INSTANCE;
-        });
-        RecyclerView rvRecommendations = binding.rvRecommendations;
-        rvRecommendations.setLayoutManager(new LinearLayoutManager(
-                requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvRecommendations.setAdapter(recommendedAdapter);
 
         // ========== OBSERVERS FOR UI STATE ==========
         // Observe text content for dynamic titles and subtitles
@@ -141,12 +126,6 @@ public class HomeFragment extends Fragment {
             binding.lastNearbyCard.setVisibility(hasData ? View.VISIBLE : View.GONE);
             cachedAdapter.setRestaurants(restaurants);
 
-            // Generate recommendations from cached restaurants
-            if (hasData) {
-                recommendationViewModel.generateRecommendations(restaurants);
-            } else {
-                recommendationViewModel.clearRecommendations();
-            }
 
             int count = restaurants != null ? restaurants.size() : 0;
             String label = getResources().getQuantityString(R.plurals.cached_restaurants_count, count, count);
@@ -187,15 +166,6 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // Observe recommendations data for display
-        recommendationViewModel.getRecommendations().observe(getViewLifecycleOwner(), recommendations -> {
-            if (recommendations != null && !recommendations.isEmpty()) {
-                binding.recommendationsCard.setVisibility(View.VISIBLE);
-                recommendedAdapter.submitList(recommendations);
-            } else {
-                binding.recommendationsCard.setVisibility(View.GONE);
-            }
-        });
 
         // Observe location permission status for showing/hiding permission banner
         homeViewModel.isPermissionGranted().observe(getViewLifecycleOwner(), granted -> {

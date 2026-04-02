@@ -39,11 +39,6 @@
     <string name="home_cta_meta">Menu scans and favorites in one place for fast decisions.</string>
     <string name="cta_find_restaurants">Find restaurants</string>
     <string name="home_permission_prompt">Allow location to show places near you.</string>
-    <string name="home_recommendations_title">Recommended for You</string>
-    <string name="home_recommendations_subtitle">Personalized picks based on your favorites and preferences</string>
-    <string name="recommendation_safe">Marked Safe</string>
-    <string name="recommendation_try">Want to Try</string>
-    <string name="recommendation_avoid">Previously Avoided</string>
     <string name="home_tips_title">Ordering tips</string>
     <string name="home_tip_one">Ask about dedicated fryers and separate prep areas.</string>
     <string name="home_tip_two">Confirm gluten-free soy sauce for Asian dishes.</string>
@@ -141,4 +136,11 @@
     <string name="loading_profile">Loading profile...</string>
     <string name="profile_not_loaded">Profile could not be loaded</string>
     <string name="cancel">Cancel</string>
+    <!-- Strings still referenced by layouts/ProfileFragment -->
+    <string name="detail_reviews_title">Reviews</string>
+    <string name="trust_level">Trust Level</string>
+    <string name="reputation_score">Reputation Score</string>
+    <string name="helpful_votes">Helpful Votes</string>
+    <string name="trust_level_title">Trust Level</string>
+    <string name="trust_level_explanation">Your trust level reflects your activity and helpfulness in the community.</string>
 </resources>
