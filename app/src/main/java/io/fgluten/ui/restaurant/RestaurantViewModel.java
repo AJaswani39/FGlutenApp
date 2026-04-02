@@ -756,6 +756,18 @@ public class RestaurantViewModel extends AndroidViewModel {
 
         List<String> evidence = html != null ? extractGfEvidence(html) : new ArrayList<>();
         restaurant.setGlutenFreeMenuItems(evidence);
+        
+        if (html != null) {
+            try {
+                String cleaned = html.replaceAll("(?s)<(script|style)[^>]*>.*?</\\1>", " ");
+                cleaned = cleaned.replaceAll("(?s)<[^>]*>", " ");
+                cleaned = cleaned.replaceAll("\\s+", " ").trim();
+                restaurant.setRawMenuText(cleaned);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to extract raw text from HTML", e);
+            }
+        }
+
         restaurant.setMenuScanTimestamp(System.currentTimeMillis());
         if (TextUtils.isEmpty(restaurant.getMenuUrl())) {
             restaurant.setMenuScanStatus(Restaurant.MenuScanStatus.NO_WEBSITE);

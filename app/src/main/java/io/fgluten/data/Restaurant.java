@@ -104,6 +104,12 @@ public class Restaurant implements Parcelable {
      * Used for opening restaurant website in external browser.
      */
     private String menuUrl;
+
+    /** 
+     * Raw text scraped from the restaurant's menu page.
+     * Used for advanced AI analysis functionality.
+     */
+    private String rawMenuText;
     
     /** Current status of gluten-free menu scanning process for this restaurant */
     private MenuScanStatus menuScanStatus;
@@ -188,6 +194,7 @@ public class Restaurant implements Parcelable {
         this.openNow = openNow;
         this.placeId = placeId;
         this.menuUrl = null;
+        this.rawMenuText = null;
         this.menuScanStatus = MenuScanStatus.NOT_STARTED;
         this.menuScanTimestamp = 0L;
         this.favoriteStatus = null;
@@ -224,6 +231,7 @@ public class Restaurant implements Parcelable {
         }
         placeId = in.readString();
         menuUrl = in.readString();
+        rawMenuText = in.readString();
         int statusOrdinal = in.readInt();
         menuScanStatus = statusOrdinal >= 0 && statusOrdinal < MenuScanStatus.values().length
                 ? MenuScanStatus.values()[statusOrdinal]
@@ -299,6 +307,14 @@ public class Restaurant implements Parcelable {
         this.menuUrl = menuUrl;
     }
 
+    public String getRawMenuText() {
+        return rawMenuText;
+    }
+
+    public void setRawMenuText(String rawMenuText) {
+        this.rawMenuText = rawMenuText;
+    }
+
     public MenuScanStatus getMenuScanStatus() {
         return menuScanStatus;
     }
@@ -358,6 +374,7 @@ public class Restaurant implements Parcelable {
         }
         dest.writeString(placeId);
         dest.writeString(menuUrl);
+        dest.writeString(rawMenuText);
         dest.writeInt(menuScanStatus != null ? menuScanStatus.ordinal() : MenuScanStatus.NOT_STARTED.ordinal());
         dest.writeLong(menuScanTimestamp);
         dest.writeString(favoriteStatus);
@@ -378,8 +395,8 @@ public class Restaurant implements Parcelable {
     @Override
     public String toString() {
         return String.format(
-                "Restaurant{name=%s, address=%s, hasGFMenu=%s, gfMenu=%s, latitude=%s, longitude=%s, distanceMeters=%s, placeId=%s, menuScanStatus=%s, favoriteStatus=%s}",
-                name, address, hasGFMenu, gfMenu, latitude, longitude, distanceMeters, placeId, menuScanStatus, favoriteStatus
+                "Restaurant{name=%s, address=%s, hasGFMenu=%s, gfMenu=%s, latitude=%s, longitude=%s, distanceMeters=%s, placeId=%s, menuUrl=%s, menuScanStatus=%s, favoriteStatus=%s}",
+                name, address, hasGFMenu, gfMenu, latitude, longitude, distanceMeters, placeId, menuUrl, menuScanStatus, favoriteStatus
         );
     }
 

@@ -79,6 +79,9 @@ class DefaultAIRepository : AIRepository {
         restaurantName: String,
         sourceType: AnalysisSource
     ): MenuAnalysisResult {
+        
+        // Simulate network latency for AI backend
+        kotlinx.coroutines.delay(2000)
 
         // Preprocess and clean the text
         val cleanedText = preprocessMenuText(menuText)

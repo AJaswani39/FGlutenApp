@@ -446,6 +446,10 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
         if (restaurant == null) {
             return "";
         }
+        if (!TextUtils.isEmpty(restaurant.getRawMenuText())) {
+            return restaurant.getRawMenuText();
+        }
+        
         List<String> menu = restaurant.getGlutenFreeMenu();
         if (menu != null && !menu.isEmpty()) {
             StringBuilder sb = new StringBuilder();
