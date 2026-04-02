@@ -332,6 +332,22 @@ public class RestaurantListFragment extends Fragment {
             updateRatingLabel(value);
             restaurantViewModel.setMinRating(value);
         });
+        
+        // Setup Search Input
+        binding.searchInput.setText(restaurantViewModel.getSearchQuery());
+        binding.searchInput.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                restaurantViewModel.setSearchQuery(s != null ? s.toString() : "");
+            }
+        });
+        
         // initialize labels
         updateDistanceLabel(binding.sliderDistance.getValue(), SettingsManager.useMiles(requireContext()));
         updateRatingLabel(binding.sliderRating.getValue());

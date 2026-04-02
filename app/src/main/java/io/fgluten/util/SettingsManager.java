@@ -36,6 +36,9 @@ public class SettingsManager {
     
     /** Preference key for distance unit preference (miles vs kilometers) */
     private static final String KEY_USE_MILES = "use_miles";
+    
+    /** Preference key for dietary profile (strict celiac vs preference) */
+    private static final String KEY_STRICT_CELIAC = "strict_celiac";
 
 
     /**
@@ -119,6 +122,28 @@ public class SettingsManager {
      */
     public static void setUseMiles(Context context, boolean useMiles) {
         prefs(context).edit().putBoolean(KEY_USE_MILES, useMiles).apply();
+    }
+
+    // ========== DIETARY PROFILE ==========
+    
+    /**
+     * Determines if the user has selected a Strict Celiac dietary profile.
+     * 
+     * @param context Application context
+     * @return true if user is strict celiac, false if general preference
+     */
+    public static boolean isStrictCeliac(Context context) {
+        return prefs(context).getBoolean(KEY_STRICT_CELIAC, false);
+    }
+
+    /**
+     * Sets the user's dietary profile.
+     * 
+     * @param context Application context
+     * @param strict true for Strict Celiac, false for Preference
+     */
+    public static void setStrictCeliac(Context context, boolean strict) {
+        prefs(context).edit().putBoolean(KEY_STRICT_CELIAC, strict).apply();
     }
 
     public static String formatDistance(Context context, double meters) {

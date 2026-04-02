@@ -476,8 +476,8 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
         try {
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(restaurant.getMenuUrl()));
             startActivity(intent);
-        } catch (Exception ignored) {
-            // Handle gracefully if no browser app is available
+        } catch (Exception e) {
+            android.widget.Toast.makeText(requireContext(), R.string.marker_directions_error, android.widget.Toast.LENGTH_SHORT).show();
         }
     }
 

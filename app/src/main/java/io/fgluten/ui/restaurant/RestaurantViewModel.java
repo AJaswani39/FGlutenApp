@@ -263,6 +263,9 @@ public class RestaurantViewModel extends AndroidViewModel {
     
     /** Minimum rating filter (0.0 = no minimum) */
     private double minRating = 0.0; // 0 means none
+    
+    /** Search text for filtering by name or cuisine */
+    private String searchQuery = "";
 
     // ========== PERSISTENT STORAGE ==========
     /** SharedPreferences for caching restaurant data */
@@ -323,8 +326,8 @@ public class RestaurantViewModel extends AndroidViewModel {
     /** Cache for robots.txt disallow rules to avoid repeated network requests */
     private final Map<String, List<String>> robotsDisallowCache = new HashMap<>();
     
-    /** In-memory cache of user favorites for fast access */
-    private Map<String, String> favoriteMap = new HashMap<>();
+    /** In-memory cache of user favorites for fast access (thread-safe) */
+    private final java.util.concurrent.ConcurrentHashMap<String, String> favoriteMap = new java.util.concurrent.ConcurrentHashMap<>();
 
     public RestaurantViewModel(@NonNull Application application) {
         super(application);
@@ -338,7 +341,7 @@ public class RestaurantViewModel extends AndroidViewModel {
         favoritesPrefs = application.getSharedPreferences("restaurant_favorites", Context.MODE_PRIVATE);
         filterPrefs = application.getSharedPreferences(PREFS_FILTERS, Context.MODE_PRIVATE);
         
-        favoriteMap = loadFavorites();
+        favoriteMap.putAll(loadFavorites());
 
         gfOnly = filterPrefs.getBoolean(PREF_KEY_GF_ONLY, false);
         openNowOnly = filterPrefs.getBoolean(PREF_KEY_OPEN_NOW, false);
@@ -404,6 +407,15 @@ public class RestaurantViewModel extends AndroidViewModel {
 
     public double getMinRating() {
         return minRating;
+    }
+
+    public String getSearchQuery() {
+        return searchQuery;
+    }
+
+    public void setSearchQuery(String query) {
+        this.searchQuery = query == null ? "" : query.trim().toLowerCase();
+        emitFilteredState(null);
     }
 
     /**
@@ -630,9 +642,36 @@ public class RestaurantViewModel extends AndroidViewModel {
         if (lastRestaurantsRaw.isEmpty() || lastUserLat == null || lastUserLng == null) {
             return;
         }
+        
+        boolean isStrictCeliac = io.fgluten.util.SettingsManager.isStrictCeliac(getApplication());
+        
         List<Restaurant> filtered = new ArrayList<>();
         for (Restaurant restaurant : lastRestaurantsRaw) {
-            if (!gfOnly || restaurant.hasGlutenFreeOptions()) {
+            boolean fitsGF = (!gfOnly || restaurant.hasGlutenFreeOptions());
+            
+            if (isStrictCeliac) {
+                // Strict Celiac requires actual menu scanning evidence or explicitly being highly rated
+                boolean hasEvidence = restaurant.getGlutenFreeMenu() != null && !restaurant.getGlutenFreeMenu().isEmpty();
+                boolean isHighlyRatedGF = restaurant.hasGlutenFreeOptions() && restaurant.getRating() != null && restaurant.getRating() >= 4.0;
+                fitsGF = hasEvidence || isHighlyRatedGF;
+            }
+            
+            boolean passesSearch = true;
+            if (!TextUtils.isEmpty(searchQuery)) {
+                boolean matchesName = restaurant.getName() != null && restaurant.getName().toLowerCase().contains(searchQuery);
+                boolean matchesMenu = false;
+                if (restaurant.getGlutenFreeMenu() != null) {
+                    for (String item : restaurant.getGlutenFreeMenu()) {
+                        if (item.toLowerCase().contains(searchQuery)) {
+                            matchesMenu = true;
+                            break;
+                        }
+                    }
+                }
+                passesSearch = matchesName || matchesMenu;
+            }
+            
+            if (fitsGF && passesSearch) {
                 boolean passesOpen = !openNowOnly || (restaurant.getOpenNow() != null && restaurant.getOpenNow());
                 boolean passesRating = minRating <= 0.0 || (restaurant.getRating() != null && restaurant.getRating() >= minRating);
                 boolean passesDistance = maxDistanceMeters <= 0.0 || restaurant.getDistanceMeters() <= maxDistanceMeters;
@@ -1036,8 +1075,8 @@ public class RestaurantViewModel extends AndroidViewModel {
                     }
                 }
             }
-        } catch (Exception ignored) {
-            // ignore robots failures
+        } catch (Exception e) {
+            Log.d(TAG, "Ignoring robots.txt parsing failure: " + e.getMessage());
         } finally {
             if (reader != null) {
                 try { reader.close(); } catch (Exception ignored) {}
@@ -1113,6 +1152,13 @@ public class RestaurantViewModel extends AndroidViewModel {
                 if (r.getMenuUrl() != null) {
                     obj.put("menuUrl", r.getMenuUrl());
                 }
+                if (r.getRawMenuText() != null) {
+                    String raw = r.getRawMenuText();
+                    if (raw.length() > 30000) {
+                        raw = raw.substring(0, 30000);
+                    }
+                    obj.put("rawMenuText", raw);
+                }
                 if (r.getMenuScanStatus() != null) {
                     obj.put("menuScanStatus", r.getMenuScanStatus().name());
                 }
@@ -1177,9 +1223,14 @@ public class RestaurantViewModel extends AndroidViewModel {
                         notes.add(notesArray.optString(j, ""));
                     }
                 }
+                String rawMenuText = obj.optString("rawMenuText", null);
+                
                 Restaurant r = new Restaurant(name, address, hasGf, menu, rLat, rLng, rating, openNow, placeId);
                 if (!TextUtils.isEmpty(menuUrl)) {
                     r.setMenuUrl(menuUrl);
+                }
+                if (!TextUtils.isEmpty(rawMenuText)) {
+                    r.setRawMenuText(rawMenuText);
                 }
                 try {
                     r.setMenuScanStatus(Restaurant.MenuScanStatus.valueOf(scanStatusString));

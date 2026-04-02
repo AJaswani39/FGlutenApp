@@ -125,11 +125,14 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         /** RadioGroup for distance unit selection (Kilometers/Miles) */
         RadioGroup unitsGroup = view.findViewById(R.id.units_group);
         
+        /** RadioGroup for dietary profile selection */
+        RadioGroup dietaryGroup = view.findViewById(R.id.dietary_group);
+        
         /** Close button to dismiss the bottom sheet */
         Button closeButton = view.findViewById(R.id.close_button);
         
         // Defensive null-safety: if any required view is missing, dismiss to avoid crashes
-        if (themeGroup == null || unitsGroup == null || closeButton == null) {
+        if (themeGroup == null || unitsGroup == null || dietaryGroup == null || closeButton == null) {
             // Views failed to inflate correctly; dismiss and bail out
             dismiss();
             return;
@@ -171,6 +174,10 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         boolean useMiles = SettingsManager.useMiles(requireContext());
         ((RadioButton) view.findViewById(useMiles ? R.id.unit_miles : R.id.unit_km)).setChecked(true);
 
+        // ========== DIETARY PROFILE INITIALIZATION ==========
+        boolean isStrictCeliac = SettingsManager.isStrictCeliac(requireContext());
+        ((RadioButton) view.findViewById(isStrictCeliac ? R.id.dietary_celiac : R.id.dietary_preference)).setChecked(true);
+
         // ========== THEME CHANGE HANDLER ==========
         /**
          * Event listener for theme mode changes
@@ -204,6 +211,16 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
             boolean miles = checkedId == R.id.unit_miles;
             SettingsManager.setUseMiles(requireContext(), miles);
             // Recreate activity so UI (filters, labels) update immediately to new units
+            if (getActivity() != null) {
+                getActivity().recreate();
+            }
+        });
+
+        // ========== DIETARY PROFILE CHANGE HANDLER ==========
+        dietaryGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            boolean isStrict = checkedId == R.id.dietary_celiac;
+            SettingsManager.setStrictCeliac(requireContext(), isStrict);
+            // Recreate activity so restaurant list is filtered with new dietary profile
             if (getActivity() != null) {
                 getActivity().recreate();
             }

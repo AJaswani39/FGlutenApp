@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -67,6 +68,8 @@ import java.util.List;
  * @author FGluten Development Team
  */
 public class HomeViewModel extends AndroidViewModel {
+
+    private static final String TAG = "HomeViewModel";
 
     // ========== CONSTANTS & CONFIGURATION ==========
     
@@ -296,9 +299,8 @@ public class HomeViewModel extends AndroidViewModel {
             // ========== UPDATE LIVEDATA ==========
             cachedRestaurants.setValue(restored);
             
-        } catch (JSONException ignored) {
-            // Handle corrupted cache data gracefully
-            // Log error for debugging but don't crash the app
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to load cached restaurants", e);
         }
     }
 }

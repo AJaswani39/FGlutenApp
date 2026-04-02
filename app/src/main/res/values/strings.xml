@@ -38,6 +38,7 @@
     <string name="home_subtitle">See what is safe around you with clear gluten-free signals.</string>
     <string name="home_cta_meta">Menu scans and favorites in one place for fast decisions.</string>
     <string name="cta_find_restaurants">Find restaurants</string>
+    <string name="search_hint">Search by name or cuisine</string>
     <string name="home_permission_prompt">Allow location to show places near you.</string>
     <string name="home_tips_title">Ordering tips</string>
     <string name="home_tip_one">Ask about dedicated fryers and separate prep areas.</string>
@@ -57,6 +58,9 @@
     <string name="filter_rating_any">Any</string>
     <string name="filter_rating_value">%1$.1f+</string>
     <string name="settings_title">Settings</string>
+    <string name="settings_dietary_profile">Dietary profile</string>
+    <string name="dietary_preference">Gluten-free preference</string>
+    <string name="dietary_celiac">Strict Celiac (highest safety)</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_system">Use system</string>
     <string name="settings_theme_light">Light</string>

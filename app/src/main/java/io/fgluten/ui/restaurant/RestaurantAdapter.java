@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import io.fgluten.R;
@@ -100,8 +101,37 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
      * @param restaurants New list of restaurants to display (null results in empty list)
      */
     public void setRestaurants(List<Restaurant> restaurants) {
-        this.restaurants = restaurants != null ? restaurants : new ArrayList<>();
-        notifyDataSetChanged();
+        List<Restaurant> newList = restaurants != null ? restaurants : new ArrayList<>();
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return RestaurantAdapter.this.restaurants.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newList.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                Restaurant oldItem = RestaurantAdapter.this.restaurants.get(oldItemPosition);
+                Restaurant newItem = newList.get(newItemPosition);
+                return oldItem.getPlaceId() != null && oldItem.getPlaceId().equals(newItem.getPlaceId());
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                Restaurant oldItem = RestaurantAdapter.this.restaurants.get(oldItemPosition);
+                Restaurant newItem = newList.get(newItemPosition);
+                return oldItem.getMenuScanStatus() == newItem.getMenuScanStatus()
+                        && oldItem.getFavoriteStatus() == null ? newItem.getFavoriteStatus() == null : oldItem.getFavoriteStatus().equals(newItem.getFavoriteStatus())
+                        && oldItem.getDistanceMeters() == newItem.getDistanceMeters()
+                        && oldItem.getRating() == null ? newItem.getRating() == null : oldItem.getRating().equals(newItem.getRating());
+            }
+        });
+        this.restaurants = newList;
+        diffResult.dispatchUpdatesTo(this);
     }
 
     @NonNull
