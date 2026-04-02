@@ -393,23 +393,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
      * @return Formatted distance string with appropriate units
      */
     private String formatDistance(double meters) {
-        if (meters <= 0) return null;
-        boolean useMiles = SettingsManager.useMiles(requireContext());
-        if (useMiles) {
-            double miles = meters / 1609.34;
-            if (miles >= 0.1) {
-                return getString(R.string.distance_miles_away, miles);
-            }
-            int feet = (int) Math.round(meters * 3.28084);
-            return getString(R.string.distance_feet_away, feet);
-        } else {
-            if (meters >= 1000) {
-                double km = meters / 1000.0;
-                return getString(R.string.distance_km_away, km);
-            }
-            int roundedMeters = (int) Math.round(meters);
-            return getString(R.string.distance_m_away, roundedMeters);
-        }
+        return SettingsManager.formatDistance(requireContext(), meters);
     }
 
     /**
@@ -499,22 +483,7 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
      * @param restaurant Restaurant to navigate to
      */
     private void openInMaps(Restaurant restaurant) {
-        if (restaurant == null) return;
-        try {
-            Uri uri = Uri.parse("geo:" + restaurant.getLatitude() + "," + restaurant.getLongitude() +
-                    "?q=" + Uri.encode(restaurant.getName()));
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            intent.setPackage("com.google.android.apps.maps");
-            startActivity(intent);
-        } catch (Exception e) {
-            try {
-                Uri uri = Uri.parse("geo:" + restaurant.getLatitude() + "," + restaurant.getLongitude());
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            } catch (Exception ignored) {
-                // Handle gracefully if no maps app is available
-            }
-        }
+        SettingsManager.openInMaps(requireContext(), restaurant);
     }
 
     // ========== UTILITY METHODS ==========

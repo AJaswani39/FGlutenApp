@@ -274,6 +274,15 @@ public class RestaurantListFragment extends Fragment {
     }
 
     private void setupFilterControls() {
+        binding.chipGfOnly.setChecked(restaurantViewModel.isGfOnly());
+        binding.chipOpenNow.setChecked(restaurantViewModel.isOpenNowOnly());
+        
+        if (restaurantViewModel.getSortMode() == SortMode.DISTANCE) {
+            binding.sortToggle.check(binding.sortDistance.getId());
+        } else {
+            binding.sortToggle.check(binding.sortName.getId());
+        }
+
         binding.chipGfOnly.setOnCheckedChangeListener((button, isChecked) -> restaurantViewModel.setGfOnly(isChecked));
         binding.chipOpenNow.setOnCheckedChangeListener((button, isChecked) -> restaurantViewModel.setOpenNowOnly(isChecked));
         binding.sortToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
@@ -295,14 +304,23 @@ public class RestaurantListFragment extends Fragment {
             binding.sliderDistance.setValueFrom(0f);
             binding.sliderDistance.setValueTo(milesMax);
             binding.sliderDistance.setStepSize(1f);
-            // convert current km value to miles for slider position
-            float currentKm = binding.sliderDistance.getValue();
-            binding.sliderDistance.setValue(currentKm / 1.609344f);
+            
+            double savedMeters = restaurantViewModel.getMaxDistanceMeters();
+            float value = savedMeters <= 0 ? 0f : (float)(savedMeters / 1609.344);
+            if (value > milesMax) value = milesMax;
+            binding.sliderDistance.setValue(value);
         } else {
             binding.sliderDistance.setValueFrom(0f);
             binding.sliderDistance.setValueTo(20f);
             binding.sliderDistance.setStepSize(1f);
+            
+            double savedMeters = restaurantViewModel.getMaxDistanceMeters();
+            float value = savedMeters <= 0 ? 0f : (float)(savedMeters / 1000.0);
+            if (value > 20f) value = 20f;
+            binding.sliderDistance.setValue(value);
         }
+
+        binding.sliderRating.setValue((float) restaurantViewModel.getMinRating());
 
         binding.sliderDistance.addOnChangeListener((slider, value, fromUser) -> {
             boolean milesNow = SettingsManager.useMiles(requireContext());

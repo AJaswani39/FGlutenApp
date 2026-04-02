@@ -1,9 +1,14 @@
 package io.fgluten.util;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 
 import androidx.appcompat.app.AppCompatDelegate;
+
+import io.fgluten.R;
+import io.fgluten.data.Restaurant;
 
 /**
  * Centralized settings management for the FGluten Android application.
@@ -114,6 +119,47 @@ public class SettingsManager {
      */
     public static void setUseMiles(Context context, boolean useMiles) {
         prefs(context).edit().putBoolean(KEY_USE_MILES, useMiles).apply();
+    }
+
+    public static String formatDistance(Context context, double meters) {
+        if (meters <= 0) {
+            return null;
+        }
+        boolean useMiles = useMiles(context);
+        if (useMiles) {
+            double miles = meters / 1609.34;
+            if (miles >= 0.1) {
+                return context.getString(R.string.distance_miles_away, miles);
+            } else {
+                int feet = (int) Math.round(meters * 3.28084);
+                return context.getString(R.string.distance_feet_away, feet);
+            }
+        } else {
+            if (meters >= 1000) {
+                double km = meters / 1000.0;
+                return context.getString(R.string.distance_km_away, km);
+            }
+            int roundedMeters = (int) Math.round(meters);
+            return context.getString(R.string.distance_m_away, roundedMeters);
+        }
+    }
+
+    public static void openInMaps(Context context, Restaurant restaurant) {
+        if (restaurant == null) return;
+        try {
+            Uri uri = Uri.parse("geo:" + restaurant.getLatitude() + "," + restaurant.getLongitude() +
+                    "?q=" + Uri.encode(restaurant.getName()));
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.google.android.apps.maps");
+            context.startActivity(intent);
+        } catch (Exception e) {
+            try {
+                Uri uri = Uri.parse("geo:" + restaurant.getLatitude() + "," + restaurant.getLongitude());
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                context.startActivity(intent);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
 }

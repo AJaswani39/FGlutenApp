@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import io.fgluten.R;
 import io.fgluten.data.Restaurant;
 import io.fgluten.util.SettingsManager;
+import io.fgluten.util.SettingsManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -237,26 +238,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         }
 
         private String formatDistance(Context context, double meters) {
-            if (meters <= 0) {
-                return null;
-            }
-            boolean useMiles = SettingsManager.useMiles(context);
-            if (useMiles) {
-                double miles = meters / 1609.34;
-                if (miles >= 0.1) {
-                    return context.getString(R.string.distance_miles_away, miles);
-                } else {
-                    int feet = (int) Math.round(meters * 3.28084);
-                    return context.getString(R.string.distance_feet_away, feet);
-                }
-            } else {
-                if (meters >= 1000) {
-                    double km = meters / 1000.0;
-                    return context.getString(R.string.distance_km_away, km);
-                }
-                int roundedMeters = (int) Math.round(meters);
-                return context.getString(R.string.distance_m_away, roundedMeters);
-            }
+            return SettingsManager.formatDistance(context, meters);
         }
 
         private String buildMeta(Restaurant restaurant) {
