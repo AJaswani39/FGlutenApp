@@ -121,6 +121,13 @@ public class RestaurantDetailBottomSheet extends BottomSheetDialogFragment {
         if (fragmentManager == null || restaurant == null) {
             return;
         }
+        // Dismiss any existing instance to avoid duplicate-tag IllegalStateException
+        // when the user taps a marker (or the map button) a second time quickly.
+        androidx.fragment.app.Fragment existing =
+                fragmentManager.findFragmentByTag("restaurant_detail_sheet");
+        if (existing instanceof RestaurantDetailBottomSheet) {
+            ((RestaurantDetailBottomSheet) existing).dismissAllowingStateLoss();
+        }
         RestaurantDetailBottomSheet sheet = newInstance(restaurant);
         sheet.show(fragmentManager, "restaurant_detail_sheet");
     }
